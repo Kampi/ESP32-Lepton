@@ -27,18 +27,22 @@
 #include <sdkconfig.h>
 
 #if defined(CONFIG_LEPTON_VOSPI_SPI2_HOST)
-    #define VOSPI_SPI_HOST                      SPI2_HOST
+    #define LEPTON_VOSPI_SPI_HOST                       SPI2_HOST
 #elif defined(CONFIG_LEPTON_VOSPI_SPI3_HOST)
-    #define VOSPI_SPI_HOST                      SPI3_HOST
-#endif
+    #define LEPTON_VOSPI_SPI_HOST                       SPI3_HOST
+#else
+    #error "No SPI host configured for VoSPI. Define CONFIG_LEPTON_VOSPI_SPI2_HOST or CONFIG_LEPTON_VOSPI_SPI3_HOST in Kconfig."
+ #endif
 
 /** @brief              Default configuration object for the FLIR Lepton Thermal Imager.
- *  @param I2C_Handle   I2C bus handle used for the CCI communication
+ *  @param I2C_Handle   I2C Bus handle
  */
-#define LEPTON_DEFAULT_CONF(I2C_Handle)                                                 {                                                                               \
-                                                                                            .UseTelemetry = false,                                                      \
-                                                                                            .UseAGC = false,                                                            \
-                                                                                            .UseAGCCalculation = false,                                                 \
+#define LEPTON_DEFAULT_CONF(I2C_Handle)                                                {                                                                                \
+                                                                                            .useTelemetry = false,                                                      \
+                                                                                            .useAGC = true,                                                             \
+                                                                                            .useAGCCalculation = true,                                                  \
+                                                                                            .useTLinear = true,                                                         \
+                                                                                            .useAutoFFC = true,                                                         \
                                                                                             .Gain = static_cast<Lepton_Gain_t>(LEPTON_SYS_GAIN_MODE_AUTO),              \
                                                                                             .VideoFormat = static_cast<Lepton_VideoFormat_t>(LEPTON_FORMAT_RAW14),      \
                                                                                             .VSync = static_cast<gpio_num_t>(CONFIG_LEPTON_GPIO_VSYNC_PIN),             \
@@ -52,10 +56,8 @@
                                                                                                 .I2C_Bus_Config = NULL,                                                 \
                                                                                                 .I2C_Bus_Handle = I2C_Handle,                                           \
                                                                                                 .I2C_Dev_Handle = NULL,                                                 \
-                                                                                                .Internal = {                                                           \
-                                                                                                    .Mutex = NULL,                                                      \
-                                                                                                    .isInitialized = false,                                             \
-                                                                                                },                                                                      \
+                                                                                                .Mutex = NULL,                                                          \
+                                                                                                .isInitialized = false,                                                 \
                                                                                             },                                                                          \
                                                                                             .VoSPI = {                                                                  \
                                                                                                 .Interface = {                                                          \
@@ -69,6 +71,7 @@
                                                                                                     .cs_ena_posttrans = 0,                                              \
                                                                                                     .clock_speed_hz = 20000000,                                         \
                                                                                                     .input_delay_ns = 0,                                                \
+                                                                                                    .sample_point = SPI_SAMPLING_POINT_PHASE_0,                         \
                                                                                                     .spics_io_num = CONFIG_LEPTON_VOSPI_CS,                             \
                                                                                                     .flags = SPI_DEVICE_HALFDUPLEX,                                     \
                                                                                                     .queue_size = 1,                                                    \
@@ -91,17 +94,23 @@
                                                                                                     .isr_cpu_id = ESP_INTR_CPU_AFFINITY_AUTO,                           \
                                                                                                     .intr_flags = 0,                                                    \
                                                                                                 },                                                                      \
-                                                                                                .Host = VOSPI_SPI_HOST,                                                 \
+                                                                                                .Host = LEPTON_VOSPI_SPI_HOST,                                          \
                                                                                                 .DMA = SPI_DMA_CH_AUTO,                                                 \
-                                                                                                .Internal = {                                                           \
-                                                                                                    .isInitialized = false,                                             \
-                                                                                                    .Handle = 0,                                                        \
-                                                                                                    .Packet = NULL,                                                     \
-                                                                                                    .Frame = NULL,                                                      \
-                                                                                                },                                                                      \
+                                                                                                .isInitialized = false,                                                 \
+                                                                                                .isResync = false,                                                      \
+                                                                                                .isCapturing = false,                                                   \
+                                                                                                .useTelemetry = false,                                                  \
+                                                                                                .Handle = NULL,                                                         \
+                                                                                                .Packet = NULL,                                                         \
+                                                                                                .ImageHeight = 0,                                                       \
+                                                                                                .ImageWidth = 0,                                                        \
+                                                                                                .BytesPerPixel = 0,                                                     \
+                                                                                                .Image_Buffer = { NULL },                                               \
+                                                                                                .CurrentBuffer = 0,                                                     \
                                                                                                 .SyncErrors = 0,                                                        \
-                                                                                                .ValidFrames = 0,                                                       \
-                                                                                            },                                                                          \
+                                                                                                .FrameCounter = 0,                                                      \
+                                                                                                .ResyncStartUs = 0,                                                     \
+                                                                                            }                                                                           \
                                                                                         }
 
 /** @brief          Assign the I2C functions to a Lepton configuration object.

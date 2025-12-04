@@ -123,15 +123,61 @@ uint32_t Lepton_GetUptime(Lepton_t* p_Device, Lepton_Result_t* p_Status)
 
 Lepton_Error_t Lepton_GetSceneStatistics(Lepton_t* p_Device, Lepton_SceneStatistics_t* p_Statistics, Lepton_Result_t* p_Status)
 {
+    if(p_Device == NULL)
+    {
+        return LEPTON_ERR_INVALID_ARG;
+    }
+    
     return CCI_GetSceneStatistics(&p_Device->Internal.CCI, p_Statistics, p_Status);
 }
 
-Lepton_Error_t Lepton_SetROI(Lepton_t* p_Device, Lepton_ROI_t ROI, Lepton_Result_t* p_Status)
+Lepton_Error_t Lepton_SetSpotmeterROI(Lepton_t* p_Device, Lepton_ROI_t ROI, Lepton_Result_t* p_Status)
 {
-    return CCI_SetROI(&p_Device->Internal.CCI, &ROI, p_Status);
+    if(p_Device == NULL)
+    {
+        return LEPTON_ERR_INVALID_ARG;
+    }
+
+    return CCI_SetSpotmeterROI(&p_Device->Internal.CCI, &ROI, p_Status);
 }
 
-Lepton_Error_t Lepton_GetROI(Lepton_t* p_Device, Lepton_ROI_t* p_ROI, Lepton_Result_t* p_Status)
+Lepton_Error_t Lepton_GetSpotmeterROI(Lepton_t* p_Device, Lepton_ROI_t* p_ROI, Lepton_Result_t* p_Status)
 {
-    return CCI_GetROI(&p_Device->Internal.CCI, p_ROI, p_Status);
+    if(p_Device == NULL)
+    {
+        return LEPTON_ERR_INVALID_ARG;
+    }
+
+    return CCI_GetSpotmeterROI(&p_Device->Internal.CCI, p_ROI, p_Status);
+}
+
+Lepton_Error_t Lepton_GetSpotmeter(Lepton_t* p_Device, Lepton_Spotmeter_t* p_Spot, Lepton_Result_t* p_Status)
+{
+    if(p_Device == NULL)
+    {
+        return LEPTON_ERR_INVALID_ARG;
+    }
+
+    // TODO: Add conversion
+    return CCI_GetSpotmeter(&p_Device->Internal.CCI, p_Spot, p_Status);
+}
+
+Lepton_Error_t Lepton_RunFFC(Lepton_t* p_Device, Lepton_Result_t* p_Status)
+{
+    if(p_Device == NULL)
+    {
+        return LEPTON_ERR_INVALID_ARG;
+    }
+
+    return CCI_RunFFC(&p_Device->Internal.CCI, p_Status);
+}
+
+Lepton_Error_t Lepton_EnableVideoFreeze(Lepton_t* p_Device, bool Enable, Lepton_Result_t* p_Status)
+{
+    if(p_Device == NULL)
+    {
+        return LEPTON_ERR_INVALID_ARG;
+    }
+
+    return CCI_SetVideoFreeze(&p_Device->Internal.CCI, Enable, p_Status);
 }
