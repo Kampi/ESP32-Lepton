@@ -1,64 +1,107 @@
-menu "LEPTON"
-    menu "SPI"
-        config LEPTON_SPI_BUFFER_SIZE
-            int "Buffer size"
-            range 256 2048
-            default 512
-            help
-                Buffer size for the SPI interface.
+menu "Lepton"
+    menu "GPIO"
+        menu "V-Sync"
+            config LEPTON_GPIO_VSYNC_PIN
+                int "V-Sync pin"
+                range 0 48
+                default 45
+
+            config LEPTON_VSYNC_PLACE_IRAM
+                bool "Place the V-Sync ISR in the IRAM"
+                default y
+        endmenu
+
+        menu "Reset"
+            config LEPTON_GPIO_RESET_PIN
+                int "Reset pin"
+                range -1 48
+                default -1
+        endmenu
+
+        menu "Power-Down"
+            config LEPTON_GPIO_PWR_PIN
+                int "Power-Down pin"
+                range -1 48
+                default -1
+        endmenu
     endmenu
 
-    menu "I2C"
-        config LEPTON_I2C_TIMEOUT
-            int "I2C timeout (ms)"
-            range 100 5000
-            default 1000
+    menu "VoSPI"
+        choice
+            prompt "VoSPI Bus"
+            default LEPTON_VOSPI_SPI2_HOST
             help
-                Timeout for I2C operations in milliseconds.
+                Select the SPI Bus the Lepton VoSPI is attached to.
+
+            config LEPTON_VOSPI_SPI2_HOST
+                bool "SPI2_HOST"
+            config LEPTON_VOSPI_SPI3_HOST
+                bool "SPI3_HOST"
+        endchoice
+
+        config LEPTON_VOSPI_MISO
+            int "MISO pin number"
+            range 0 48
+            default 41
+
+        config LEPTON_VOSPI_SCK
+            int "SCK pin number"
+            range 0 48
+            default 42
+
+        config LEPTON_VOSPI_CS
+            int "CS pin number"
+            range -1 48
+            default 19
     endmenu
 
-    menu "FreeRTOS"
-        config LEPTON_TASK_PRIO
-            int "Task priority"
-            range 12 25
-            default 12
-            help
-                Task priority for the Lepton camera task.
-
-        config LEPTON_TASK_STACK_SIZE
-            int "Task stack size"
-            range 4096 8192
-            default 4096
-            help
-                Stack size for the camera task.
-
-        config LEPTON_TASK_CORE_USE_AFFINITY
+    menu "Capture Task"
+        config LEPTON_TASK_CORE_AFFINITY
             bool "Use core affinity"
-            default n
+            default y
             help
-                Enable this option if you want to use a specific core for the camera task.
+                Enable this option if you want to use a specific core for the driver.
 
         config LEPTON_TASK_CORE
-            int "Task core"
-            depends on LEPTON_TASK_CORE_USE_AFFINITY
-            range 0 1
-            default 1
+            depends on LEPTON_TASK_CORE_AFFINITY
+            int "Core used for the capture task"
+            range 0 1 if SOC_CPU_CORES_NUM > 2
+            default 0
             help
-                Core used by the camera task.
+                Use a specific core for the capture task.
+
+        config LEPTON_TASK_STACK
+            int "Stack size for the capture task"
+            range 4096 16384
+            default 8192
+            help
+                Stack size of the capture task.
+
+        config LEPTON_TASK_PRIORITY
+            int "Priority for the capture task"
+            range 0 31
+            default 12
+            help
+                Capture task priority.
+    endmenu
+
+    menu "Memory"
+        config LEPTON_MEMORY_SPIRAM
+            depends on SPIRAM
+            bool "Use the SPI RAM for memory allocations"
+            default y
+            help
+                Enable this option to use external SPI RAM for memory allocations.
+
+        config LEPTON_MEMORY_BUFFERS
+            int "Number of image buffers"
+            range 0 8
+            default 2
     endmenu
 
     menu "Misc"
         config LEPTON_MISC_ERROR_BASE
-            hex "LEPTON driver error base definition"
-            range 0 FFFF
-            default 0xB000
-            help
-                Set the error base for the driver.
-
-        config LEPTON_MISC_ENABLE_LOG
-            bool "Enable log output"
-            default y
-            help
-                Enable this option if you need log output from the driver.
+            hex "Lepton driver error base code definition"
+            default 0xB000     
     endmenu
 endmenu

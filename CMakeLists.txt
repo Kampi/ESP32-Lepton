@@ -1,25 +1,32 @@
 set(COMPONENT_SRCS
     "src/lepton.cpp"
+    "src/lepton_cci.cpp"
+    "src/lepton_capture.cpp"
+    "src/VoSPI/vospi.cpp"
+    "src/CCI/cci.cpp"
     )
 
 set(COMPONENT_ADD_INCLUDEDIRS
 	"include"
+    "include/Definitions"
+    "include/CCI"
+    "include/VoSPI"
 	)
 
-if((IDF_TARGET STREQUAL "esp32") OR (IDF_TARGET STREQUAL "esp32c2") OR (IDF_TARGET STREQUAL "esp32c3") OR (IDF_TARGET STREQUAL "esp32c6") OR (IDF_TARGET STREQUAL "esp32s2") OR (IDF_TARGET STREQUAL "esp32s3"))
+set(COMPONENT_PRIV_INCLUDEDIRS
+    "include/CCI"
+    "include/VoSPI"
+    )
+
+set(COMPONENT_PRIV_REQUIRES freertos driver)
+
+if((IDF_TARGET STREQUAL "esp32") OR (IDF_TARGET STREQUAL "esp32s2") OR (IDF_TARGET STREQUAL "esp32s3") OR (IDF_TARGET STREQUAL "esp32c2") OR (IDF_TARGET STREQUAL "esp32c3") OR (IDF_TARGET STREQUAL "esp32c6"))
 	list(APPEND COMPONENT_PRIV_REQUIRES esp_timer)
-	list(APPEND COMPONENT_SRCS "src/Arch/SPI/lepton_spi.cpp")
-	list(APPEND COMPONENT_SRCS "src/Arch/I2C/lepton_i2c.cpp")
-	list(APPEND COMPONENT_SRCS "src/Arch/GPIO/lepton_gpio.cpp")
 endif()
 
 idf_component_register(SRCS ${COMPONENT_SRCS}
                        INCLUDE_DIRS ${COMPONENT_ADD_INCLUDEDIRS}
-
-                       # Only public requires, because the header files includes them
-                       REQUIRES freertos driver
-
-                       # The private requires are only used by the driver
+                       PRIV_INCLUDE_DIRS ${COMPONENT_PRIV_INCLUDEDIRS}
                        PRIV_REQUIRES ${COMPONENT_PRIV_REQUIRES}
                        )
 

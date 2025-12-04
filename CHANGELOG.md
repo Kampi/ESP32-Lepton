@@ -1,11 +1,6 @@
-# CHANGELOG
-
-## [Unreleased]
+## [1.0.0] - 
 
 **Added:**
 
-- Initial release
-- ESP32 component for FLIR Lepton 3.5 Thermal Camera
-- SPI interface support
-- I2C interface support
-- Basic camera control functions
+Initial release
+Change version number to 1.0.0
