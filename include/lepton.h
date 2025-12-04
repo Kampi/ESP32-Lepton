@@ -41,7 +41,7 @@
  *  @param Kelvin 	Temperature [Kelvin]
  *  @return			Temperature [Degree Celsius]
  */
-inline __attribute__((always_inline)) float Lepton_KelvonToCelsius(uint32_t Kelvin)
+inline __attribute__((always_inline)) float Lepton_KelvinToCelsius(uint32_t Kelvin)
 {
     return (static_cast<float>(Kelvin) * 100.0) - 273.15;
 }
@@ -166,11 +166,11 @@ Lepton_Error_t Lepton_EnableAGC(Lepton_t* p_Device, bool Enable, Lepton_Result_t
 
 /** @brief              
  *  @param p_Device     Pointer to device instance
- *  @param Emissitivity 
+ *  @param Emissivity 
  *  @param p_Status     (Optional) Pointer to device status
  *  @return             LEPTON_ERR_OK when successful
  */
-Lepton_Error_t Lepton_Emissivity(Lepton_t* p_Device, uint16_t Emissitivity, Lepton_Result_t* p_Status = NULL);
+Lepton_Error_t Lepton_Emissivity(Lepton_t* p_Device, uint16_t Emissivity, Lepton_Result_t* p_Status = NULL);
 
 /** @brief          Get the uptime of the device in milliseconds.
  *  @param p_Device Pointer to device instance

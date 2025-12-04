@@ -68,7 +68,7 @@ Lepton_Error_t Lepton_EnableAGC(Lepton_t* p_Device, bool Enable, Lepton_Result_t
     return LEPTON_ERR_OK;
 }
 
-Lepton_Error_t Lepton_Emissivity(Lepton_t* p_Device, uint16_t Emissitivity, Lepton_Result_t* p_Status)
+Lepton_Error_t Lepton_Emissivity(Lepton_t* p_Device, uint16_t Emissivity, Lepton_Result_t* p_Status)
 {
     Lepton_FluxLinearParams_t FluxValues;
 
@@ -77,22 +77,22 @@ Lepton_Error_t Lepton_Emissivity(Lepton_t* p_Device, uint16_t Emissitivity, Lept
         return LEPTON_ERR_INVALID_ARG;
     }
 
-    ESP_LOGI(TAG, "Set Emissivity: %u%%", Emissitivity);
+    ESP_LOGI(TAG, "Set Emissivity: %u%%", Emissivity);
 
     if(p_Device->Internal.isRadiometric)
     {
         // Scale percentage into Lepton scene emissivity values (1-100% -> 82-8192).
-        if(Emissitivity < 1)
+        if(Emissivity < 1)
         {
-            Emissitivity = 1;
+            Emissivity = 1;
         }
 
-        if(Emissitivity > 100)
+        if(Emissivity > 100)
         {
-            Emissitivity = 100;
+            Emissivity = 100;
         }
 
-        FluxValues.sceneEmissivity = Emissitivity * 8192 / 100;
+        FluxValues.sceneEmissivity = Emissivity * 8192 / 100;
 
         // Set default (no lens) values for the remaining parameters.
         FluxValues.TBkgK      = 29515;

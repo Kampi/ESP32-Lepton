@@ -107,8 +107,8 @@ Lepton_Error_t Lepton_StartCapture(Lepton_t* p_Device)
 
     if(p_Device->Internal.CaptureHandle == NULL)
     {
-        goto Lepton_StartCapture_Error_1;
         Error = LEPTON_ERR_NO_MEM;
+        goto Lepton_StartCapture_Error_1;
     }
 
     esp_task_wdt_add(p_Device->Internal.CaptureHandle);
