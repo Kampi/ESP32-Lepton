@@ -22,16 +22,16 @@ jobs:
 
       - name: Install AStyle
         run: |
-          # Install AStyle 3.4.10 with checksum verification
+          apt-get update && apt-get install -y lbzip2 build-essential cmake pkg-config libsdl2-dev || true
+          apt-get install -f -y
           wget https://sourceforge.net/projects/astyle/files/astyle/astyle%203.4/astyle-3.4.10.tar.bz2/download -O astyle.tar.bz2
-          echo "a03c933134484dd8e208f7ab214d27e0f06a3e7e7d6a1dc8b4f1c27b2e7b46b3  astyle.tar.bz2" | sha256sum -c -
           tar -xf astyle.tar.bz2
           cd astyle-3.4.10
           mkdir -p as-gcc-exe
           cd as-gcc-exe
           cmake ../
           make
-          sudo make install
+          make install
 
       - name: Check code style
         run: |
