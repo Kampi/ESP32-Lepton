@@ -12,8 +12,8 @@ on:
       - '*.md'
 
 env:
-  # Master branch (main or master). Can be changed for testing
-  master_branch: master
+  # Master branch (main or master)
+  master_branch: main
 
 permissions:
   contents: write
