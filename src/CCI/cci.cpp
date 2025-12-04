@@ -27,126 +27,129 @@
 
 #include "cci.h"
 
-#define CCI_ADDRESS 									0x2A
+#define CCI_ADDRESS                                 0x2A
 
 // CCI register locations
-#define CCI_REG_STATUS 									0x0002
-#define CCI_REG_COMMAND 								0x0004
-#define CCI_REG_DATA_LENGTH 							0x0006
-#define CCI_REG_DATA_0 									0x0008
-#define CCI_REG_DATA_1 									0x000A
-#define CCI_REG_DATA_2 									0x000C
-#define CCI_REG_DATA_3 									0x000E
-#define CCI_REG_DATA_4 									0x0010
-#define CCI_REG_DATA_5 									0x0012
-#define CCI_REG_DATA_6 									0x0014
-#define CCI_REG_DATA_7 									0x0016
-#define CCI_REG_DATA_8 									0x0018
-#define CCI_REG_DATA_9 									0x001A
-#define CCI_REG_DATA_10 								0x001C
-#define CCI_REG_DATA_11 								0x001E
-#define CCI_REG_DATA_12 								0x0020
-#define CCI_REG_DATA_13 								0x0022
-#define CCI_REG_DATA_14 								0x0024
-#define CCI_REG_DATA_15 								0x0026
-#define CCI_BLOCK_BUF_0 								0xF800
-#define CCI_BLOCK_BUF_1 								0xFC00
+#define CCI_REG_STATUS                              0x0002
+#define CCI_REG_COMMAND                             0x0004
+#define CCI_REG_DATA_LENGTH                         0x0006
+#define CCI_REG_DATA_0                              0x0008
+#define CCI_REG_DATA_1                              0x000A
+#define CCI_REG_DATA_2                              0x000C
+#define CCI_REG_DATA_3                              0x000E
+#define CCI_REG_DATA_4                              0x0010
+#define CCI_REG_DATA_5                              0x0012
+#define CCI_REG_DATA_6                              0x0014
+#define CCI_REG_DATA_7                              0x0016
+#define CCI_REG_DATA_8                              0x0018
+#define CCI_REG_DATA_9                              0x001A
+#define CCI_REG_DATA_10                             0x001C
+#define CCI_REG_DATA_11                             0x001E
+#define CCI_REG_DATA_12                             0x0020
+#define CCI_REG_DATA_13                             0x0022
+#define CCI_REG_DATA_14                             0x0024
+#define CCI_REG_DATA_15                             0x0026
+#define CCI_BLOCK_BUF_0                             0xF800
+#define CCI_BLOCK_BUF_1                             0xFC00
 
 /**
- * @brief 	CCI Commands
- * 			Each command is defined by
- * 				- A SDK Module ID
- * 				- A base
- * 				- An offset
- *			Protected commands needs an offset of 0x4000 to disable the protection.
+ * @brief   CCI Commands
+ *          Each command is defined by
+ *              - A SDK Module ID
+ *              - A base
+ *              - An offset
+ *          Protected commands needs an offset of 0x4000 to disable the protection.
  */
-#define CCI_CMD_SDK_MODULE_AGC							0x0100
-#define CCI_CMD_AGC_GET_ENABLE							(CCI_CMD_SDK_MODULE_AGC + 0x00)
-#define CCI_CMD_AGC_SET_POLICY 							(CCI_CMD_SDK_MODULE_AGC + 0x01)
-#define CCI_CMD_AGC_GET_POLICY							(CCI_CMD_SDK_MODULE_AGC + 0x04)
-#define CCI_CMD_AGC_SET_ENABLE 							(CCI_CMD_SDK_MODULE_AGC + 0x05)
-#define CCI_CMD_AGC_GET_ROI								(CCI_CMD_SDK_MODULE_AGC + 0x08)
-#define CCI_CMD_AGC_SET_ROI 							(CCI_CMD_SDK_MODULE_AGC + 0x09)
-#define CCI_CMD_AGC_GET_HISTOGRAM_STATISTICS			(CCI_CMD_SDK_MODULE_AGC + 0x0C)
-#define CCI_CMD_AGC_GET_HEQ_DAMPENING					(CCI_CMD_SDK_MODULE_AGC + 0x24)
-#define CCI_CMD_AGC_SET_HEQ_DAMPENING					(CCI_CMD_SDK_MODULE_AGC + 0x25)
-#define CCI_CMD_AGC_GET_HEQ_CLIP_LIMIT_HIGH				(CCI_CMD_SDK_MODULE_AGC + 0x2C)
-#define CCI_CMD_AGC_SET_HEQ_CLIP_LIMIT_HIGH				(CCI_CMD_SDK_MODULE_AGC + 0x2D)
-#define CCI_CMD_AGC_GET_HEQ_CLIP_LIMIT_LOW				(CCI_CMD_SDK_MODULE_AGC + 0x30)
-#define CCI_CMD_AGC_SET_HEQ_CLIP_LIMIT_LOW				(CCI_CMD_SDK_MODULE_AGC + 0x31)
-#define CCI_CMD_AGC_GET_HEQ_EMPTY_COUNTS				(CCI_CMD_SDK_MODULE_AGC + 0x3C)
-#define CCI_CMD_AGC_SET_HEQ_EMPTY_COUNTS				(CCI_CMD_SDK_MODULE_AGC + 0x3D)
-#define CCI_CMD_AGC_GET_HEQ_OUTPUT_SCALE				(CCI_CMD_SDK_MODULE_AGC + 0x44)
-#define CCI_CMD_AGC_SET_HEQ_OUTPUT_SCALE				(CCI_CMD_SDK_MODULE_AGC + 0x45)
-#define CCI_CMD_AGC_GET_CALC_ENABLE_STATE 				(CCI_CMD_SDK_MODULE_AGC + 0x48)
-#define CCI_CMD_AGC_SET_CALC_ENABLE_STATE 				(CCI_CMD_SDK_MODULE_AGC + 0x49)
-#define CCI_CMD_AGC_GET_HEQ_LINEAR						(CCI_CMD_SDK_MODULE_AGC + 0x4C)
-#define CCI_CMD_AGC_SET_HEQ_LINEAR 						(CCI_CMD_SDK_MODULE_AGC + 0x4D)
+#define CCI_CMD_SDK_MODULE_AGC                      0x0100
+#define CCI_CMD_AGC_GET_ENABLE                      (CCI_CMD_SDK_MODULE_AGC + 0x00)
+#define CCI_CMD_AGC_SET_POLICY                      (CCI_CMD_SDK_MODULE_AGC + 0x01)
+#define CCI_CMD_AGC_GET_POLICY                      (CCI_CMD_SDK_MODULE_AGC + 0x04)
+#define CCI_CMD_AGC_SET_ENABLE                      (CCI_CMD_SDK_MODULE_AGC + 0x05)
+#define CCI_CMD_AGC_GET_ROI                         (CCI_CMD_SDK_MODULE_AGC + 0x08)
+#define CCI_CMD_AGC_SET_ROI                         (CCI_CMD_SDK_MODULE_AGC + 0x09)
+#define CCI_CMD_AGC_GET_HISTOGRAM_STATISTICS        (CCI_CMD_SDK_MODULE_AGC + 0x0C)
+#define CCI_CMD_AGC_GET_HEQ_DAMPENING               (CCI_CMD_SDK_MODULE_AGC + 0x24)
+#define CCI_CMD_AGC_SET_HEQ_DAMPENING               (CCI_CMD_SDK_MODULE_AGC + 0x25)
+#define CCI_CMD_AGC_GET_HEQ_CLIP_LIMIT_HIGH         (CCI_CMD_SDK_MODULE_AGC + 0x2C)
+#define CCI_CMD_AGC_SET_HEQ_CLIP_LIMIT_HIGH         (CCI_CMD_SDK_MODULE_AGC + 0x2D)
+#define CCI_CMD_AGC_GET_HEQ_CLIP_LIMIT_LOW          (CCI_CMD_SDK_MODULE_AGC + 0x30)
+#define CCI_CMD_AGC_SET_HEQ_CLIP_LIMIT_LOW          (CCI_CMD_SDK_MODULE_AGC + 0x31)
+#define CCI_CMD_AGC_GET_HEQ_EMPTY_COUNTS            (CCI_CMD_SDK_MODULE_AGC + 0x3C)
+#define CCI_CMD_AGC_SET_HEQ_EMPTY_COUNTS            (CCI_CMD_SDK_MODULE_AGC + 0x3D)
+#define CCI_CMD_AGC_GET_HEQ_OUTPUT_SCALE            (CCI_CMD_SDK_MODULE_AGC + 0x44)
+#define CCI_CMD_AGC_SET_HEQ_OUTPUT_SCALE            (CCI_CMD_SDK_MODULE_AGC + 0x45)
+#define CCI_CMD_AGC_GET_CALC_ENABLE_STATE           (CCI_CMD_SDK_MODULE_AGC + 0x48)
+#define CCI_CMD_AGC_SET_CALC_ENABLE_STATE           (CCI_CMD_SDK_MODULE_AGC + 0x49)
+#define CCI_CMD_AGC_GET_HEQ_LINEAR                  (CCI_CMD_SDK_MODULE_AGC + 0x4C)
+#define CCI_CMD_AGC_SET_HEQ_LINEAR                  (CCI_CMD_SDK_MODULE_AGC + 0x4D)
 
-#define CCI_CMD_SDK_MODULE_SYS							0x0200
-#define CCI_CMD_SYS_RUN_PING 							(CCI_CMD_SDK_MODULE_SYS + 0x02)
-#define CCI_CMD_SYS_GET_SERIALNUMBER					(CCI_CMD_SDK_MODULE_SYS + 0x08)
-#define CCI_CMD_SYS_GET_UPTIME 							(CCI_CMD_SDK_MODULE_SYS + 0x0C)
-#define CCI_CMD_SYS_GET_AUX_TEMP 						(CCI_CMD_SDK_MODULE_SYS + 0x10)
-#define CCI_CMD_SYS_GET_FPA_TEMP 						(CCI_CMD_SDK_MODULE_SYS + 0x14)
-#define CCI_CMD_SYS_GET_TELEMETRY_ENABLE_STATE 			(CCI_CMD_SDK_MODULE_SYS + 0x18)
-#define CCI_CMD_SYS_SET_TELEMETRY_ENABLE_STATE 			(CCI_CMD_SDK_MODULE_SYS + 0x19)
-#define CCI_CMD_SYS_GET_TELEMETRY_LOCATION 				(CCI_CMD_SDK_MODULE_SYS + 0x1C)
-#define CCI_CMD_SYS_SET_TELEMETRY_LOCATION 				(CCI_CMD_SDK_MODULE_SYS + 0x1D)
-#define CCI_CMD_SYS_GET_SCENE_STATISTICS 				(CCI_CMD_SDK_MODULE_SYS + 0x2C)
-#define CCI_CMD_SYS_GET_SCENE_ROI		 				(CCI_CMD_SDK_MODULE_SYS + 0x30)
-#define CCI_CMD_SYS_SET_SCENE_ROI 						(CCI_CMD_SDK_MODULE_SYS + 0x31)
-#define CCI_CMD_SYS_RUN_FFC 							(CCI_CMD_SDK_MODULE_SYS + 0x42)
-#define CCI_CMD_SYS_GET_GAIN_MODE 						(CCI_CMD_SDK_MODULE_SYS + 0x48)
-#define CCI_CMD_SYS_SET_GAIN_MODE 						(CCI_CMD_SDK_MODULE_SYS + 0x49)
+#define CCI_CMD_SDK_MODULE_SYS                      0x0200
+#define CCI_CMD_SYS_RUN_PING                        (CCI_CMD_SDK_MODULE_SYS + 0x02)
+#define CCI_CMD_SYS_GET_SERIALNUMBER                (CCI_CMD_SDK_MODULE_SYS + 0x08)
+#define CCI_CMD_SYS_GET_UPTIME                      (CCI_CMD_SDK_MODULE_SYS + 0x0C)
+#define CCI_CMD_SYS_GET_AUX_TEMP                    (CCI_CMD_SDK_MODULE_SYS + 0x10)
+#define CCI_CMD_SYS_GET_FPA_TEMP                    (CCI_CMD_SDK_MODULE_SYS + 0x14)
+#define CCI_CMD_SYS_GET_TELEMETRY_ENABLE_STATE      (CCI_CMD_SDK_MODULE_SYS + 0x18)
+#define CCI_CMD_SYS_SET_TELEMETRY_ENABLE_STATE      (CCI_CMD_SDK_MODULE_SYS + 0x19)
+#define CCI_CMD_SYS_GET_TELEMETRY_LOCATION          (CCI_CMD_SDK_MODULE_SYS + 0x1C)
+#define CCI_CMD_SYS_SET_TELEMETRY_LOCATION          (CCI_CMD_SDK_MODULE_SYS + 0x1D)
+#define CCI_CMD_SYS_GET_SCENE_STATISTICS            (CCI_CMD_SDK_MODULE_SYS + 0x2C)
+#define CCI_CMD_SYS_GET_SCENE_ROI                   (CCI_CMD_SDK_MODULE_SYS + 0x30)
+#define CCI_CMD_SYS_SET_SCENE_ROI                   (CCI_CMD_SDK_MODULE_SYS + 0x31)
+#define CCI_CMD_SYS_GET_SHUTTER_POSITION            (CCI_CMD_SDK_MODULE_SYS + 0x38)
+#define CCI_CMD_SYS_SET_SHUTTER_POSITION            (CCI_CMD_SDK_MODULE_SYS + 0x39)
+#define CCI_CMD_SYS_RUN_FFC                         (CCI_CMD_SDK_MODULE_SYS + 0x42)
+#define CCI_CMD_SYS_GET_GAIN_MODE                   (CCI_CMD_SDK_MODULE_SYS + 0x48)
+#define CCI_CMD_SYS_SET_GAIN_MODE                   (CCI_CMD_SDK_MODULE_SYS + 0x49)
 
-#define CCI_CMD_SDK_MODULE_VID							0x0300
-#define CCI_CMD_VID_GET_VIDEO_LOOKUP					(CCI_CMD_SDK_MODULE_VID + 0x04)
-#define CCI_CMD_VID_SET_VIDEO_LOOKUP					(CCI_CMD_SDK_MODULE_VID + 0x05)
-#define CCI_CMD_VID_GET_VIDEO_CUSTOM_LOOKUP				(CCI_CMD_SDK_MODULE_VID + 0x08)
-#define CCI_CMD_VID_SET_VIDEO_CUSTOM_LOOKUP				(CCI_CMD_SDK_MODULE_VID + 0x09)
-#define CCI_CMD_VID_GET_VIDEO_FOCUS_CALC_ENABLE			(CCI_CMD_SDK_MODULE_VID + 0x0C)
-#define CCI_CMD_VID_SET_VIDEO_FOCUS_CALC_ENABLE			(CCI_CMD_SDK_MODULE_VID + 0x0D)
-#define CCI_CMD_VID_GET_VIDEO_FOCUS_ROI					(CCI_CMD_SDK_MODULE_VID + 0x10)
-#define CCI_CMD_VID_SET_VIDEO_FOCUS_ROI					(CCI_CMD_SDK_MODULE_VID + 0x11)
-#define CCI_CMD_VID_GET_VIDEO_FOCUS_THRESHOLD			(CCI_CMD_SDK_MODULE_VID + 0x14)
-#define CCI_CMD_VID_SET_VIDEO_FOCUS_THRESHOLD			(CCI_CMD_SDK_MODULE_VID + 0x15)
-#define CCI_CMD_VID_GET_VIDEO_FOCUS_METRIC				(CCI_CMD_SDK_MODULE_VID + 0x18)
-#define CCI_CMD_VID_GET_VIDEO_FREEZE					(CCI_CMD_SDK_MODULE_VID + 0x24)
-#define CCI_CMD_VID_SET_VIDEO_FREEZE					(CCI_CMD_SDK_MODULE_VID + 0x25)
-#define CCI_CMD_VID_GET_VIDEO_OUTPUT_FORMAT				(CCI_CMD_SDK_MODULE_VID + 0x30)
-#define CCI_CMD_VID_SET_VIDEO_OUTPUT_FORMAT				(CCI_CMD_SDK_MODULE_VID + 0x31)
-#define CCI_CMD_VID_GET_VIDEO_PSEUDO_COLOR_SELECT		(CCI_CMD_SDK_MODULE_VID + 0x34)
-#define CCI_CMD_VID_SET_VIDEO_PSEUDO_COLOR_SELECT		(CCI_CMD_SDK_MODULE_VID + 0x35)
+#define CCI_CMD_SDK_MODULE_VID                      0x0300
+#define CCI_CMD_VID_GET_VIDEO_LOOKUP                (CCI_CMD_SDK_MODULE_VID + 0x04)
+#define CCI_CMD_VID_SET_VIDEO_LOOKUP                (CCI_CMD_SDK_MODULE_VID + 0x05)
+#define CCI_CMD_VID_GET_VIDEO_CUSTOM_LOOKUP         (CCI_CMD_SDK_MODULE_VID + 0x08)
+#define CCI_CMD_VID_SET_VIDEO_CUSTOM_LOOKUP         (CCI_CMD_SDK_MODULE_VID + 0x09)
+#define CCI_CMD_VID_GET_VIDEO_FOCUS_CALC_ENABLE     (CCI_CMD_SDK_MODULE_VID + 0x0C)
+#define CCI_CMD_VID_SET_VIDEO_FOCUS_CALC_ENABLE     (CCI_CMD_SDK_MODULE_VID + 0x0D)
+#define CCI_CMD_VID_GET_VIDEO_FOCUS_ROI             (CCI_CMD_SDK_MODULE_VID + 0x10)
+#define CCI_CMD_VID_SET_VIDEO_FOCUS_ROI             (CCI_CMD_SDK_MODULE_VID + 0x11)
+#define CCI_CMD_VID_GET_VIDEO_FOCUS_THRESHOLD       (CCI_CMD_SDK_MODULE_VID + 0x14)
+#define CCI_CMD_VID_SET_VIDEO_FOCUS_THRESHOLD       (CCI_CMD_SDK_MODULE_VID + 0x15)
+#define CCI_CMD_VID_GET_VIDEO_FOCUS_METRIC          (CCI_CMD_SDK_MODULE_VID + 0x18)
+#define CCI_CMD_VID_GET_VIDEO_FREEZE                (CCI_CMD_SDK_MODULE_VID + 0x24)
+#define CCI_CMD_VID_SET_VIDEO_FREEZE                (CCI_CMD_SDK_MODULE_VID + 0x25)
+#define CCI_CMD_VID_GET_VIDEO_OUTPUT_FORMAT         (CCI_CMD_SDK_MODULE_VID + 0x30)
+#define CCI_CMD_VID_SET_VIDEO_OUTPUT_FORMAT         (CCI_CMD_SDK_MODULE_VID + 0x31)
+#define CCI_CMD_VID_GET_VIDEO_PSEUDO_COLOR_SELECT   (CCI_CMD_SDK_MODULE_VID + 0x34)
+#define CCI_CMD_VID_SET_VIDEO_PSEUDO_COLOR_SELECT   (CCI_CMD_SDK_MODULE_VID + 0x35)
 
 // Protected commands
-#define CCI_CMD_SDK_MODULE_OEM							0x0800
-#define CCI_CMD_OEM_GET_PART_NUM  						(0x4000 + CCI_CMD_SDK_MODULE_OEM + 0x1C)
-#define CCI_CMD_OEM_GET_SOFTWARE_REVISION				(0x4000 + CCI_CMD_SDK_MODULE_OEM + 0x20)
-#define CCI_CMD_OEM_GET_VIDEO_OUTPUT_SOURCE				(0x4000 + CCI_CMD_SDK_MODULE_OEM + 0x2C)
-#define CCI_CMD_OEM_SET_VIDEO_OUTPUT_SOURCE				(0x4000 + CCI_CMD_SDK_MODULE_OEM + 0x2D)
-#define CCI_CMD_OEM_GET_VIDEO_OUTPUT_CONSTANT			(0x4000 + CCI_CMD_SDK_MODULE_OEM + 0x3C)
-#define CCI_CMD_OEM_SET_VIDEO_OUTPUT_CONSTANT			(0x4000 + CCI_CMD_SDK_MODULE_OEM + 0x3D)
-#define CCI_CMD_OEM_RUN_REBOOT  						(0x4000 + CCI_CMD_SDK_MODULE_OEM + 0x42)
-#define CCI_CMD_OEM_GET_GPIO_MODE  						(0x4000 + CCI_CMD_SDK_MODULE_OEM + 0x54)
-#define CCI_CMD_OEM_SET_GPIO_MODE  						(0x4000 + CCI_CMD_SDK_MODULE_OEM + 0x55)
+#define CCI_CMD_SDK_MODULE_OEM                      0x0800
+#define CCI_CMD_OEM_GET_PART_NUM                    (0x4000 + CCI_CMD_SDK_MODULE_OEM + 0x1C)
+#define CCI_CMD_OEM_GET_SOFTWARE_REVISION           (0x4000 + CCI_CMD_SDK_MODULE_OEM + 0x20)
+#define CCI_CMD_OEM_GET_VIDEO_OUTPUT_SOURCE         (0x4000 + CCI_CMD_SDK_MODULE_OEM + 0x2C)
+#define CCI_CMD_OEM_SET_VIDEO_OUTPUT_SOURCE         (0x4000 + CCI_CMD_SDK_MODULE_OEM + 0x2D)
+#define CCI_CMD_OEM_GET_VIDEO_OUTPUT_CONSTANT       (0x4000 + CCI_CMD_SDK_MODULE_OEM + 0x3C)
+#define CCI_CMD_OEM_SET_VIDEO_OUTPUT_CONSTANT       (0x4000 + CCI_CMD_SDK_MODULE_OEM + 0x3D)
+#define CCI_CMD_OEM_RUN_REBOOT                      (0x4000 + CCI_CMD_SDK_MODULE_OEM + 0x42)
+#define CCI_CMD_OEM_GET_GPIO_MODE                   (0x4000 + CCI_CMD_SDK_MODULE_OEM + 0x54)
+#define CCI_CMD_OEM_SET_GPIO_MODE                   (0x4000 + CCI_CMD_SDK_MODULE_OEM + 0x55)
 
-#define CCI_CMD_SDK_MODULE_RAD							0x0E00
-#define CCI_CMD_RAD_GET_RADIOMETRY_ENABLE_STATE 		(0x4000 + CCI_CMD_SDK_MODULE_RAD + 0x10)
-#define CCI_CMD_RAD_SET_RADIOMETRY_ENABLE_STATE 		(0x4000 + CCI_CMD_SDK_MODULE_RAD + 0x11)
-#define CCI_CMD_RAD_GET_RADIOMETRY_FLUX_LINEAR_PARAMS 	(0x4000 + CCI_CMD_SDK_MODULE_RAD + 0xBC)
-#define CCI_CMD_RAD_SET_RADIOMETRY_FLUX_LINEAR_PARAMS 	(0x4000 + CCI_CMD_SDK_MODULE_RAD + 0xBD)
+#define CCI_CMD_SDK_MODULE_RAD                      0x0E00
+#define CCI_CMD_RAD_GET_RADIOMETRY_ENABLE_STATE     (0x4000 + CCI_CMD_SDK_MODULE_RAD + 0x10)
+#define CCI_CMD_RAD_SET_RADIOMETRY_ENABLE_STATE     (0x4000 + CCI_CMD_SDK_MODULE_RAD + 0x11)
+#define CCI_CMD_RAD_GET_RADIOMETRY_FLUX_LINEAR_PARAMS   (0x4000 + CCI_CMD_SDK_MODULE_RAD + 0xBC)
+#define CCI_CMD_RAD_SET_RADIOMETRY_FLUX_LINEAR_PARAMS   (0x4000 + CCI_CMD_SDK_MODULE_RAD + 0xBD)
 #define CCI_CMD_RAD_GET_RADIOMETRY_TLINEAR_ENABLE_STATE (0x4000 + CCI_CMD_SDK_MODULE_RAD + 0xC0)
 #define CCI_CMD_RAD_SET_RADIOMETRY_TLINEAR_ENABLE_STATE (0x4000 + CCI_CMD_SDK_MODULE_RAD + 0xC1)
-#define CCI_CMD_RAD_GET_RADIOMETRY_TLINEAR_AUTO_RES 	(0x4000 + CCI_CMD_SDK_MODULE_RAD + 0xC8)
-#define CCI_CMD_RAD_SET_RADIOMETRY_TLINEAR_AUTO_RES 	(0x4000 + CCI_CMD_SDK_MODULE_RAD + 0xC9)
-#define CCI_CMD_RAD_GET_RADIOMETRY_SPOT_ROI 			(0x4000 + CCI_CMD_SDK_MODULE_RAD + 0xCC)
-#define CCI_CMD_RAD_SET_RADIOMETRY_SPOT_ROI 			(0x4000 + CCI_CMD_SDK_MODULE_RAD + 0xCD)
+#define CCI_CMD_RAD_GET_RADIOMETRY_TLINEAR_AUTO_RES (0x4000 + CCI_CMD_SDK_MODULE_RAD + 0xC8)
+#define CCI_CMD_RAD_SET_RADIOMETRY_TLINEAR_AUTO_RES (0x4000 + CCI_CMD_SDK_MODULE_RAD + 0xC9)
+#define CCI_CMD_RAD_GET_RADIOMETRY_SPOT_ROI         (0x4000 + CCI_CMD_SDK_MODULE_RAD + 0xCC)
+#define CCI_CMD_RAD_SET_RADIOMETRY_SPOT_ROI         (0x4000 + CCI_CMD_SDK_MODULE_RAD + 0xCD)
+#define CCI_CMD_RAD_GET_RADIOMETRY_SPOT             (0x4000 + CCI_CMD_SDK_MODULE_RAD + 0xD0)
 
 // Bit positions
-#define CCI_BIT_BOOT_STATUS_BIT							0x02
-#define CCI_BIT_BOOT_MODE_BIT							0x01
-#define CCI_BIT_BUSY									0x00
+#define CCI_BIT_BOOT_STATUS_BIT                     0x02
+#define CCI_BIT_BOOT_MODE_BIT                       0x01
+#define CCI_BIT_BUSY                                0x00
 
 /** @brief Buffer for the I2C burst transmissions.
  */
@@ -176,11 +179,11 @@ static Lepton_Error_t CCI_WaitBusy(CCI_t* p_Interface, Lepton_Result_t* p_Status
 {
     Lepton_Error_t Error;
 
-    if((p_Interface == NULL) || (p_Interface->I2C_Write == NULL) || (p_Interface->I2C_Read == NULL) || (p_Interface->Internal.Mutex == NULL))
+    if((p_Interface == NULL) || (p_Interface->I2C_Write == NULL) || (p_Interface->I2C_Read == NULL) || (p_Interface->Mutex == NULL))
     {
         return LEPTON_ERR_INVALID_ARG;
     }
-    else if(p_Interface->Internal.isInitialized == false)
+    else if(p_Interface->isInitialized == false)
     {
         return LEPTON_ERR_INVALID_STATE;
     }
@@ -192,18 +195,18 @@ static Lepton_Error_t CCI_WaitBusy(CCI_t* p_Interface, Lepton_Result_t* p_Status
         _CCI_Buffer[0] = (CCI_REG_STATUS >> 8) & 0xFF;
         _CCI_Buffer[1] = CCI_REG_STATUS & 0xFF;
 
-        xSemaphoreTake(p_Interface->Internal.Mutex, portMAX_DELAY);
+        xSemaphoreTake(p_Interface->Mutex, portMAX_DELAY);
         if((p_Interface->I2C_Write(&p_Interface->I2C_Dev_Handle, _CCI_Buffer, 2) != 0) || (p_Interface->I2C_Read(&p_Interface->I2C_Dev_Handle, _CCI_Buffer, 2) != 0))
         {
             ESP_LOGE(TAG, "Failed to access Status register!");
 
-            xSemaphoreGive(p_Interface->Internal.Mutex);
+            xSemaphoreGive(p_Interface->Mutex);
 
             Error = LEPTON_ERR_FAIL;
             break;
         }
 
-        xSemaphoreGive(p_Interface->Internal.Mutex);
+        xSemaphoreGive(p_Interface->Mutex);
 
         vTaskDelay(10 / portTICK_PERIOD_MS);
     } while((_CCI_Buffer[1] & 0x07) != ((0x01 << CCI_BIT_BOOT_STATUS_BIT) | (0x01 << CCI_BIT_BOOT_MODE_BIT)));
@@ -226,11 +229,11 @@ static Lepton_Error_t CCI_WriteRegister(CCI_t* p_Interface, uint16_t Register, u
 {
     Lepton_Error_t Error;
 
-    if((p_Interface == NULL) || (p_Interface->I2C_Write == NULL) || (p_Interface->Internal.Mutex == NULL))
+    if((p_Interface == NULL) || (p_Interface->I2C_Write == NULL) || (p_Interface->Mutex == NULL))
     {
         return LEPTON_ERR_INVALID_ARG;
     }
-    else if(p_Interface->Internal.isInitialized == false)
+    else if(p_Interface->isInitialized == false)
     {
         return LEPTON_ERR_INVALID_STATE;
     }
@@ -241,16 +244,16 @@ static Lepton_Error_t CCI_WriteRegister(CCI_t* p_Interface, uint16_t Register, u
     _CCI_Buffer[2] = static_cast<uint8_t>((Value >> 8) & 0xFF);
     _CCI_Buffer[3] = static_cast<uint8_t>(Value & 0xFF);
 
-    xSemaphoreTake(p_Interface->Internal.Mutex, portMAX_DELAY);
+    xSemaphoreTake(p_Interface->Mutex, portMAX_DELAY);
     if(p_Interface->I2C_Write(&p_Interface->I2C_Dev_Handle, _CCI_Buffer, 4) != 0)
     {
-        xSemaphoreGive(p_Interface->Internal.Mutex);
+        xSemaphoreGive(p_Interface->Mutex);
 
         ESP_LOGE(TAG, "Failed to write CCI register %02x with value %02x", Register, Value);
 
         Error = LEPTON_ERR_FAIL;
     };
-    xSemaphoreGive(p_Interface->Internal.Mutex);
+    xSemaphoreGive(p_Interface->Mutex);
 
     return Error;
 }
@@ -266,11 +269,11 @@ static Lepton_Error_t CCI_WriteBurst(CCI_t* p_Interface, uint16_t Start, uint16_
 {
     Lepton_Error_t Error;
 
-    if((p_Interface == NULL) || (Length == 0) || (p_Buf == NULL) || (p_Interface->I2C_Write == NULL) || (p_Interface->Internal.Mutex == NULL))
+    if((p_Interface == NULL) || (Length == 0) || (p_Buf == NULL) || (p_Interface->I2C_Write == NULL) || (p_Interface->Mutex == NULL))
     {
         return LEPTON_ERR_INVALID_ARG;
     }
-    else if(p_Interface->Internal.isInitialized == false)
+    else if(p_Interface->isInitialized == false)
     {
         return LEPTON_ERR_INVALID_STATE;
     }
@@ -290,14 +293,14 @@ static Lepton_Error_t CCI_WriteBurst(CCI_t* p_Interface, uint16_t Start, uint16_
         _CCI_Buffer[(i << 1) + 1] = static_cast<uint8_t>(*p_Buf++ & 0xFF);
     }
 
-    xSemaphoreTake(p_Interface->Internal.Mutex, portMAX_DELAY);
+    xSemaphoreTake(p_Interface->Mutex, portMAX_DELAY);
     if(p_Interface->I2C_Write(&p_Interface->I2C_Dev_Handle, _CCI_Buffer, (Length << 1) + 2) != 0)
     {
         ESP_LOGE(TAG, "Failed to perform write burst at CCI register %02x with length %u", Start, Length);
 
         Error = LEPTON_ERR_FAIL;
     };
-    xSemaphoreGive(p_Interface->Internal.Mutex);
+    xSemaphoreGive(p_Interface->Mutex);
     
     return Error;
 }
@@ -312,11 +315,11 @@ static Lepton_Error_t CCI_ReadRegister(CCI_t* p_Interface, uint16_t Register, ui
 {
     Lepton_Error_t Error;
 
-    if((p_Interface == NULL) || (p_Value == NULL) || (p_Interface->I2C_Write == NULL) || (p_Interface->I2C_Read == NULL) || (p_Interface->Internal.Mutex == NULL))
+    if((p_Interface == NULL) || (p_Value == NULL) || (p_Interface->I2C_Write == NULL) || (p_Interface->I2C_Read == NULL) || (p_Interface->Mutex == NULL))
     {
         return LEPTON_ERR_INVALID_ARG;
     }
-    else if(p_Interface->Internal.isInitialized == false)
+    else if(p_Interface->isInitialized == false)
     {
         return LEPTON_ERR_INVALID_STATE;
     }
@@ -325,7 +328,7 @@ static Lepton_Error_t CCI_ReadRegister(CCI_t* p_Interface, uint16_t Register, ui
     _CCI_Buffer[0] = static_cast<uint8_t>(Register >> 8);
     _CCI_Buffer[1] = static_cast<uint8_t>(Register & 0xFF);
 
-    xSemaphoreTake(p_Interface->Internal.Mutex, portMAX_DELAY);
+    xSemaphoreTake(p_Interface->Mutex, portMAX_DELAY);
     if((p_Interface->I2C_Write(&p_Interface->I2C_Dev_Handle, _CCI_Buffer, 2) != 0) || (p_Interface->I2C_Read(&p_Interface->I2C_Dev_Handle, _CCI_Buffer, 2) != 0))
     {
         ESP_LOGE(TAG, "Failed to access CCI register %02x", Register);
@@ -335,7 +338,7 @@ static Lepton_Error_t CCI_ReadRegister(CCI_t* p_Interface, uint16_t Register, ui
 
     *p_Value = (_CCI_Buffer[0] << 8) | _CCI_Buffer[1];
 
-    xSemaphoreGive(p_Interface->Internal.Mutex);
+    xSemaphoreGive(p_Interface->Mutex);
 
     return Error;
 }
@@ -351,11 +354,11 @@ static Lepton_Error_t CCI_ReadBurst(CCI_t* p_Interface, uint16_t Start, uint16_t
 {
     Lepton_Error_t Error;
 
-    if((p_Interface == NULL) || (Length == 0) || (p_Buf == NULL) || (p_Interface->I2C_Read == NULL) || (p_Interface->Internal.Mutex == NULL))
+    if((p_Interface == NULL) || (Length == 0) || (p_Buf == NULL) || (p_Interface->I2C_Read == NULL) || (p_Interface->Mutex == NULL))
     {
         return LEPTON_ERR_INVALID_ARG;
     }
-    else if(p_Interface->Internal.isInitialized == false)
+    else if(p_Interface->isInitialized == false)
     {
         return LEPTON_ERR_INVALID_STATE;
     }
@@ -368,7 +371,7 @@ static Lepton_Error_t CCI_ReadBurst(CCI_t* p_Interface, uint16_t Start, uint16_t
     _CCI_Buffer[0] = static_cast<uint8_t>(Start >> 8);
     _CCI_Buffer[1] = static_cast<uint8_t>(Start & 0xFF);
 
-    xSemaphoreTake(p_Interface->Internal.Mutex, portMAX_DELAY);
+    xSemaphoreTake(p_Interface->Mutex, portMAX_DELAY);
     if((p_Interface->I2C_Write(&p_Interface->I2C_Dev_Handle, _CCI_Buffer, 2) != 0) || (p_Interface->I2C_Read(&p_Interface->I2C_Dev_Handle, _CCI_Buffer, Length << 1) != 0))
     {
         ESP_LOGE(TAG, "Failed to initiate CCI read burst at register %02x", Start);
@@ -378,32 +381,32 @@ static Lepton_Error_t CCI_ReadBurst(CCI_t* p_Interface, uint16_t Start, uint16_t
     }
 
     // Copy the data in the buffer.
-    for(uint32_t i = 0; i <= Length; i++)
+    for(uint32_t i = 0; i < Length; i++)
     {
         *p_Buf++ = (_CCI_Buffer[i << 1] << 8) | _CCI_Buffer[(i << 1) + 1];
     }
 
 CCI_ReadBurst_Exit:
-    xSemaphoreGive(p_Interface->Internal.Mutex);
+    xSemaphoreGive(p_Interface->Mutex);
 
     return Error;
 }
 
 Lepton_Error_t CCI_Init(CCI_t* p_Interface)
 {
-    if((p_Interface == NULL) || (p_Interface->I2C_Init == NULL))
+    if(p_Interface == NULL)
     {
         return LEPTON_ERR_INVALID_ARG;
     }
-    else if(p_Interface->Internal.isInitialized == true)
+    else if(p_Interface->isInitialized == true)
     {
         return LEPTON_ERR_OK;
     }
 
-    if(p_Interface->Internal.Mutex == NULL)
+    if(p_Interface->Mutex == NULL)
     {
-        p_Interface->Internal.Mutex = xSemaphoreCreateMutex();
-        if(p_Interface->Internal.Mutex == NULL)
+        p_Interface->Mutex = xSemaphoreCreateMutex();
+        if(p_Interface->Mutex == NULL)
         {
             return LEPTON_ERR_FAIL;
         }
@@ -428,7 +431,7 @@ Lepton_Error_t CCI_Init(CCI_t* p_Interface)
         return LEPTON_ERR_FAIL;
     }
 
-    p_Interface->Internal.isInitialized = true;
+    p_Interface->isInitialized = true;
 
     return LEPTON_ERR_OK;
 }
@@ -439,19 +442,19 @@ Lepton_Error_t CCI_Deinit(CCI_t* p_Interface)
     {
         return LEPTON_ERR_INVALID_ARG;
     }
-    else if(p_Interface->Internal.isInitialized == false)
+    else if(p_Interface->isInitialized == false)
     {
         return LEPTON_ERR_OK;
     }
 
     p_Interface->I2C_Deinit(p_Interface->I2C_Bus_Handle);
 
-    if(p_Interface->Internal.Mutex != NULL)
+    if(p_Interface->Mutex != NULL)
     {
-        vSemaphoreDelete(p_Interface->Internal.Mutex);
+        vSemaphoreDelete(p_Interface->Mutex);
     }
 
-    p_Interface->Internal.isInitialized = false;
+    p_Interface->isInitialized = false;
 
     return LEPTON_ERR_OK;
 }
@@ -497,8 +500,11 @@ Lepton_Error_t CCI_Get(CCI_t* p_Interface, uint16_t Command, uint16_t Length, ui
     // First: Execute the command when the device is not busy anymore.
     LEPTON_ERROR_CHECK(CCI_WriteRegister(p_Interface, CCI_REG_DATA_LENGTH, Length));
     LEPTON_ERROR_CHECK(CCI_WriteRegister(p_Interface, CCI_REG_COMMAND, Command));
+    
+    // Wait for command to complete
+    LEPTON_ERROR_CHECK(CCI_WaitBusy(p_Interface, p_Status));
 
-    // Second: Write the data.
+    // Second: Read the data.
     Start = CCI_REG_DATA_0;
     if((Length > 16) && (Length <= 512))
     {
@@ -552,12 +558,31 @@ Lepton_Error_t CCI_GetSoftwareVersion(CCI_t* p_Interface, Lepton_Version_t* p_Ve
 
 Lepton_Error_t CCI_GetSerialNumber(CCI_t* p_Interface, uint8_t* p_Serial, Lepton_Result_t* p_Status)
 {
+    uint16_t Buffer[4] = {0};
+    Lepton_Error_t Error;
+
     if(p_Serial == NULL)
     {
         return LEPTON_ERR_INVALID_ARG;
     }
+    
+    /* Initialize serial buffer */
+    memset(p_Serial, 0, 8);
 
-    return CCI_Get(p_Interface, CCI_CMD_SYS_GET_SERIALNUMBER, 4, (uint16_t*)p_Serial, p_Status);
+    Error = CCI_Get(p_Interface, CCI_CMD_SYS_GET_SERIALNUMBER, 4, Buffer, p_Status);
+    if(Error != LEPTON_ERR_OK)
+    {
+        return Error;
+    }
+
+    /* Convert from 16-bit words to byte array - matches Lepton CCI byte order */
+    for(int i = 0; i < 4; i++)
+    {
+        p_Serial[i * 2] = (Buffer[i] >> 8) & 0xFF;      // High byte first
+        p_Serial[i * 2 + 1] = Buffer[i] & 0xFF;         // Low byte second
+    }
+
+    return LEPTON_ERR_OK;
 }
 
 Lepton_Error_t CCI_GetUptime(CCI_t* p_Interface, uint32_t* p_Uptime, Lepton_Result_t* p_Status)
@@ -1066,14 +1091,73 @@ Lepton_Error_t CCI_GetVideoSource(CCI_t* p_Interface, Lepton_VideoSource_t* p_So
     return LEPTON_ERR_OK;
 }
 
-Lepton_Error_t CCI_SetROI(CCI_t* p_Interface, const Lepton_ROI_t* p_ROI, Lepton_Result_t* p_Status)
+Lepton_Error_t CCI_SetShutterPosition(CCI_t* p_Interface, Lepton_ShutterPos_t Position, Lepton_Result_t* p_Status)
+{
+    LEPTON_ERROR_CHECK(CCI_WaitBusy(p_Interface, p_Status));
+    LEPTON_ERROR_CHECK(CCI_WriteRegister(p_Interface, CCI_REG_DATA_0, Position & 0xFFFF));
+    LEPTON_ERROR_CHECK(CCI_WriteRegister(p_Interface, CCI_REG_DATA_1, (Position >> 16) & 0xFFFF));
+    LEPTON_ERROR_CHECK(CCI_WriteRegister(p_Interface, CCI_REG_DATA_LENGTH, 2));
+    LEPTON_ERROR_CHECK(CCI_WriteRegister(p_Interface, CCI_REG_COMMAND, CCI_CMD_SYS_SET_SHUTTER_POSITION));
+
+    return CCI_WaitBusy(p_Interface, p_Status);
+}
+
+Lepton_Error_t CCI_GetShutterPosition(CCI_t* p_Interface, Lepton_ShutterPos_t* p_Position, Lepton_Result_t* p_Status)
+{
+    uint16_t Low;
+    uint16_t High;
+
+    if(p_Position == NULL)
+    {
+        return LEPTON_ERR_INVALID_ARG;
+    }
+
+    LEPTON_ERROR_CHECK(CCI_WaitBusy(p_Interface, p_Status));
+    LEPTON_ERROR_CHECK(CCI_WriteRegister(p_Interface, CCI_REG_DATA_LENGTH, 2));
+    LEPTON_ERROR_CHECK(CCI_WriteRegister(p_Interface, CCI_REG_COMMAND, CCI_CMD_SYS_GET_SHUTTER_POSITION));
+    LEPTON_ERROR_CHECK(CCI_WaitBusy(p_Interface, p_Status));
+    LEPTON_ERROR_CHECK(CCI_ReadRegister(p_Interface, CCI_REG_DATA_0, &Low));
+    LEPTON_ERROR_CHECK(CCI_ReadRegister(p_Interface, CCI_REG_DATA_1, &High));
+    LEPTON_ERROR_CHECK(CCI_WaitBusy(p_Interface, p_Status));
+
+    *p_Position = static_cast<Lepton_ShutterPos_t>((High << 16) | Low);
+
+    return LEPTON_ERR_OK;
+}
+
+Lepton_Error_t CCI_SetAGCROI(CCI_t* p_Interface, const Lepton_ROI_t* p_ROI, Lepton_Result_t* p_Status)
+{
+    return CCI_Set(p_Interface, CCI_CMD_AGC_SET_ROI, 4, reinterpret_cast<const uint16_t*>(p_ROI), p_Status);
+}
+
+Lepton_Error_t CCI_GetAGCROI(CCI_t* p_Interface, Lepton_ROI_t* p_ROI, Lepton_Result_t* p_Status)
+{
+    return CCI_Get(p_Interface, CCI_CMD_AGC_GET_ROI, 4, reinterpret_cast<uint16_t*>(p_ROI), p_Status);
+}
+
+Lepton_Error_t CCI_SetSceneROI(CCI_t* p_Interface, const Lepton_ROI_t* p_ROI, Lepton_Result_t* p_Status)
 {
     return CCI_Set(p_Interface, CCI_CMD_SYS_SET_SCENE_ROI, 4, reinterpret_cast<const uint16_t*>(p_ROI), p_Status);
 }
 
-Lepton_Error_t CCI_GetROI(CCI_t* p_Interface, Lepton_ROI_t* p_ROI, Lepton_Result_t* p_Status)
+Lepton_Error_t CCI_GetSceneROI(CCI_t* p_Interface, Lepton_ROI_t* p_ROI, Lepton_Result_t* p_Status)
 {
     return CCI_Get(p_Interface, CCI_CMD_SYS_GET_SCENE_ROI, 4, reinterpret_cast<uint16_t*>(p_ROI), p_Status);
+}
+
+Lepton_Error_t CCI_SetSpotmeterROI(CCI_t* p_Interface, const Lepton_ROI_t* p_ROI, Lepton_Result_t* p_Status)
+{
+    return CCI_Set(p_Interface, CCI_CMD_RAD_SET_RADIOMETRY_SPOT_ROI, 4, reinterpret_cast<const uint16_t*>(p_ROI), p_Status);
+}
+
+Lepton_Error_t CCI_GetSpotmeterROI(CCI_t* p_Interface, Lepton_ROI_t* p_ROI, Lepton_Result_t* p_Status)
+{
+    return CCI_Get(p_Interface, CCI_CMD_RAD_GET_RADIOMETRY_SPOT_ROI, 4, reinterpret_cast<uint16_t*>(p_ROI), p_Status);
+}
+
+Lepton_Error_t CCI_GetSpotmeter(CCI_t* p_Interface, Lepton_Spotmeter_t* p_Spot, Lepton_Result_t* p_Status)
+{
+    return CCI_Get(p_Interface, CCI_CMD_RAD_GET_RADIOMETRY_SPOT, 4, reinterpret_cast<uint16_t*>(p_Spot), p_Status);
 }
 
 Lepton_Error_t CCI_GetSceneStatistics(CCI_t* p_Interface, Lepton_SceneStatistics_t* p_Statistics, Lepton_Result_t* p_Status)

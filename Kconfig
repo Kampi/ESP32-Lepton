@@ -3,8 +3,8 @@ menu "Lepton"
         menu "V-Sync"
             config LEPTON_GPIO_VSYNC_PIN
                 int "V-Sync pin"
-                range 0 48
-                default 45
+                range -1 48
+                default -1
 
             config LEPTON_VSYNC_PLACE_IRAM
                 bool "Place the V-Sync ISR in the IRAM"
@@ -53,6 +53,13 @@ menu "Lepton"
             int "CS pin number"
             range -1 48
             default 19
+
+        config LEPTON_VOSPI_FRAME_BUFFERS
+            int "Number of image buffers"
+            range 1 8
+            default 2
+            help
+                Number of image buffers.
     endmenu
 
     menu "Capture Task"

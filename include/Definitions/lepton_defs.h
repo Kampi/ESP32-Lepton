@@ -128,6 +128,28 @@ typedef enum
  */
 typedef enum
 {
+    LEPTON_SHUTTER_POS_UNKNOWN = -1,		    /**< */
+    LEPTON_SHUTTER_POS_IDLE = 0,				/**< */
+    LEPTON_SHUTTER_POS_OPEN,					/**< */
+    LEPTON_SHUTTER_POS_CLOSED,				    /**< */
+    LEPTON_SHUTTER_POS_BRAKE_ON,				/**< */
+    LEPTON_SHUTTER_POS_END,  				    /**< */
+} Lepton_ShutterPos_t;
+
+/** @brief FFC shutter mode definitions.
+ */
+typedef enum
+{
+    LEPTON_FFC_SHUTTER_MODE_MANUAL = 0,         /**< Manual FFC mode - shutter operates only on command */
+    LEPTON_FFC_SHUTTER_MODE_AUTO,               /**< Auto FFC mode - shutter operates based on time/temp */
+    LEPTON_FFC_SHUTTER_MODE_EXTERNAL,           /**< External FFC mode - shutter controlled externally */
+    LEPTON_FFC_SHUTTER_MODE_END                 /**< */
+} Lepton_FFC_ShutterMode_t;
+
+/** @brief 
+ */
+typedef enum
+{
     LEPTON_OEM_GPIO_MODE_GPIO,					/**< */
     LEPTON_OEM_GPIO_MODE_I2C_MASTER,           	/**< */
     LEPTON_OEM_GPIO_MODE_SPI_MASTER_VLB_DATA,	/**< */
@@ -157,15 +179,15 @@ typedef enum
  */
 typedef enum
 {
-    LEPTON_FORMAT_RGB888 	            = 3,    /**< 24-bit color mode. */
-    LEPTON_FORMAT_RAW14 	            = 7,	/**< 14-bit raw data. */
+    LEPTON_FORMAT_RGB888 	= 3,				/**< 24-bit color mode. */
+    LEPTON_FORMAT_RAW14 	= 7,				/**< 14-bit raw data. */
 } Lepton_VideoFormat_t;
 
 /** @brief Video output source definitions.
  */
 typedef enum
 {
-    LEPTON_SOURCE_RAW 		            = 0, 	/*< Before video processing. */
+    LEPTON_SOURCE_RAW 		= 0, 				/*< Before video processing. */
     LEPTON_SOURCE_COOKED, 						/*< Post video processing - Normal mode. */
     LEPTON_SOURCE_RAMP, 						/*< Software Ramp pattern - Increase in X and Y. */
     LEPTON_SOURCE_CONSTANT,						/*< Software Constant value pattern. */
@@ -192,13 +214,21 @@ typedef struct
  */
 typedef struct
 {
-    bool Telemetry_Valid;						/**< #true when the telemetry is valid. */
-    bool Image_Valid;							/**< */
-    uint16_t Heigth;							/**< Image height in pixel. */
-    uint16_t Width;								/**< Image width in pixel. */
+    uint16_t Height;							/**< Image buffer height in pixel. */
+    uint16_t Width;								/**< Image buffer width in pixel. */
+    uint8_t BytesPerPixel;						/**< Number of bytes per pixel. */
     uint16_t* Image_Buffer;						/**< Pointer to memory location for image buffer. */
-    uint16_t* Telemetry_Buffer;					/**< Pointer to memory location for telemetry buffer. */
-} Lepton_Buffer_t;
+} Lepton_FrameBuffer_t;
+
+/** @brief Spotmeter object definition.
+ */
+typedef struct
+{
+    uint16_t SpotTemperature;                   /**< Spotmeter temperature value in Kelvin. */
+    uint16_t Max;                               /**< Maximum temperature value in Kelvin within the spotmeter ROI. */
+    uint16_t Min;                               /**< Minimum temperature value in Kelvin within the spotmeter ROI. */
+    uint16_t AverageTemperature;                /**< Average temperature value in Kelvin within the spotmeter ROI. */
+} Lepton_Spotmeter_t;
 
 /** @brief Image scene statistics object definition.
  */
@@ -214,10 +244,10 @@ typedef struct
  */
 typedef struct
 {
-    uint16_t StartColumn;						/**< Start column. */
-    uint16_t StartRow;							/**< Start row. */
-    uint16_t EndColumn;							/**< End column. */
-    uint16_t EndRow;							/**< End row. */
+    uint16_t x;						            /**< */
+    uint16_t y;							        /**< */
+    uint16_t w;							        /**< */
+    uint16_t h;							        /**< */
 } Lepton_ROI_t;
 
 /** @brief Pixel definition for custom look-up table.
@@ -230,7 +260,7 @@ typedef struct
     uint8_t B;									/**< Blue pixel. */
 } Lepton_LookUp_Pixel_t;
 
-/** @brief Custom look-up table definition.
+/** @brief Custom look-up table definition
  */
 typedef struct
 {
@@ -250,13 +280,10 @@ typedef struct
                                                 /**< NOTE: Only needed when I2C_Init is used! */
     i2c_master_bus_handle_t I2C_Bus_Handle;     /**< Pointer to I2C bus handle. */
     i2c_master_dev_handle_t I2C_Dev_Handle;     /**< Pointer to I2C device handle. */    
-    struct
-    {
-        SemaphoreHandle_t Mutex;				/**< Mutex for the I2C communication.
+    SemaphoreHandle_t Mutex;				    /**< Mutex for the I2C communication.
                                                      NOTE: Managed by the device driver. */
-        bool isInitialized;						/**< #true when the device is initialized.
+    bool isInitialized;						    /**< #true when the device is initialized.
                                                      NOTE: Managed by the device driver. */
-    } Internal;
 } CCI_t;
 
 /** @brief Lepton VoSPI communication object.
@@ -267,19 +294,28 @@ typedef struct
     spi_bus_config_t Master;					/**< SPI master configuration. */
     spi_host_device_t Host;						/**< SPI host interface used by the driver. */
     int DMA;									/**< DMA channel used by the VoSPI driver. */
-    struct
-    {
-        bool isInitialized;						/**< #true when the device is initialized.
-                                                      NOTE: Managed by the device driver. */
-        spi_device_handle_t Handle;				/**< SPI device handle for communication.
-                                                      NOTE: Managed by the device driver. */
-        uint16_t* Packet;					    /**< Pointer to allocated array to store one Lepton packet (DMA capable).
-                                                      NOTE: Managed by the device driver. */
-        uint16_t* Frame;					    /**< 
+    bool isInitialized;						    /**< #true when the device is initialized.
                                                      NOTE: Managed by the device driver. */
-    } Internal;
+    bool isResync;                              /**< #true when a resynchronization is in progress.
+                                                     NOTE: Managed by the device driver. */
+    bool isCapturing;					        /**< 
+                                                     NOTE: Managed by the device driver. */
+    bool useTelemetry;						    /**< 
+                                                     NOTE: Managed by the device driver. */
+    spi_device_handle_t Handle;				    /**< SPI device handle for communication.
+                                                     NOTE: Managed by the device driver. */
+    uint16_t* Packet;					        /**< Pointer to allocated array to store one Lepton packet (DMA capable).
+                                                     NOTE: Managed by the device driver. */
+    uint16_t ImageHeight;						/**< Image buffer height in pixel. */
+    uint16_t ImageWidth;						/**< Image buffer width in pixel. */
+    uint8_t BytesPerPixel;						/**< Number of bytes per pixel. */
+    uint16_t* Image_Buffer[CONFIG_LEPTON_VOSPI_FRAME_BUFFERS];					/**< Pointer to memory location for image buffer. */
+    uint8_t CurrentBuffer;						/**< Current buffer index used by the driver. 
+                                                     NOTE: Managed by the device driver. */
     uint32_t SyncErrors;						/**< */
-    uint32_t ValidFrames;						/**< */
+    uint32_t FrameCounter;						/**< */
+    int64_t ResyncStartUs;                      /**< Timestamp when the resynchronization started.
+                                                     NOTE: Managed by the device driver. */
 } VoSPI_t;
 
 /** @brief Lepton Thermal Camera software version object definition.
@@ -310,7 +346,9 @@ typedef struct
         GPIO_Set PowerDown;					    /**< Function pointer to control the power-down line.
                                                      NOTE: Can be set to NULL to leave it unused. */
         gpio_num_t VSync;						/**< Pin uses for the VSync signal. */
-        TaskHandle_t CaptureHandle;				/**< Handle for the capture task.
+        TaskHandle_t CapHandle;				    /**< Handle for the capture task.
+                                                     NOTE: Managed by the device driver. */
+        QueueHandle_t FrameQueue;               /**< Queue for frame ready events.
                                                      NOTE: Managed by the device driver. */
         bool isInitialized;						/**< #true when the device is initialized.
                                                      NOTE: Managed by the device driver. */
@@ -322,13 +360,9 @@ typedef struct
                                                      NOTE: Managed by the device driver. */
         bool isTLinear;							/**< 
                                                      NOTE: Managed by the device driver. */
-        bool useTelemetry;						/**< 
-                                                     NOTE: Managed by the device driver. */
         bool isAutoRes;							/**< 
                                                      NOTE: Managed by the device driver. */
         bool isTLinearAutoRes;					/**< 
-                                                     NOTE: Managed by the device driver. */
-        bool isCapturing;					    /**< 
                                                      NOTE: Managed by the device driver. */
         Lepton_Gain_t Gain;						/**< 
                                                       NOTE: Managed by the device driver. */
@@ -338,8 +372,6 @@ typedef struct
                                                       NOTE: Managed by the device driver. */
         VoSPI_t VoSPI;							/**< VoSPI device object used by the camera driver.
                                                       NOTE: Managed by the device driver. */
-        QueueHandle_t FrameQueue;               /**< Handle for the frame queue.
-                                                     NOTE: Managed by the device driver. */
     } Internal;
 } Lepton_t;
 
@@ -347,9 +379,11 @@ typedef struct
  */
 typedef struct
 {
-    bool UseTelemetry;							/**< */
-    bool UseAGC;								/**< */
-    bool UseAGCCalculation;						/**< */
+    bool useTelemetry;							/**< */
+    bool useAGC;								/**< */
+    bool useAGCCalculation;						/**< */
+    bool useTLinear;							/**< */
+    bool useAutoFFC;                            /**< */
     Lepton_Gain_t Gain;							/**< */
     Lepton_VideoFormat_t VideoFormat;			/**< */
     gpio_num_t VSync;							/**< Pin used for the VSync signal. */
