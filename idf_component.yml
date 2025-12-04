@@ -1,4 +1,3 @@
-version: "main"
 description: "ESP32 component for FLIR Lepton 3.5 Thermal Camera"
 url: https://github.com/Kampi/ESP32-Lepton
 repository: https://github.com/Kampi/ESP32-Lepton
@@ -9,9 +8,6 @@ tags:
   - flir
   - lepton
 targets:
-  - esp32
-  - esp32c3
-  - esp32c6
   - esp32s3
 maintainers:
   - "Daniel Kampert <DanielKampert@kampis-elektroecke.de>"

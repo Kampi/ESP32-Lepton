@@ -229,7 +229,7 @@ Lepton_Error_t CCI_SetTelemetryPosition(CCI_t* p_Interface, Lepton_TelemetryPos_
  */
 Lepton_Error_t CCI_GetTelemetry(CCI_t* p_Interface, Lepton_TelemetryPos_t* p_Position, Lepton_Result_t* p_Status = NULL);
 
-/** @brief 			
+/** @brief 			    Enable / Disable Radiometry T-Linear Auto Res.
  *  @param p_Interface  Pointer to CCI interface object
  *  @param Enable	    Enable / Disable
  *  @param p_Status	    (Optional) Pointer to device status
@@ -237,7 +237,7 @@ Lepton_Error_t CCI_GetTelemetry(CCI_t* p_Interface, Lepton_TelemetryPos_t* p_Pos
  */
 Lepton_Error_t CCI_SetRadiometryTLinearAutoRes(CCI_t* p_Interface, bool Enable, Lepton_Result_t* p_Status = NULL);
 
-/** @brief 			
+/** @brief 			    Get the Radiometry T-Linear Auto Res state.
  *  @param p_Interface  Pointer to CCI interface object
  *  @param p_Enable	    Pointer to state
  *  @param p_Status	    (Optional) Pointer to device status
@@ -293,6 +293,20 @@ Lepton_Error_t CCI_SetVideoFormat(CCI_t* p_Interface, Lepton_VideoFormat_t Forma
  */
 Lepton_Error_t CCI_GetVideoFormat(CCI_t* p_Interface, Lepton_VideoFormat_t* p_Format, Lepton_Result_t* p_Status = NULL);
 
+/** @brief 			    
+ *  @param p_Interface  Pointer to CCI interface object
+ *  @param Position
+ *  @return			    LEPTON_ERR_OK when successful
+ */
+Lepton_Error_t CCI_SetShutterPosition(CCI_t* p_Interface, Lepton_ShutterPos_t Position, Lepton_Result_t* p_Status = NULL);
+
+/** @brief 			    
+ *  @param p_Interface  Pointer to CCI interface object
+ *  @param p_Position
+ *  @return			    LEPTON_ERR_OK when successful
+ */
+Lepton_Error_t CCI_GetShutterPosition(CCI_t* p_Interface, Lepton_ShutterPos_t* p_Position, Lepton_Result_t* p_Status = NULL);
+
 /** @brief 			    Set the video output source.
  *  @param p_Interface  Pointer to CCI interface object
  *  @param Source		Video output source
@@ -311,21 +325,61 @@ Lepton_Error_t CCI_SetVideoSource(CCI_t* p_Interface, Lepton_VideoSource_t Sourc
  */
 Lepton_Error_t CCI_GetVideoSource(CCI_t* p_Interface, Lepton_VideoSource_t* p_Source, Lepton_Result_t* p_Status = NULL);
 
-/** @brief 			    Set the video ROI.
+/** @brief 			    Set the AGC ROI.
  *  @param p_Interface  Pointer to CCI interface object
  *  @param p_ROI		Pointer to ROI object
  *  @param p_Status	    (Optional) Pointer to device status
  *  @return			    LEPTON_ERR_OK when successful
  */
-Lepton_Error_t CCI_SetROI(CCI_t* p_Interface, const Lepton_ROI_t* p_ROI, Lepton_Result_t* p_Status);
+Lepton_Error_t CCI_SetAGCROI(CCI_t* p_Interface, const Lepton_ROI_t* p_ROI, Lepton_Result_t* p_Status);
 
-/** @brief 			    Get the video ROI.
+/** @brief 			    Get the AGC ROI.
  *  @param p_Interface  Pointer to CCI interface object
  *  @param p_ROI		Pointer to ROI object
  *  @param p_Status	    (Optional) Pointer to device status
  *  @return			    LEPTON_ERR_OK when successful
  */
-Lepton_Error_t CCI_GetROI(CCI_t* p_Interface, Lepton_ROI_t* p_ROI, Lepton_Result_t* p_Status);
+Lepton_Error_t CCI_GetAGCROI(CCI_t* p_Interface, Lepton_ROI_t* p_ROI, Lepton_Result_t* p_Status);
+
+/** @brief 			    Set the scene ROI.
+ *  @param p_Interface  Pointer to CCI interface object
+ *  @param p_ROI		Pointer to ROI object
+ *  @param p_Status	    (Optional) Pointer to device status
+ *  @return			    LEPTON_ERR_OK when successful
+ */
+Lepton_Error_t CCI_SetSceneROI(CCI_t* p_Interface, const Lepton_ROI_t* p_ROI, Lepton_Result_t* p_Status);
+
+/** @brief 			    Get the scene ROI.
+ *  @param p_Interface  Pointer to CCI interface object
+ *  @param p_ROI		Pointer to ROI object
+ *  @param p_Status	    (Optional) Pointer to device status
+ *  @return			    LEPTON_ERR_OK when successful
+ */
+Lepton_Error_t CCI_GetSceneROI(CCI_t* p_Interface, Lepton_ROI_t* p_ROI, Lepton_Result_t* p_Status);
+
+/** @brief 			    Set the spotmeter ROI.
+ *  @param p_Interface  Pointer to CCI interface object
+ *  @param p_ROI		Pointer to ROI object
+ *  @param p_Status	    (Optional) Pointer to device status
+ *  @return			    LEPTON_ERR_OK when successful
+ */
+Lepton_Error_t CCI_SetSpotmeterROI(CCI_t* p_Interface, const Lepton_ROI_t* p_ROI, Lepton_Result_t* p_Status);
+
+/** @brief 			    Get the spotmeter ROI.
+ *  @param p_Interface  Pointer to CCI interface object
+ *  @param p_ROI		Pointer to ROI object
+ *  @param p_Status	    (Optional) Pointer to device status
+ *  @return			    LEPTON_ERR_OK when successful
+ */
+Lepton_Error_t CCI_GetSpotmeterROI(CCI_t* p_Interface, Lepton_ROI_t* p_ROI, Lepton_Result_t* p_Status);
+
+/** @brief 			    Get the spotmeter.
+ *  @param p_Interface  Pointer to CCI interface object
+ *  @param p_Spot		Pointer to screne statistics object
+ *  @param p_Status	    (Optional) Pointer to device status
+ *  @return			    LEPTON_ERR_OK when successful
+ */
+Lepton_Error_t CCI_GetSpotmeter(CCI_t* p_Interface, Lepton_Spotmeter_t* p_Spot, Lepton_Result_t* p_Status);
 
 /** @brief 			    Returns the current scene statistics for the video frame defined by the SYS ROI (see section 4.5.13).
  *  @param p_Interface  Pointer to CCI interface object

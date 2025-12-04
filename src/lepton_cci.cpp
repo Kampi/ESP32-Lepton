@@ -28,6 +28,10 @@ Lepton_Error_t Lepton_GetTemp(Lepton_t* p_Device, uint16_t* p_FPA, uint16_t* p_A
     {
         return LEPTON_ERR_INVALID_ARG;
     }
+    else if(p_Device->Internal.isInitialized == false)
+    {
+        return LEPTON_ERR_NOT_INITIALIZED;
+    }
 
     LEPTON_ERROR_CHECK(CCI_GetAuxTemp(&p_Device->Internal.CCI, p_AUX, p_Status));
 
@@ -40,6 +44,10 @@ Lepton_Error_t Lepton_EnableAGC(Lepton_t* p_Device, bool Enable, Lepton_Result_t
     {
         return LEPTON_ERR_INVALID_ARG;
     }
+    else if(p_Device->Internal.isInitialized == false)
+    {
+        return LEPTON_ERR_NOT_INITIALIZED;
+    }
 
     if(Enable)
     {
@@ -51,7 +59,7 @@ Lepton_Error_t Lepton_EnableAGC(Lepton_t* p_Device, bool Enable, Lepton_Result_t
         }
 
         LEPTON_ERROR_CHECK(CCI_SetAGC(&p_Device->Internal.CCI, true, p_Status));
-        LEPTON_ERROR_CHECK(CCI_GetAGC(&p_Device->Internal.CCI, &p_Device->Internal.isAGC, p_Status));
+        LEPTON_ERROR_CHECK(CCI_GetAGC(&p_Device->Internal.CCI, &p_Device->Internal.useAGC, p_Status));
     }
     else
     {
@@ -62,7 +70,7 @@ Lepton_Error_t Lepton_EnableAGC(Lepton_t* p_Device, bool Enable, Lepton_Result_t
         }
 
         LEPTON_ERROR_CHECK(CCI_SetAGC(&p_Device->Internal.CCI, false, p_Status));
-        LEPTON_ERROR_CHECK(CCI_GetAGC(&p_Device->Internal.CCI, &p_Device->Internal.isAGC, p_Status));
+        LEPTON_ERROR_CHECK(CCI_GetAGC(&p_Device->Internal.CCI, &p_Device->Internal.useAGC, p_Status));
     }
 
     return LEPTON_ERR_OK;
@@ -75,6 +83,10 @@ Lepton_Error_t Lepton_Emissivity(Lepton_t* p_Device, uint16_t Emissivity, Lepton
     if(p_Device == NULL)
     {
         return LEPTON_ERR_INVALID_ARG;
+    }
+    else if(p_Device->Internal.isInitialized == false)
+    {
+        return LEPTON_ERR_NOT_INITIALIZED;
     }
 
     ESP_LOGI(TAG, "Set Emissivity: %u%%", Emissivity);
@@ -113,7 +125,7 @@ uint32_t Lepton_GetUptime(Lepton_t* p_Device, Lepton_Result_t* p_Status)
 {
     uint32_t Time;
 
-    if((p_Device == NULL) || (CCI_GetUptime(&p_Device->Internal.CCI, &Time, p_Status) != LEPTON_ERR_OK))
+    if((p_Device == NULL) || (p_Device->Internal.isInitialized == false) || (CCI_GetUptime(&p_Device->Internal.CCI, &Time, p_Status) != LEPTON_ERR_OK))
     {
         return 0;
     }
@@ -123,15 +135,85 @@ uint32_t Lepton_GetUptime(Lepton_t* p_Device, Lepton_Result_t* p_Status)
 
 Lepton_Error_t Lepton_GetSceneStatistics(Lepton_t* p_Device, Lepton_SceneStatistics_t* p_Statistics, Lepton_Result_t* p_Status)
 {
+    if(p_Device == NULL)
+    {
+        return LEPTON_ERR_INVALID_ARG;
+    }
+    else if(p_Device->Internal.isInitialized == false)
+    {
+        return LEPTON_ERR_NOT_INITIALIZED;
+    }
+
     return CCI_GetSceneStatistics(&p_Device->Internal.CCI, p_Statistics, p_Status);
 }
 
-Lepton_Error_t Lepton_SetROI(Lepton_t* p_Device, Lepton_ROI_t ROI, Lepton_Result_t* p_Status)
+Lepton_Error_t Lepton_SetSpotmeterROI(Lepton_t* p_Device, Lepton_ROI_t ROI, Lepton_Result_t* p_Status)
 {
-    return CCI_SetROI(&p_Device->Internal.CCI, &ROI, p_Status);
+    if(p_Device == NULL)
+    {
+        return LEPTON_ERR_INVALID_ARG;
+    }
+    else if(p_Device->Internal.isInitialized == false)
+    {
+        return LEPTON_ERR_NOT_INITIALIZED;
+    }
+
+    return CCI_SetSpotmeterROI(&p_Device->Internal.CCI, &ROI, p_Status);
 }
 
-Lepton_Error_t Lepton_GetROI(Lepton_t* p_Device, Lepton_ROI_t* p_ROI, Lepton_Result_t* p_Status)
+Lepton_Error_t Lepton_GetSpotmeterROI(Lepton_t* p_Device, Lepton_ROI_t* p_ROI, Lepton_Result_t* p_Status)
 {
-    return CCI_GetROI(&p_Device->Internal.CCI, p_ROI, p_Status);
+    if(p_Device == NULL)
+    {
+        return LEPTON_ERR_INVALID_ARG;
+    }
+    else if(p_Device->Internal.isInitialized == false)
+    {
+        return LEPTON_ERR_NOT_INITIALIZED;
+    }
+
+    return CCI_GetSpotmeterROI(&p_Device->Internal.CCI, p_ROI, p_Status);
+}
+
+Lepton_Error_t Lepton_GetSpotmeter(Lepton_t* p_Device, Lepton_Spotmeter_t* p_Spot, Lepton_Result_t* p_Status)
+{
+    if(p_Device == NULL)
+    {
+        return LEPTON_ERR_INVALID_ARG;
+    }
+    else if(p_Device->Internal.isInitialized == false)
+    {
+        return LEPTON_ERR_NOT_INITIALIZED;
+    }
+
+    // TODO: Add conversion
+    return CCI_GetSpotmeter(&p_Device->Internal.CCI, p_Spot, p_Status);
+}
+
+Lepton_Error_t Lepton_SetVideoSource(Lepton_t* p_Device, Lepton_VideoSource_t Source, uint16_t Constant, Lepton_Result_t* p_Status)
+{
+    if(p_Device == NULL)
+    {
+        return LEPTON_ERR_INVALID_ARG;
+    }
+    else if(p_Device->Internal.isInitialized == false)
+    {
+        return LEPTON_ERR_NOT_INITIALIZED;
+    }
+
+    return CCI_SetVideoSource(&p_Device->Internal.CCI, Source, Constant, p_Status);
+}
+
+Lepton_Error_t Lepton_GetVideoSource(Lepton_t* p_Device, Lepton_VideoSource_t* p_Source, Lepton_Result_t* p_Status)
+{
+    if(p_Device == NULL)
+    {
+        return LEPTON_ERR_INVALID_ARG;
+    }
+    else if(p_Device->Internal.isInitialized == false)
+    {
+        return LEPTON_ERR_NOT_INITIALIZED;
+    }
+
+    return CCI_GetVideoSource(&p_Device->Internal.CCI, p_Source, p_Status);
 }

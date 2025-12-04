@@ -23,38 +23,30 @@
 #include "lepton_defs.h"
 #include "lepton_errors.h"
 
-/** @brief VoSPI segment length in packets when telemetry is disabled.
+/** @brief Packet number that contains the segment ID (TTT field).
  */
-#define LEPTON_VOSPI_PACKETS_PER_SEGMENT        60
+#define VOSPI_PACKET_WITH_SEGMENT_ID            20
+
+/** @brief Minimum resync time in milliseconds (CS held HIGH).
+ *         Lepton requires ~185ms to reset VoSPI state machine.
+ */
+#define VOSPI_RESYNC_MS                         200
+
+/** @brief Pixels per packet for Lepton 3.5 (half a line).
+ */
+#define VOSPI_PIXELS_PER_PACKET                 80
 
 /** @brief Segments per frame.
  */
 #define LEPTON_VOSPI_SEGMENTS_PER_FRAME         4
 
-/** @brief VoSPI packet length in bytes.
- */
-#define LEPTON_VOSPI_PACKET_LENGTH              (LEPTON_IMAGE_WIDTH + 4)
-
-/** @brief VoSPI segment length in words (16 bit) when telemetry is disabled.
- */
-#define LEPTON_VOSPI_WORDS_PER_SEGMENT          (LEPTON_VOSPI_PACKETS_PER_SEGMENT * (LEPTON_IMAGE_WIDTH / 2))
-
-/** @brief Telemetry length in words (16 bit).
- */
-#define LEPTON_VOSPI_TELEMETRY_LENGTH            (LEPTON_IMAGE_WIDTH / 2)
-
-/** @brief Number of lines used for the telemetry.
- */
-#define LEPTON_VOSPI_TELEMETRY_ROWS             3
-
 /** @brief              Initialise the VoSPI interface.
  *  @param p_Interface  Pointer to VoSPI interface object
- *  @param UseTelemetry (Optional) Set to #true when telemetry is included
  *  @return             LEPTON_ERR_OK when successful
  *                      LEPTON_ERR_FAIL when the initialization has failed
  *                      LEPTON_ERR_NO_MEM when no memory is available for the SPI
  */
-Lepton_Error_t VoSPI_Init(VoSPI_t* p_Interface, bool UseTelemetry = false);
+Lepton_Error_t VoSPI_Init(VoSPI_t* p_Interface);
 
 /** @brief              Deinitialise the VoSPI interface.
  *  @param p_Interface  Pointer to VoSPI interface object
@@ -62,16 +54,26 @@ Lepton_Error_t VoSPI_Init(VoSPI_t* p_Interface, bool UseTelemetry = false);
  */
 Lepton_Error_t VoSPI_Deinit(VoSPI_t* p_Interface);
 
-/** @brief				
- *  @param p_Interface	
- *  @return			    LEPTON_ERR_OK when successful
- */
-int VoSPI_SoftSync(VoSPI_t* p_Interface);
-
-/** @brief              
+/** @brief              Request a VoSPI resync.
+ *                      This holds CS high for ~200ms to reset the Lepton's VoSPI state machine.
+ *                      Call this when sync is lost.
  *  @param p_Interface  Pointer to VoSPI interface object
- *  @return             LEPTON_ERR_OK when a frame was received successfully
  */
-int VoSPI_CaptureImage(VoSPI_t* p_Interface);
+void VoSPI_RequestResync(VoSPI_t* p_Interface);
+
+/** @brief              Check if VoSPI is currently in resync period.
+ *  @param p_Interface  Pointer to VoSPI interface object
+ *  @return             true if still resyncing (CS held high), false when ready to capture
+ */
+bool VoSPI_isResyncing(VoSPI_t* p_Interface);
+
+/** @brief              Capture a complete frame from the Lepton.
+ *  @param p_Interface  Pointer to VoSPI interface object
+ *  @param p_BufferIndex Output: index of the buffer that was written (valid only when ESP_OK)
+ *  @return             ESP_OK when a frame was received successfully
+ *                      ESP_ERR_NOT_FINISHED when no frame is ready yet (call again)
+ *                      ESP_FAIL on sync error (resync will be triggered automatically)
+ */
+int VoSPI_CaptureImage(VoSPI_t* p_Interface, uint8_t* p_BufferIndex);
 
 #endif /* VOSPI_H_ */

@@ -70,6 +70,10 @@ typedef uint32_t Lepton_Error_t;
  */
 #define LEPTON_ERR_BUSY                                         (LEPTON_ERROR_BASE + 8)
 
+/** @brief Operation not supported.
+ */
+#define LEPTON_ERR_NOT_SUPPORTED                                (LEPTON_ERROR_BASE + 9)
+
 /** @brief
  */
 #define LEPTON_ERROR_CHECK(Func)                                do                                                                                  \
