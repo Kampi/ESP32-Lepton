@@ -30,6 +30,6 @@ idf_component_register(SRCS ${COMPONENT_SRCS}
                        PRIV_REQUIRES ${COMPONENT_PRIV_REQUIRES}
                        )
 
-target_compile_definitions(${COMPONENT_LIB} PUBLIC LEPTON_LIB_MAJOR=1)
-target_compile_definitions(${COMPONENT_LIB} PUBLIC LEPTON_LIB_MINOR=0)
-target_compile_definitions(${COMPONENT_LIB} PUBLIC LEPTON_LIB_BUILD=0)
+target_compile_definitions(${COMPONENT_LIB} PUBLIC LEPTON_LIB_MAJOR=main)
+target_compile_definitions(${COMPONENT_LIB} PUBLIC LEPTON_LIB_MINOR=)
+target_compile_definitions(${COMPONENT_LIB} PUBLIC LEPTON_LIB_BUILD=)
