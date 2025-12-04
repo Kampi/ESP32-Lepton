@@ -1,0 +1,33 @@
+# AStyle configuration for ESP32-Lepton component
+
+# Style options
+--style=allman
+--indent=spaces=4
+--indent-classes
+--indent-switches
+--indent-cases
+--indent-namespaces
+--indent-labels
+--indent-preproc-block
+--indent-preproc-define
+--indent-col1-comments
+
+# Padding options
+--pad-oper
+--pad-header
+--unpad-paren
+--delete-empty-lines
+--align-pointer=name
+--align-reference=name
+
+# Formatting options
+--break-closing-braces
+--add-braces
+--convert-tabs
+--max-code-length=120
+--break-after-logical
+
+# Other options
+--suffix=none
+--formatted
+--lineend=linux

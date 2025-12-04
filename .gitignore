@@ -1,0 +1,6 @@
+desktop.ini
+*.log
+.vscode
+
+__pycache__
+dist
