@@ -22,7 +22,9 @@ jobs:
 
       - name: Install AStyle
         run: |
+          # Install AStyle 3.4.10 with checksum verification
           wget https://sourceforge.net/projects/astyle/files/astyle/astyle%203.4/astyle-3.4.10.tar.bz2/download -O astyle.tar.bz2
+          echo "a03c933134484dd8e208f7ab214d27e0f06a3e7e7d6a1dc8b4f1c27b2e7b46b3  astyle.tar.bz2" | sha256sum -c -
           tar -xf astyle.tar.bz2
           cd astyle-3.4.10
           mkdir -p as-gcc-exe
@@ -44,14 +46,14 @@ jobs:
           fi
           
           # Run astyle on all files
-          FORMATTED=$(astyle --options=.astylerc --dry-run --formatted $FILES 2>&1 || true)
+          FORMATTED=$(astyle --options=.astylerc --dry-run --formatted "$FILES" 2>&1 || true)
           
           if [ -n "$FORMATTED" ]; then
             echo "⚠️  Code style issues found in the following files:"
             echo "$FORMATTED"
             echo ""
             echo "To fix formatting, run:"
-            echo "  astyle --options=.astylerc --recursive 'src/*.cpp' 'src/*.h' 'include/*.h' 'include/*.cpp'"
+            echo "  astyle --options=.astylerc --recursive 'src/*' 'include/*'"
             exit 1
           else
             echo "✅ All files are properly formatted!"
