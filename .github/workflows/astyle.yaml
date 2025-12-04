@@ -22,8 +22,8 @@ jobs:
 
       - name: Install AStyle
         run: |
-          apt-get update && apt-get install -y lbzip2 build-essential cmake pkg-config libsdl2-dev || true
-          apt-get install -f -y
+          sudo apt-get update && apt-get install -y lbzip2 build-essential cmake pkg-config libsdl2-dev || true
+          sudo apt-get install -f -y
           wget https://sourceforge.net/projects/astyle/files/astyle/astyle%203.4/astyle-3.4.10.tar.bz2/download -O astyle.tar.bz2
           tar -xf astyle.tar.bz2
           cd astyle-3.4.10
@@ -31,7 +31,7 @@ jobs:
           cd as-gcc-exe
           cmake ../
           make
-          make install
+          sudo make install
 
       - name: Check code style
         run: |
