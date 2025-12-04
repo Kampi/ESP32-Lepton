@@ -1,0 +1,64 @@
+menu "LEPTON"
+    menu "SPI"
+        config LEPTON_SPI_BUFFER_SIZE
+            int "Buffer size"
+            range 256 2048
+            default 512
+            help
+                Buffer size for the SPI interface.
+    endmenu
+
+    menu "I2C"
+        config LEPTON_I2C_TIMEOUT
+            int "I2C timeout (ms)"
+            range 100 5000
+            default 1000
+            help
+                Timeout for I2C operations in milliseconds.
+    endmenu
+
+    menu "FreeRTOS"
+        config LEPTON_TASK_PRIO
+            int "Task priority"
+            range 12 25
+            default 12
+            help
+                Task priority for the Lepton camera task.
+
+        config LEPTON_TASK_STACK_SIZE
+            int "Task stack size"
+            range 4096 8192
+            default 4096
+            help
+                Stack size for the camera task.
+
+        config LEPTON_TASK_CORE_USE_AFFINITY
+            bool "Use core affinity"
+            default n
+            help
+                Enable this option if you want to use a specific core for the camera task.
+
+        config LEPTON_TASK_CORE
+            int "Task core"
+            depends on LEPTON_TASK_CORE_USE_AFFINITY
+            range 0 1
+            default 1
+            help
+                Core used by the camera task.
+    endmenu
+
+    menu "Misc"
+        config LEPTON_MISC_ERROR_BASE
+            hex "LEPTON driver error base definition"
+            range 0 FFFF
+            default 0xB000
+            help
+                Set the error base for the driver.
+
+        config LEPTON_MISC_ENABLE_LOG
+            bool "Enable log output"
+            default y
+            help
+                Enable this option if you need log output from the driver.
+    endmenu
+endmenu
