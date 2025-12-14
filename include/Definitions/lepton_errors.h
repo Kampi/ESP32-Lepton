@@ -24,7 +24,7 @@
 
 #include <sdkconfig.h>
 
-#ifndef CONFIG_LEPTON_ERROR_BASE
+#ifndef CONFIG_LEPTON_MISC_ERROR_BASE
     #define CONFIG_LEPTON_MISC_ERROR_BASE                       0xB000
 #endif
 
@@ -74,7 +74,12 @@ typedef uint32_t Lepton_Error_t;
  */
 #define LEPTON_ERR_NOT_SUPPORTED                                (LEPTON_ERROR_BASE + 9)
 
-/** @brief
+/** @brief Operation not finished.
+ */
+#define LEPTON_ERR_NOT_FINISHED                                 (LEPTON_ERROR_BASE + 10)
+
+/** @brief      Macro to check for Lepton errors in function calls.
+ *  @param Func Function call to check
  */
 #define LEPTON_ERROR_CHECK(Func)                                do                                                                                  \
                                                                 {                                                                                   \

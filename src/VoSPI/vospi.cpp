@@ -82,14 +82,14 @@ Lepton_Error_t VoSPI_Init(VoSPI_t* p_Interface)
 
     if(spi_bus_initialize(p_Interface->Host, &p_Interface->Master, p_Interface->DMA) != ESP_OK)
     {
-        ESP_LOGE(TAG, "Lepton SPI Master initialization failed!");
+        ESP_LOGE(TAG, "SPI Master initialization failed!");
         Error = LEPTON_ERR_FAIL;
         goto VoSPI_Init_Error_1;
     }
 
     if(spi_bus_add_device(p_Interface->Host, &p_Interface->Interface, &p_Interface->Handle) != ESP_OK)
     {
-        ESP_LOGE(TAG, "Failed to add Lepton SPI device!");
+        ESP_LOGE(TAG, "Failed to add SPI device!");
         Error = LEPTON_ERR_FAIL;
         goto VoSPI_Init_Error_1;
     }
@@ -99,7 +99,7 @@ Lepton_Error_t VoSPI_Init(VoSPI_t* p_Interface)
         heap_caps_malloc(p_Interface->ImageWidth + 4, MALLOC_CAP_DMA));
     if(p_Interface->Packet == NULL)
     {
-        ESP_LOGE(TAG, "Failed to allocate Lepton DMA packet buffer!");
+        ESP_LOGE(TAG, "Failed to allocate DMA packet buffer!");
         Error = LEPTON_ERR_NO_MEM;
         goto VoSPI_Init_Error_2;
     }
@@ -110,9 +110,25 @@ Lepton_Error_t VoSPI_Init(VoSPI_t* p_Interface)
         p_Interface->Image_Buffer[i] = reinterpret_cast<uint16_t*>(heap_caps_malloc(p_Interface->ImageWidth * p_Interface->ImageHeight * p_Interface->BytesPerPixel, MALLOC_CAP_SPIRAM));
         if(p_Interface->Image_Buffer[i] == NULL)
         {
-            ESP_LOGE(TAG, "Failed to allocate Lepton frame buffer!");
+            ESP_LOGE(TAG, "Failed to allocate frame buffer!");
             Error = LEPTON_ERR_NO_MEM;
             goto VoSPI_Init_Error_3;
+        }
+    }
+
+    if(p_Interface->useTelemetry)
+    {
+        /* Telemetry contains 4 packets (or 3 lines) = 4 * 80 pixels * 2 bytes = 640 bytes */
+        size_t telemetryBufferSize = 4 * VOSPI_PIXELS_PER_PACKET * sizeof(uint16_t);
+        for(uint8_t i = 0; i < CONFIG_LEPTON_VOSPI_FRAME_BUFFERS; i++)
+        {
+            p_Interface->Telemetry_Buffer[i] = reinterpret_cast<uint16_t*>(heap_caps_malloc(telemetryBufferSize, MALLOC_CAP_SPIRAM));
+            if(p_Interface->Telemetry_Buffer[i] == NULL)
+            {
+                ESP_LOGE(TAG, "Failed to allocate telemetry buffer!");
+                Error = LEPTON_ERR_NO_MEM;
+                goto VoSPI_Init_Error_4;
+            }
         }
     }
 
@@ -120,13 +136,32 @@ Lepton_Error_t VoSPI_Init(VoSPI_t* p_Interface)
     p_Interface->isInitialized = true;
 
     /* Initialize resync state - start with a resync to establish sync */
-    p_Interface->isResync = true;
-    p_Interface->ResyncStartUs = esp_timer_get_time();
+    VoSPI_RequestResync(p_Interface);
 
-    ESP_LOGI(TAG, "VoSPI initialized successfully");
+    ESP_LOGD(TAG, "VoSPI initialized successfully");
+
     return LEPTON_ERR_OK;
 
+VoSPI_Init_Error_4:
+    for(uint8_t i = 0; i < CONFIG_LEPTON_VOSPI_FRAME_BUFFERS; i++)
+    {
+        if(p_Interface->Telemetry_Buffer[i] != NULL)
+        {
+            heap_caps_free(p_Interface->Telemetry_Buffer[i]);
+            p_Interface->Telemetry_Buffer[i] = NULL;
+        }
+    }
+
 VoSPI_Init_Error_3:
+    for(uint8_t i = 0; i < CONFIG_LEPTON_VOSPI_FRAME_BUFFERS; i++)
+    {
+        if(p_Interface->Image_Buffer[i] != NULL)
+        {
+            heap_caps_free(p_Interface->Image_Buffer[i]);
+            p_Interface->Image_Buffer[i] = NULL;
+        }
+    }
+
     heap_caps_free(p_Interface->Packet);
 
 VoSPI_Init_Error_2:
@@ -154,6 +189,12 @@ Lepton_Error_t VoSPI_Deinit(VoSPI_t* p_Interface)
 
     for(uint8_t i = 0; i < CONFIG_LEPTON_VOSPI_FRAME_BUFFERS; i++)
     {
+        if(p_Interface->Telemetry_Buffer[i] != NULL)
+        {
+            heap_caps_free(p_Interface->Telemetry_Buffer[i]);
+            p_Interface->Telemetry_Buffer[i] = NULL;
+        }
+
         if(p_Interface->Image_Buffer[i] != NULL)
         {
             heap_caps_free(p_Interface->Image_Buffer[i]);
@@ -178,18 +219,15 @@ void VoSPI_RequestResync(VoSPI_t* p_Interface)
         return;
     }
 
+    ESP_LOGD(TAG, "Resync requested");
+
     p_Interface->isResync = true;
     p_Interface->ResyncStartUs = esp_timer_get_time();
-    ESP_LOGD(TAG, "Resync requested");
 }
 
-bool VoSPI_isResyncing(VoSPI_t* p_Interface)
+bool VoSPI_IsResyncing(VoSPI_t* p_Interface)
 {
-    if(p_Interface == NULL)
-    {
-        return;
-    }
-    else if(p_Interface->isResync == false)
+    if(p_Interface == NULL || (p_Interface->isResync == false))
     {
         return false;
     }
@@ -205,21 +243,21 @@ bool VoSPI_isResyncing(VoSPI_t* p_Interface)
     return true;
 }
 
-int VoSPI_CaptureImage(VoSPI_t* p_Interface, uint8_t* p_BufferIndex)
+Lepton_Error_t VoSPI_CaptureImage(VoSPI_t* p_Interface, uint8_t* p_BufferIndex)
 {
     uint16_t Header;
     uint8_t* PacketData;
 
-    if(p_Interface == NULL || (p_Interface->isInitialized == false))
+    if(p_Interface == NULL || (p_Interface->isInitialized == false) || (p_BufferIndex == NULL))
     {
-        ESP_LOGE(TAG, "Invalid interface or not initialized");
-        return ESP_ERR_INVALID_ARG;
+        ESP_LOGE(TAG, "Invalid interface or not initialized!");
+        return LEPTON_ERR_INVALID_ARG;
     }
 
     /* If in resync period, CS is held high (no SPI activity) */
-    if(VoSPI_isResyncing(p_Interface))
+    if(VoSPI_IsResyncing(p_Interface))
     {
-        return ESP_ERR_NOT_FINISHED;
+        return LEPTON_ERR_NOT_FINISHED;
     }
 
     /* Capture all 4 segments */
@@ -232,9 +270,10 @@ int VoSPI_CaptureImage(VoSPI_t* p_Interface, uint8_t* p_BufferIndex)
             /* Read packet from camera */
             if(VoSPI_ReadPacket(p_Interface, &Header, &PacketData) != ESP_OK)
             {
-                ESP_LOGE(TAG, "SPI read failed");
+                ESP_LOGE(TAG, "SPI read failed!");
                 VoSPI_RequestResync(p_Interface);
-                return ESP_FAIL;
+
+                return LEPTON_ERR_FAIL;
             }
 
             uint16_t packetNum = Header & 0x0FFF;
@@ -254,7 +293,8 @@ int VoSPI_CaptureImage(VoSPI_t* p_Interface, uint8_t* p_BufferIndex)
                 /* Out of sync - start over */
                 ESP_LOGD(TAG, "Packet num mismatch: got %u, expected %u (seg %u)", packetNum, packet, Segment);
                 VoSPI_RequestResync(p_Interface);
-                return ESP_FAIL;
+
+                return LEPTON_ERR_FAIL;
             }
 
             /* Packet 20 contains segment ID */
@@ -272,16 +312,69 @@ int VoSPI_CaptureImage(VoSPI_t* p_Interface, uint8_t* p_BufferIndex)
                     /* Wrong segment - out of sync, start over */
                     ESP_LOGD(TAG, "Segment mismatch: TTT=%u, expected %u", TTT, Segment);
                     VoSPI_RequestResync(p_Interface);
-                    return ESP_FAIL;
+
+                    return LEPTON_ERR_FAIL;
                 }
             }
 
             /* Copy to frame buffer if not discarding */
-            if(!discardSegment)
+            if(discardSegment == false)
             {
-                size_t frameOffset = ((Segment - 1) * p_Interface->PacketsPerFrame + packet) * VOSPI_PIXELS_PER_PACKET;
-                
-                uint16_t* dest = &p_Interface->Image_Buffer[p_Interface->CurrentBuffer][frameOffset];
+                size_t frameOffset;
+                uint16_t* dest;
+
+                /* We must take care about telemetry packets */
+                if(p_Interface->useTelemetry)
+                {
+                    /* The first four packets of segment 1 contain telemetry data */
+                    if(p_Interface->TelemetryPosition == LEPTON_TELEMETRY_LOCATION_HEADER)
+                    {
+                        /* Store the telemetry data for the first four packets of segment 1 */
+                        if((Segment == 1) && (packet < 4))
+                        {
+                            frameOffset = packet * VOSPI_PIXELS_PER_PACKET;
+                            dest = &p_Interface->Telemetry_Buffer[p_Interface->CurrentBuffer][frameOffset];
+                        }
+                        /* Segments 1-4: offset by (Segment - 1) * 60 - 4 packets (because Segment 1 lost 4 packets to telemetry) */
+                        else
+                        {
+                            frameOffset = ((Segment - 1) * p_Interface->PacketsPerFrame + packet - 4) * VOSPI_PIXELS_PER_PACKET;
+                            dest = &p_Interface->Image_Buffer[p_Interface->CurrentBuffer][frameOffset];
+                        }
+                    }
+                    /* The last four packets of segment 4 contain telemetry data */
+                    else if(p_Interface->TelemetryPosition == LEPTON_TELEMETRY_LOCATION_FOOTER)
+                    {
+                        /* Segments 1-3 and segment 4 packets 0-56: normal offset */
+                        if((Segment < 4) || (packet <= 56))
+                        {
+                            frameOffset = ((Segment - 1) * p_Interface->PacketsPerFrame + packet) * VOSPI_PIXELS_PER_PACKET;
+                            dest = &p_Interface->Image_Buffer[p_Interface->CurrentBuffer][frameOffset];
+                        }
+                        /* Store the telemetry data for the last four packets of segment 4 (57, 58, 59, 60) */
+                        else
+                        {
+                            frameOffset = (packet - 57) * VOSPI_PIXELS_PER_PACKET;
+                            dest = &p_Interface->Telemetry_Buffer[p_Interface->CurrentBuffer][frameOffset];
+                        }
+                    }
+                    /* Catch invalid cases */
+                    else
+                    {
+                        ESP_LOGE(TAG, "Invalid telemetry position setting!");
+                        VoSPI_RequestResync(p_Interface);
+
+                        return LEPTON_ERR_FAIL;
+                    }
+                }
+                /* Otherwise use the regular calculation */
+                else
+                {
+                    frameOffset = ((Segment - 1) * p_Interface->PacketsPerFrame + packet) * VOSPI_PIXELS_PER_PACKET;
+                    dest = &p_Interface->Image_Buffer[p_Interface->CurrentBuffer][frameOffset];
+                }
+
+                /* Copy packet data from the SPI buffer to the output buffer (big-endian to little-endian conversion) */
                 for(size_t i = 0; i < VOSPI_PIXELS_PER_PACKET; i++)
                 {
                     dest[i] = (static_cast<uint16_t>(PacketData[i * 2]) << 8) | PacketData[i * 2 + 1];
@@ -308,5 +401,5 @@ int VoSPI_CaptureImage(VoSPI_t* p_Interface, uint8_t* p_BufferIndex)
 
     ESP_LOGD(TAG, "Frame captured successfully to buffer %u (total: %" PRIu32 ")", p_Interface->CurrentBuffer, p_Interface->FrameCounter);
 
-    return ESP_OK;
+    return LEPTON_ERR_OK;
 }

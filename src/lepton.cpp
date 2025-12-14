@@ -59,15 +59,15 @@ Lepton_Error_t Lepton_Init(Lepton_t* p_Device, const Lepton_Conf_t* const p_Init
     p_Device->Internal.PowerDown = p_Init->PowerDown;
     p_Device->Internal.isInitialized = false;
 
-    ESP_LOGI(TAG, "Lepton configuration:");
-    ESP_LOGI(TAG, " V-Sync: %i", p_Init->VSync);
-    ESP_LOGI(TAG, " SPI:");
-    ESP_LOGI(TAG, "  Interface: %u", static_cast<unsigned int>(p_Device->Internal.VoSPI.Host));
-    ESP_LOGI(TAG, "  Clock: %u", static_cast<unsigned int>(p_Device->Internal.VoSPI.Interface.clock_speed_hz));
-    ESP_LOGI(TAG, "  SCLK: %u", static_cast<unsigned int>(p_Device->Internal.VoSPI.Master.sclk_io_num));
-    ESP_LOGI(TAG, "  MISO: %u", static_cast<unsigned int>(p_Device->Internal.VoSPI.Master.miso_io_num));
-    ESP_LOGI(TAG, "  CS: %u", static_cast<unsigned int>(p_Device->Internal.VoSPI.Interface.spics_io_num));
-    ESP_LOGI(TAG, "  DMA channel: %u", static_cast<unsigned int>(p_Device->Internal.VoSPI.DMA));
+    ESP_LOGD(TAG, "Lepton configuration:");
+    ESP_LOGD(TAG, " V-Sync: %i", p_Init->VSync);
+    ESP_LOGD(TAG, " SPI:");
+    ESP_LOGD(TAG, "  Interface: %u", static_cast<unsigned int>(p_Device->Internal.VoSPI.Host));
+    ESP_LOGD(TAG, "  Clock: %u", static_cast<unsigned int>(p_Device->Internal.VoSPI.Interface.clock_speed_hz));
+    ESP_LOGD(TAG, "  SCLK: %u", static_cast<unsigned int>(p_Device->Internal.VoSPI.Master.sclk_io_num));
+    ESP_LOGD(TAG, "  MISO: %u", static_cast<unsigned int>(p_Device->Internal.VoSPI.Master.miso_io_num));
+    ESP_LOGD(TAG, "  CS: %u", static_cast<unsigned int>(p_Device->Internal.VoSPI.Interface.spics_io_num));
+    ESP_LOGD(TAG, "  DMA channel: %u", static_cast<unsigned int>(p_Device->Internal.VoSPI.DMA));
 
     if(p_Device->Internal.Reset != NULL)
     {
@@ -118,58 +118,66 @@ Lepton_Error_t Lepton_Init(Lepton_t* p_Device, const Lepton_Conf_t* const p_Init
         goto Lepton_Init_Error_1;
     }
 
+    ESP_LOGD(TAG, "Sync configuration with Lepton:");
     if((CCI_SetRadiometry(&p_Device->Internal.CCI, p_Device->Internal.isRadiometric, p_Status) != LEPTON_ERR_OK) ||
        (CCI_GetRadiometry(&p_Device->Internal.CCI, &p_Device->Internal.isRadiometric, p_Status) != LEPTON_ERR_OK))
     {
         goto Lepton_Init_Error_1;
     }
-    ESP_LOGI(TAG, "Lepton Radiometry: %u", p_Device->Internal.isRadiometric);
+    ESP_LOGD(TAG, " Lepton Radiometry: %u", p_Device->Internal.isRadiometric);
 
         // TLinear depends on AGC
         /*
         val = (lep_stP->agc_set_enabled) ? CCI_RADIOMETRY_TLINEAR_DISABLED : CCI_RADIOMETRY_TLINEAR_ENABLED;
         cci_set_radiometry_tlinear_enable_state(val);
         rsp = cci_get_radiometry_tlinear_enable_state();
-        ESP_LOGI(TAG, "Lepton Radiometry TLinear = %d", rsp);
+        ESP_LOGD(TAG, "Lepton Radiometry TLinear = %d", rsp);
         if (rsp != val) {
             ESP_LOGE(TAG, "Lepton communication failed (%d)", rsp);
               return ESP_FAIL;
         }*/
 
-    if((CCI_SetTelemetry(&p_Device->Internal.CCI, p_Init->useTelemetry, p_Status) != LEPTON_ERR_OK) || 
+    if((CCI_SetTelemetry(&p_Device->Internal.CCI, p_Init->VoSPI.useTelemetry, p_Status) != LEPTON_ERR_OK) || 
        (CCI_GetTelemetry(&p_Device->Internal.CCI, &p_Device->Internal.VoSPI.useTelemetry, p_Status) != LEPTON_ERR_OK))
     {
         goto Lepton_Init_Error_1;
     }
-    ESP_LOGI(TAG, "Lepton Telemetry: %s", p_Device->Internal.VoSPI.useTelemetry ? "true" : "false");
+    ESP_LOGD(TAG, " Use Telemetry: %s", p_Device->Internal.VoSPI.useTelemetry ? "true" : "false");
+
+    if((CCI_SetTelemetryPosition(&p_Device->Internal.CCI, p_Init->VoSPI.TelemetryPosition, p_Status) != LEPTON_ERR_OK) ||
+       (CCI_GetTelemetryPosition(&p_Device->Internal.CCI, &p_Device->Internal.VoSPI.TelemetryPosition, p_Status) != LEPTON_ERR_OK))
+    {
+        goto Lepton_Init_Error_1;
+    }
+    ESP_LOGD(TAG, " Telemetry Position: %u", p_Device->Internal.VoSPI.TelemetryPosition);
 
     if((CCI_SetRadiometryTLinearAutoRes(&p_Device->Internal.CCI, p_Init->useTLinear, p_Status) != LEPTON_ERR_OK) ||
        (CCI_GetRadiometryTLinearAutoRes(&p_Device->Internal.CCI, &p_Device->Internal.isTLinearAutoRes, p_Status) != LEPTON_ERR_OK))
     {
         goto Lepton_Init_Error_1;
     }
-    ESP_LOGI(TAG, "Lepton Radiometry Auto Resolution: %s", p_Device->Internal.isTLinearAutoRes ? "true" : "false");
+    ESP_LOGD(TAG, " Radiometry Auto Resolution: %s", p_Device->Internal.isTLinearAutoRes ? "true" : "false");
 
     if((CCI_SetAGCCalc(&p_Device->Internal.CCI, p_Init->useAGCCalculation, p_Status) != LEPTON_ERR_OK) ||
        (CCI_GetAGCCalc(&p_Device->Internal.CCI, &p_Device->Internal.useAGCCalc, p_Status) != LEPTON_ERR_OK))
     {
         goto Lepton_Init_Error_1;
     }
-    ESP_LOGI(TAG, "Use Lepton AGC calculation: %s", p_Device->Internal.useAGCCalc ? "true" : "false");
+    ESP_LOGD(TAG, " Use AGC calculation: %s", p_Device->Internal.useAGCCalc ? "true" : "false");
 
     if((CCI_SetAGC(&p_Device->Internal.CCI, p_Init->useAGC, p_Status) != LEPTON_ERR_OK) ||
        (CCI_GetAGC(&p_Device->Internal.CCI, &p_Device->Internal.useAGC, p_Status) != LEPTON_ERR_OK))
     {
         goto Lepton_Init_Error_1;
     }
-    ESP_LOGI(TAG, "Lepton AGC enabled: %s", p_Device->Internal.useAGC ? "true" : "false");
+    ESP_LOGD(TAG, " AGC enabled: %s", p_Device->Internal.useAGC ? "true" : "false");
 
     if((CCI_SetGainMode(&p_Device->Internal.CCI, p_Init->Gain, p_Status) != LEPTON_ERR_OK) ||
        (CCI_GetGainMode(&p_Device->Internal.CCI, &p_Device->Internal.Gain, p_Status) != LEPTON_ERR_OK))
     {
         goto Lepton_Init_Error_1;
     }
-    ESP_LOGI(TAG, "Lepton Gain Mode: %u", p_Device->Internal.Gain);
+    ESP_LOGD(TAG, " Gain Mode: %u", p_Device->Internal.Gain);
 
     p_Device->Internal.isInitialized = true;
 
@@ -178,7 +186,6 @@ Lepton_Error_t Lepton_Init(Lepton_t* p_Device, const Lepton_Conf_t* const p_Init
     {
         goto Lepton_Init_Error_1;
     }
-
 
     /*
     if(p_Device->Internal.isRadiometric)
@@ -199,16 +206,7 @@ Lepton_Error_t Lepton_Init(Lepton_t* p_Device, const Lepton_Conf_t* const p_Init
     }
 #endif
 
-    Error = VoSPI_Init(&p_Device->Internal.VoSPI);
-    if(Error != LEPTON_ERR_OK)
-    {
-        goto Lepton_Init_Error_2;
-    }
-
     return LEPTON_ERR_OK;
-
-Lepton_Init_Error_2:
-    VoSPI_Deinit(&p_Device->Internal.VoSPI);
 
 Lepton_Init_Error_1:
     CCI_Deinit(&p_Device->Internal.CCI);
@@ -261,9 +259,13 @@ Lepton_Error_t Lepton_SetVideoFormat(Lepton_t* p_Device, Lepton_VideoFormat_t Fo
 {
     Lepton_Error_t Error;
 
-    if((p_Device == NULL) || (Format != LEPTON_FORMAT_RAW14))
+    if(p_Device == NULL)
     {
         return LEPTON_ERR_INVALID_ARG;
+    }
+    else if(p_Device->Internal.VoSPI.isCapturing)
+    {
+        return LEPTON_ERR_BUSY;
     }
     else if(p_Device->Internal.VideoFormat == Format)
     {
@@ -282,8 +284,6 @@ Lepton_Error_t Lepton_SetVideoFormat(Lepton_t* p_Device, Lepton_VideoFormat_t Fo
         return LEPTON_ERR_FAIL;
     }
 
-    ESP_LOGI(TAG, "Video Format: %u", p_Device->Internal.VideoFormat);
-
     if(Format == LEPTON_FORMAT_RAW14)
     {
         p_Device->Internal.VoSPI.ImageWidth = 160;
@@ -292,7 +292,7 @@ Lepton_Error_t Lepton_SetVideoFormat(Lepton_t* p_Device, Lepton_VideoFormat_t Fo
 
         if(p_Device->Internal.VoSPI.useTelemetry)
         {
-            p_Device->Internal.VoSPI.PacketsPerFrame = 63;
+            p_Device->Internal.VoSPI.PacketsPerFrame = 61;
         }
         else
         {
@@ -308,13 +308,9 @@ Lepton_Error_t Lepton_SetVideoFormat(Lepton_t* p_Device, Lepton_VideoFormat_t Fo
 
         if(p_Device->Internal.VoSPI.useTelemetry)
         {
-            ESP_LOGE(TAG, "Telemtry enabled!");
+            ESP_LOGE(TAG, "Please disable telemtry!");
             return LEPTON_ERR_INVALID_ARG;
         }
-
-        // TODO: Test me
-        ESP_LOGE(TAG, "Unsupported video format!");
-        return LEPTON_ERR_INVALID_ARG;
     }
     else
     {
@@ -322,9 +318,15 @@ Lepton_Error_t Lepton_SetVideoFormat(Lepton_t* p_Device, Lepton_VideoFormat_t Fo
         return LEPTON_ERR_INVALID_ARG;
     }
 
-    VoSPI_RequestResync(&p_Device->Internal.VoSPI);
+    ESP_LOGD(TAG, "Video Format: %u", p_Device->Internal.VideoFormat);
+    ESP_LOGD(TAG, " Width: %u", p_Device->Internal.VoSPI.ImageWidth);
+    ESP_LOGD(TAG, " Height: %u", p_Device->Internal.VoSPI.ImageHeight);
+    ESP_LOGD(TAG, " Bytes Per Pixel: %u", p_Device->Internal.VoSPI.BytesPerPixel);
+    ESP_LOGD(TAG, " Packets Per Frame: %u", p_Device->Internal.VoSPI.PacketsPerFrame);
 
-    return LEPTON_ERR_OK;
+    /* We must reinitialize the VoSPI interface to apply images changes */
+    VoSPI_Deinit(&p_Device->Internal.VoSPI);
+    return VoSPI_Init(&p_Device->Internal.VoSPI);
 }
 
 Lepton_Error_t Lepton_EnableTelemetry(Lepton_t* p_Device, bool Enable, Lepton_Result_t* p_Status)
@@ -334,6 +336,10 @@ Lepton_Error_t Lepton_EnableTelemetry(Lepton_t* p_Device, bool Enable, Lepton_Re
     if(p_Device == NULL)
     {
         return LEPTON_ERR_INVALID_ARG;
+    }
+    else if(p_Device->Internal.VoSPI.isCapturing)
+    {
+        return LEPTON_ERR_BUSY;
     }
     else if(p_Device->Internal.VideoFormat == LEPTON_FORMAT_RGB888)
     {
@@ -348,7 +354,7 @@ Lepton_Error_t Lepton_EnableTelemetry(Lepton_t* p_Device, bool Enable, Lepton_Re
     if(Error != LEPTON_ERR_OK)
     {
         return Error;
-    }    
+    }
     
     Error = CCI_GetTelemetry(&p_Device->Internal.CCI, &p_Device->Internal.VoSPI.useTelemetry, p_Status);
     if(Error != LEPTON_ERR_OK)
@@ -356,9 +362,26 @@ Lepton_Error_t Lepton_EnableTelemetry(Lepton_t* p_Device, bool Enable, Lepton_Re
         return Error;
     }
 
-    ESP_LOGI(TAG, "Use telemetry: %s", p_Device->Internal.VoSPI.useTelemetry ? "true" : "false");
+    if(p_Device->Internal.VideoFormat == LEPTON_FORMAT_RAW14)
+    {
+        if(p_Device->Internal.VoSPI.useTelemetry)
+        {
+            p_Device->Internal.VoSPI.PacketsPerFrame = 61;
+        }
+        else
+        {
+            p_Device->Internal.VoSPI.PacketsPerFrame = 60;
+        }
+    }
+    else
+    {
+        ESP_LOGE(TAG, "Unsupported video format!");
+        return LEPTON_ERR_INVALID_ARG;
+    }
 
-    VoSPI_RequestResync(&p_Device->Internal.VoSPI);
+    ESP_LOGD(TAG, "Use telemetry: %s", p_Device->Internal.VoSPI.useTelemetry ? "true" : "false");
 
-    return LEPTON_ERR_OK;
+    /* We must reinitialize the VoSPI interface to apply telemetry changes */
+    VoSPI_Deinit(&p_Device->Internal.VoSPI);
+    return VoSPI_Init(&p_Device->Internal.VoSPI);
 }

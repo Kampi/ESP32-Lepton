@@ -56,7 +56,7 @@ menu "Lepton"
 
         config LEPTON_VOSPI_FRAME_BUFFERS
             int "Number of image buffers"
-            range 0 8
+            range 1 8
             default 2
             help
                 Number of image buffers.
@@ -72,15 +72,15 @@ menu "Lepton"
         config LEPTON_CAPTURE_TASK_CORE
             depends on LEPTON_CAPTURE_TASK_CORE_AFFINITY
             int "Core used for the capture task"
-            range 0 1 if SOC_CPU_CORES_NUM > 2
+            range 0 1 if SOC_CPU_CORES_NUM > 1
             default 0
             help
                 Use a specific core for the capture task.
 
         config LEPTON_CAPTURE_TASK_STACK
             int "Stack size for the capture task"
-            range 4096 16384
-            default 8192
+            range 2048 16384
+            default 4096
             help
                 Stack size of the capture task.
 
@@ -90,20 +90,6 @@ menu "Lepton"
             default 16
             help
                 Capture task priority.
-    endmenu
-
-    menu "Memory"
-        config LEPTON_MEMORY_SPIRAM
-            depends on SPIRAM
-            bool "Use the SPI RAM for memory allocations"
-            default y
-            help
-                Enable this option to use external SPI RAM for memory allocations.
-
-        config LEPTON_MEMORY_BUFFERS
-            int "Number of image buffers"
-            range 0 8
-            default 2
     endmenu
 
     menu "Misc"

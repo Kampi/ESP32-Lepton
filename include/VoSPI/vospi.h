@@ -63,17 +63,17 @@ void VoSPI_RequestResync(VoSPI_t* p_Interface);
 
 /** @brief              Check if VoSPI is currently in resync period.
  *  @param p_Interface  Pointer to VoSPI interface object
- *  @return             true if still resyncing (CS held high), false when ready to capture
+ *  @return             #true if still resyncing (CS held high), false when ready to capture
  */
-bool VoSPI_isResyncing(VoSPI_t* p_Interface);
+bool VoSPI_IsResyncing(VoSPI_t* p_Interface);
 
-/** @brief              Capture a complete frame from the Lepton.
- *  @param p_Interface  Pointer to VoSPI interface object
- *  @param p_BufferIndex Output: index of the buffer that was written (valid only when ESP_OK)
- *  @return             ESP_OK when a frame was received successfully
- *                      ESP_ERR_NOT_FINISHED when no frame is ready yet (call again)
- *                      ESP_FAIL on sync error (resync will be triggered automatically)
+/** @brief                  Capture a complete frame from the Lepton.
+ *  @param p_Interface      Pointer to VoSPI interface object
+ *  @param p_BufferIndex    Output: index of the buffer that was written (valid only when LEPTON_ERR_OK)
+ *  @return                 LEPTON_ERR_OK when a frame was received successfully
+ *                          LEPTON_ERR_NOT_FINISHED when no frame is ready yet (call again)
+ *                          LEPTON_ERR_FAIL on sync error (resync will be triggered automatically)
  */
-int VoSPI_CaptureImage(VoSPI_t* p_Interface, uint8_t* p_BufferIndex);
+Lepton_Error_t VoSPI_CaptureImage(VoSPI_t* p_Interface, uint8_t* p_BufferIndex);
 
 #endif /* VOSPI_H_ */

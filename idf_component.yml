@@ -1,7 +1,7 @@
 description: "ESP32 component for FLIR Lepton 3.5 Thermal Camera"
 url: https://github.com/Kampi/ESP32-Lepton
 repository: https://github.com/Kampi/ESP32-Lepton
-license: "MIT"
+license: "GPL-3.0"
 tags:
   - thermal
   - camera
@@ -13,4 +13,4 @@ maintainers:
   - "Daniel Kampert <DanielKampert@kampis-elektroecke.de>"
 dependencies:
   idf:
-    version: ">=4.0"
+    version: ">=5.0"

@@ -30,22 +30,21 @@
 
 #include <sdkconfig.h>
 
-#ifndef CONFIG_LEPTON_TASK_STACK
-    #define CONFIG_LEPTON_TASK_STACK                2048
+#ifndef CONFIG_LEPTON_CAPTURE_TASK_STACK
+    #define CONFIG_LEPTON_CAPTURE_TASK_STACK                4096
 #endif
 
-#ifndef CONFIG_LEPTON_TASK_PRIORITY
-    #define CONFIG_LEPTON_TASK_PRIORITY             12
+#ifndef CONFIG_LEPTON_CAPTURE_TASK_PRIORITY
+    #define CONFIG_LEPTON_CAPTURE_TASK_PRIORITY             16
 #endif
 
-#ifndef CONFIG_LEPTON_TASK_CORE_AFFINITY
-    #ifndef CONFIG_LEPTON_TASK_CORE
-        #define CONFIG_LEPTON_TASK_CORE             1
+#ifndef CONFIG_LEPTON_CAPTURE_TASK_CORE_AFFINITY
+    #ifndef CONFIG_LEPTON_CAPTURE_TASK_CORE
+        #define CONFIG_LEPTON_CAPTURE_TASK_CORE             1
     #endif
 #endif
 
 static const char* TAG = "Lepton-Capture";
-
 
 #if CONFIG_LEPTON_GPIO_VSYNC_PIN >= 0
 /** @brief			
@@ -77,11 +76,11 @@ static void Lepton_CaptureTask(void* p_Args)
     
     int consecutiveErrors = 0;
 
-    ESP_LOGI(TAG, "Capture task started");
+    esp_task_wdt_add(NULL);
 
-    Device->Internal.VoSPI.isCapturing = true;
+    ESP_LOGD(TAG, "Capture task started");
 
-    while(true)
+    while(Device->Internal.VoSPI.isCapturing)
     {
         int Error;
         uint8_t BufferIndex = 0;
@@ -91,13 +90,20 @@ static void Lepton_CaptureTask(void* p_Args)
         /* Capture the frame */
         Error = VoSPI_CaptureImage(&Device->Internal.VoSPI, &BufferIndex);
 
-        if(Error == ESP_OK)
+        if(Error == LEPTON_ERR_OK)
         {
             consecutiveErrors = 0;
             
             if(Device->Internal.VoSPI.FrameCounter % 100 == 0)
             {
-                ESP_LOGI(TAG, "Captured %u frames, queue space: %d", static_cast<unsigned int>(Device->Internal.VoSPI.FrameCounter), uxQueueSpacesAvailable(Device->Internal.FrameQueue));
+                if(Device->Internal.FrameQueue != NULL)
+                {
+                    ESP_LOGD(TAG, "Captured %u frames, queue space: %d", static_cast<unsigned int>(Device->Internal.VoSPI.FrameCounter), uxQueueSpacesAvailable(Device->Internal.FrameQueue));
+                }
+                else
+                {
+                    ESP_LOGD(TAG, "Captured %u frames", static_cast<unsigned int>(Device->Internal.VoSPI.FrameCounter));
+                }
             }
 
             /* Frame successfully captured - send pointer to queue if available */
@@ -111,6 +117,15 @@ static void Lepton_CaptureTask(void* p_Args)
                 /* Use the buffer index returned by VoSPI_CaptureImage */
                 FrameBuffer.Image_Buffer = Device->Internal.VoSPI.Image_Buffer[BufferIndex];
 
+                if(Device->Internal.VoSPI.useTelemetry)
+                {
+                    FrameBuffer.Telemetry_Buffer = Device->Internal.VoSPI.Telemetry_Buffer[BufferIndex];
+                }
+                else
+                {
+                    FrameBuffer.Telemetry_Buffer = NULL;
+                }
+
                 /* Use overwrite to always update with latest frame */
                 xQueueOverwrite(Device->Internal.FrameQueue, &FrameBuffer);
             }
@@ -119,7 +134,7 @@ static void Lepton_CaptureTask(void* p_Args)
                 ESP_LOGW(TAG, "Frame queue is NULL!");
             }
         }
-        else if(Error == ESP_FAIL)
+        else if(Error == LEPTON_ERR_FAIL)
         {
             /* Sync error - already handled in VoSPI_CaptureImage */
             Device->Internal.VoSPI.SyncErrors++;
@@ -130,7 +145,7 @@ static void Lepton_CaptureTask(void* p_Args)
                 ESP_LOGW(TAG, "Sync error occurred (consecutive: %d, total: %" PRIu32 ")", consecutiveErrors, Device->Internal.VoSPI.SyncErrors);
             }
         }
-        else if(Error == ESP_ERR_NOT_FINISHED)
+        else if(Error == LEPTON_ERR_NOT_FINISHED)
         {
             ESP_LOGD(TAG, "Resyncing...");
         }
@@ -150,17 +165,14 @@ Lepton_Error_t Lepton_StartCapture(Lepton_t* p_Device, QueueHandle_t p_Queue)
 
     if(p_Device == NULL)
     {
-        ESP_LOGE(TAG, "Device is NULL");
         return LEPTON_ERR_INVALID_ARG;
     }
     else if(p_Device->Internal.isInitialized == false)
     {
-        ESP_LOGE(TAG, "Device not initialized");
         return LEPTON_ERR_NOT_INITIALIZED;
     }
     else if(p_Device->Internal.CapHandle != NULL)
     {
-        ESP_LOGE(TAG, "Capture already running");
         return LEPTON_ERR_BUSY;
     }
 
@@ -168,10 +180,11 @@ Lepton_Error_t Lepton_StartCapture(Lepton_t* p_Device, QueueHandle_t p_Queue)
 
     p_Device->Internal.FrameQueue = p_Queue;
     p_Device->Internal.VoSPI.CurrentBuffer = 0;
+    p_Device->Internal.VoSPI.isCapturing = true;
 
-    ESP_LOGI(TAG, "Creating capture task...");
+    ESP_LOGD(TAG, "Creating capture task...");
 
-    #ifdef CONFIG_LEPTON_TASK_CORE_AFFINITY
+    #ifdef CONFIG_LEPTON_CAPTURE_TASK_CORE_AFFINITY
         xTaskCreatePinnedToCore(&Lepton_CaptureTask, "Lepton_Capture", CONFIG_LEPTON_CAPTURE_TASK_STACK, p_Device, CONFIG_LEPTON_CAPTURE_TASK_PRIORITY, &p_Device->Internal.CapHandle, CONFIG_LEPTON_CAPTURE_TASK_CORE);
     #else
         xTaskCreate(&Lepton_CaptureTask, "Lepton_Capture", CONFIG_LEPTON_CAPTURE_TASK_STACK, p_Device, CONFIG_LEPTON_CAPTURE_TASK_PRIORITY, &p_Device->Internal.CapHandle);
@@ -181,12 +194,12 @@ Lepton_Error_t Lepton_StartCapture(Lepton_t* p_Device, QueueHandle_t p_Queue)
     {
         Error = LEPTON_ERR_NO_MEM;
         ESP_LOGE(TAG, "Failed to create capture task!");
+        p_Device->Internal.VoSPI.isCapturing = false;
+        p_Device->Internal.FrameQueue = NULL;
         goto Lepton_StartCapture_Error_1;
     }
 
-    ESP_LOGI(TAG, "Capture task created successfully");
-
-    esp_task_wdt_add(p_Device->Internal.CapHandle);
+    ESP_LOGD(TAG, "Capture task created successfully");
 
     /* V-Sync is a high-level signal. So we need to add a positive edge interrupt */
     #if CONFIG_LEPTON_GPIO_VSYNC_PIN >= 0
@@ -205,12 +218,12 @@ Lepton_Error_t Lepton_StartCapture(Lepton_t* p_Device, QueueHandle_t p_Queue)
         #error "Untested"
     #endif
 
-    ESP_LOGI(TAG, "Capture started successfully");
+    ESP_LOGD(TAG, "Capture started successfully");
 
     return LEPTON_ERR_OK;
 
 Lepton_StartCapture_Error_1:
-    ESP_LOGE(TAG, "Initialization error: 0x%X", static_cast<unsigned int>(Error));
+    ESP_LOGE(TAG, "Initialization error: 0x%X!", static_cast<unsigned int>(Error));
 
     return Error;
 }
@@ -229,6 +242,8 @@ Lepton_Error_t Lepton_StopCapture(Lepton_t* p_Device)
     {
         return LEPTON_ERR_OK;
     }
+
+    p_Device->Internal.VoSPI.isCapturing = false;
 
     vTaskDelete(p_Device->Internal.CapHandle);
     esp_task_wdt_delete(p_Device->Internal.CapHandle);
@@ -296,9 +311,9 @@ bool Lepton_Raw14ToRGB(uint16_t* p_Input, uint8_t* p_Output, uint16_t Width, uin
             normalized = 255;
         }
 
-        p_Output[i * 3 + 0] = Lepton_Palette_Iron_R[normalized];
-        p_Output[i * 3 + 1] = Lepton_Palette_Iron_G[normalized];
-        p_Output[i * 3 + 2] = Lepton_Palette_Iron_B[normalized];
+        p_Output[i * 3 + 0] = Lepton_Palette_Iron[normalized][0];
+        p_Output[i * 3 + 1] = Lepton_Palette_Iron[normalized][1];
+        p_Output[i * 3 + 2] = Lepton_Palette_Iron[normalized][2];
 
         /* Reset watchdog periodically during conversion */
         if((i & 0x3FF) == 0)  /* Every 1024 pixels */

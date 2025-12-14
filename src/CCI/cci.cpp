@@ -202,8 +202,7 @@ static Lepton_Error_t CCI_WaitBusy(CCI_t* p_Interface, Lepton_Result_t* p_Status
 
             xSemaphoreGive(p_Interface->Mutex);
 
-            Error = LEPTON_ERR_FAIL;
-            break;
+            return LEPTON_ERR_FAIL;
         }
 
         xSemaphoreGive(p_Interface->Mutex);
@@ -249,7 +248,7 @@ static Lepton_Error_t CCI_WriteRegister(CCI_t* p_Interface, uint16_t Register, u
     {
         xSemaphoreGive(p_Interface->Mutex);
 
-        ESP_LOGE(TAG, "Failed to write CCI register %02x with value %02x", Register, Value);
+        ESP_LOGE(TAG, "Failed to write CCI register %02x with value %02x!", Register, Value);
 
         Error = LEPTON_ERR_FAIL;
     };
@@ -296,7 +295,7 @@ static Lepton_Error_t CCI_WriteBurst(CCI_t* p_Interface, uint16_t Start, uint16_
     xSemaphoreTake(p_Interface->Mutex, portMAX_DELAY);
     if(p_Interface->I2C_Write(&p_Interface->I2C_Dev_Handle, _CCI_Buffer, (Length << 1) + 2) != 0)
     {
-        ESP_LOGE(TAG, "Failed to perform write burst at CCI register %02x with length %u", Start, Length);
+        ESP_LOGE(TAG, "Failed to perform write burst at CCI register %02x with length %u!", Start, Length);
 
         Error = LEPTON_ERR_FAIL;
     };
@@ -313,8 +312,6 @@ static Lepton_Error_t CCI_WriteBurst(CCI_t* p_Interface, uint16_t Start, uint16_
  */
 static Lepton_Error_t CCI_ReadRegister(CCI_t* p_Interface, uint16_t Register, uint16_t* p_Value)
 {
-    Lepton_Error_t Error;
-
     if((p_Interface == NULL) || (p_Value == NULL) || (p_Interface->I2C_Write == NULL) || (p_Interface->I2C_Read == NULL) || (p_Interface->Mutex == NULL))
     {
         return LEPTON_ERR_INVALID_ARG;
@@ -324,23 +321,23 @@ static Lepton_Error_t CCI_ReadRegister(CCI_t* p_Interface, uint16_t Register, ui
         return LEPTON_ERR_INVALID_STATE;
     }
 
-    Error = LEPTON_ERR_OK;
     _CCI_Buffer[0] = static_cast<uint8_t>(Register >> 8);
     _CCI_Buffer[1] = static_cast<uint8_t>(Register & 0xFF);
 
     xSemaphoreTake(p_Interface->Mutex, portMAX_DELAY);
     if((p_Interface->I2C_Write(&p_Interface->I2C_Dev_Handle, _CCI_Buffer, 2) != 0) || (p_Interface->I2C_Read(&p_Interface->I2C_Dev_Handle, _CCI_Buffer, 2) != 0))
     {
-        ESP_LOGE(TAG, "Failed to access CCI register %02x", Register);
+        ESP_LOGE(TAG, "Failed to access CCI register %02x!", Register);
 
-        Error = LEPTON_ERR_FAIL;
+        xSemaphoreGive(p_Interface->Mutex);
+        return LEPTON_ERR_FAIL;
     }
 
     *p_Value = (_CCI_Buffer[0] << 8) | _CCI_Buffer[1];
 
     xSemaphoreGive(p_Interface->Mutex);
 
-    return Error;
+    return LEPTON_ERR_OK;
 }
 
 /** @brief 				Perform a read burst to the register (up to 512 words).
@@ -374,7 +371,7 @@ static Lepton_Error_t CCI_ReadBurst(CCI_t* p_Interface, uint16_t Start, uint16_t
     xSemaphoreTake(p_Interface->Mutex, portMAX_DELAY);
     if((p_Interface->I2C_Write(&p_Interface->I2C_Dev_Handle, _CCI_Buffer, 2) != 0) || (p_Interface->I2C_Read(&p_Interface->I2C_Dev_Handle, _CCI_Buffer, Length << 1) != 0))
     {
-        ESP_LOGE(TAG, "Failed to initiate CCI read burst at register %02x", Start);
+        ESP_LOGE(TAG, "Failed to initiate CCI read burst at register %02x!", Start);
 
         Error = LEPTON_ERR_FAIL;
         goto CCI_ReadBurst_Exit;
@@ -414,11 +411,11 @@ Lepton_Error_t CCI_Init(CCI_t* p_Interface)
 
     if((p_Interface->I2C_Init != NULL) && (p_Interface->I2C_Bus_Config != NULL))
     {
-        ESP_LOGI(TAG, " I2C:");
-        ESP_LOGI(TAG, "  Interface: %u", static_cast<unsigned int>(p_Interface->I2C_Bus_Config->i2c_port));
-        ESP_LOGI(TAG, "  Clock: %u", static_cast<unsigned int>(_CCI_I2C_Config.scl_speed_hz));
-        ESP_LOGI(TAG, "  SCL: %u", static_cast<unsigned int>(p_Interface->I2C_Bus_Config->scl_io_num));
-        ESP_LOGI(TAG, "  SDA: %u", static_cast<unsigned int>(p_Interface->I2C_Bus_Config->sda_io_num));
+        ESP_LOGD(TAG, " I2C:");
+        ESP_LOGD(TAG, "  Interface: %u", static_cast<unsigned int>(p_Interface->I2C_Bus_Config->i2c_port));
+        ESP_LOGD(TAG, "  Clock: %u", static_cast<unsigned int>(_CCI_I2C_Config.scl_speed_hz));
+        ESP_LOGD(TAG, "  SCL: %u", static_cast<unsigned int>(p_Interface->I2C_Bus_Config->scl_io_num));
+        ESP_LOGD(TAG, "  SDA: %u", static_cast<unsigned int>(p_Interface->I2C_Bus_Config->sda_io_num));
 
         if(p_Interface->I2C_Init(p_Interface->I2C_Bus_Config, &p_Interface->I2C_Bus_Handle))
         {
@@ -438,7 +435,7 @@ Lepton_Error_t CCI_Init(CCI_t* p_Interface)
 
 Lepton_Error_t CCI_Deinit(CCI_t* p_Interface)
 {
-    if((p_Interface == NULL) || (p_Interface->I2C_Deinit == NULL))
+    if(p_Interface == NULL)
     {
         return LEPTON_ERR_INVALID_ARG;
     }
@@ -447,11 +444,15 @@ Lepton_Error_t CCI_Deinit(CCI_t* p_Interface)
         return LEPTON_ERR_OK;
     }
 
-    p_Interface->I2C_Deinit(p_Interface->I2C_Bus_Handle);
+    if(p_Interface->I2C_Deinit != NULL)
+    {
+        p_Interface->I2C_Deinit(p_Interface->I2C_Bus_Handle);
+    }
 
     if(p_Interface->Mutex != NULL)
     {
         vSemaphoreDelete(p_Interface->Mutex);
+        p_Interface->Mutex = NULL;
     }
 
     p_Interface->isInitialized = false;
@@ -682,7 +683,7 @@ Lepton_Error_t CCI_GetGPIOMode(CCI_t* p_Interface, Lepton_GPIO_t* p_Mode, Lepton
 
     *p_Mode = static_cast<Lepton_GPIO_t>((High << 16) | Low);
 
-    ESP_LOGI(TAG, "GPIO Mode: %u", static_cast<unsigned int>(*p_Mode));
+    ESP_LOGD(TAG, "GPIO Mode: %u", static_cast<unsigned int>(*p_Mode));
 
     return LEPTON_ERR_OK;
 }
@@ -868,7 +869,7 @@ Lepton_Error_t CCI_SetTelemetryPosition(CCI_t* p_Interface, Lepton_TelemetryPos_
     return CCI_WaitBusy(p_Interface, p_Status);
 }
 
-Lepton_Error_t CCI_GetTelemetry(CCI_t* p_Interface, Lepton_TelemetryPos_t* p_Position, Lepton_Result_t* p_Status)
+Lepton_Error_t CCI_GetTelemetryPosition(CCI_t* p_Interface, Lepton_TelemetryPos_t* p_Position, Lepton_Result_t* p_Status)
 {
     uint16_t Low;
     uint16_t High;
@@ -1127,32 +1128,131 @@ Lepton_Error_t CCI_GetShutterPosition(CCI_t* p_Interface, Lepton_ShutterPos_t* p
 
 Lepton_Error_t CCI_SetAGCROI(CCI_t* p_Interface, const Lepton_ROI_t* p_ROI, Lepton_Result_t* p_Status)
 {
-    return CCI_Set(p_Interface, CCI_CMD_AGC_SET_ROI, 4, reinterpret_cast<const uint16_t*>(p_ROI), p_Status);
+    uint16_t Buffer[4];
+    
+    if(p_ROI == NULL)
+    {
+        return LEPTON_ERR_INVALID_ARG;
+    }
+    
+    /* Lepton expects: startRow, startCol, endRow, endCol */
+    Buffer[0] = p_ROI->Start_Row;
+    Buffer[1] = p_ROI->Start_Col;
+    Buffer[2] = p_ROI->End_Row;
+    Buffer[3] = p_ROI->End_Col;
+    
+    return CCI_Set(p_Interface, CCI_CMD_AGC_SET_ROI, 4, Buffer, p_Status);
 }
 
 Lepton_Error_t CCI_GetAGCROI(CCI_t* p_Interface, Lepton_ROI_t* p_ROI, Lepton_Result_t* p_Status)
 {
-    return CCI_Get(p_Interface, CCI_CMD_AGC_GET_ROI, 4, reinterpret_cast<uint16_t*>(p_ROI), p_Status);
+    uint16_t Buffer[4];
+    Lepton_Error_t Error;
+    
+    if(p_ROI == NULL)
+    {
+        return LEPTON_ERR_INVALID_ARG;
+    }
+    
+    Error = CCI_Get(p_Interface, CCI_CMD_AGC_GET_ROI, 4, Buffer, p_Status);
+    if(Error != LEPTON_ERR_OK)
+    {
+        return Error;
+    }
+    
+    /* Lepton returns: startRow, startCol, endRow, endCol */
+    p_ROI->Start_Row = Buffer[0];
+    p_ROI->Start_Col = Buffer[1];
+    p_ROI->End_Row = Buffer[2];
+    p_ROI->End_Col = Buffer[3];
+    
+    return LEPTON_ERR_OK;
 }
 
 Lepton_Error_t CCI_SetSceneROI(CCI_t* p_Interface, const Lepton_ROI_t* p_ROI, Lepton_Result_t* p_Status)
 {
-    return CCI_Set(p_Interface, CCI_CMD_SYS_SET_SCENE_ROI, 4, reinterpret_cast<const uint16_t*>(p_ROI), p_Status);
+    uint16_t Buffer[4];
+    
+    if(p_ROI == NULL)
+    {
+        return LEPTON_ERR_INVALID_ARG;
+    }
+    
+    /* Lepton expects: startRow, startCol, endRow, endCol */
+    Buffer[0] = p_ROI->Start_Row;
+    Buffer[1] = p_ROI->Start_Col;
+    Buffer[2] = p_ROI->End_Row;
+    Buffer[3] = p_ROI->End_Col;
+    
+    return CCI_Set(p_Interface, CCI_CMD_SYS_SET_SCENE_ROI, 4, Buffer, p_Status);
 }
 
 Lepton_Error_t CCI_GetSceneROI(CCI_t* p_Interface, Lepton_ROI_t* p_ROI, Lepton_Result_t* p_Status)
 {
-    return CCI_Get(p_Interface, CCI_CMD_SYS_GET_SCENE_ROI, 4, reinterpret_cast<uint16_t*>(p_ROI), p_Status);
+    uint16_t Buffer[4];
+    Lepton_Error_t Error;
+    
+    if(p_ROI == NULL)
+    {
+        return LEPTON_ERR_INVALID_ARG;
+    }
+    
+    Error = CCI_Get(p_Interface, CCI_CMD_SYS_GET_SCENE_ROI, 4, Buffer, p_Status);
+    if(Error != LEPTON_ERR_OK)
+    {
+        return Error;
+    }
+    
+    /* Lepton returns: startRow, startCol, endRow, endCol */
+    p_ROI->Start_Row = Buffer[0];
+    p_ROI->Start_Col = Buffer[1];
+    p_ROI->End_Row = Buffer[2];
+    p_ROI->End_Col = Buffer[3];
+    
+    return LEPTON_ERR_OK;
 }
 
 Lepton_Error_t CCI_SetSpotmeterROI(CCI_t* p_Interface, const Lepton_ROI_t* p_ROI, Lepton_Result_t* p_Status)
 {
-    return CCI_Set(p_Interface, CCI_CMD_RAD_SET_RADIOMETRY_SPOT_ROI, 4, reinterpret_cast<const uint16_t*>(p_ROI), p_Status);
+    uint16_t Buffer[4];
+    
+    if(p_ROI == NULL)
+    {
+        return LEPTON_ERR_INVALID_ARG;
+    }
+    
+    /* Lepton expects: startRow, startCol, endRow, endCol */
+    Buffer[0] = p_ROI->Start_Row;
+    Buffer[1] = p_ROI->Start_Col;
+    Buffer[2] = p_ROI->End_Row;
+    Buffer[3] = p_ROI->End_Col;
+    
+    return CCI_Set(p_Interface, CCI_CMD_RAD_SET_RADIOMETRY_SPOT_ROI, 4, Buffer, p_Status);
 }
 
 Lepton_Error_t CCI_GetSpotmeterROI(CCI_t* p_Interface, Lepton_ROI_t* p_ROI, Lepton_Result_t* p_Status)
 {
-    return CCI_Get(p_Interface, CCI_CMD_RAD_GET_RADIOMETRY_SPOT_ROI, 4, reinterpret_cast<uint16_t*>(p_ROI), p_Status);
+    uint16_t Buffer[4];
+    Lepton_Error_t Error;
+    
+    if(p_ROI == NULL)
+    {
+        return LEPTON_ERR_INVALID_ARG;
+    }
+    
+    Error = CCI_Get(p_Interface, CCI_CMD_RAD_GET_RADIOMETRY_SPOT_ROI, 4, Buffer, p_Status);
+    if(Error != LEPTON_ERR_OK)
+    {
+        return Error;
+    }
+    
+    /* Lepton returns: startRow, startCol, endRow, endCol */
+    p_ROI->Start_Row = Buffer[0];
+    p_ROI->Start_Col = Buffer[1];
+    p_ROI->End_Row = Buffer[2];
+    p_ROI->End_Col = Buffer[3];
+    
+    return LEPTON_ERR_OK;
 }
 
 Lepton_Error_t CCI_GetSpotmeter(CCI_t* p_Interface, Lepton_Spotmeter_t* p_Spot, Lepton_Result_t* p_Status)

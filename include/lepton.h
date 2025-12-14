@@ -18,19 +18,19 @@
  */
 
 #ifndef LEPTON_H_
-
 #define LEPTON_H_
-
-// Hilfsmakro zum Stringifizieren von Defines
-#ifndef STRINGIFY
-#define STRINGIFY_HELPER(x) #x
-#define STRINGIFY(x) STRINGIFY_HELPER(x)
-#endif
 
 #include "lepton_defs.h"
 #include "lepton_errors.h"
 #include "lepton_config.h"
 #include "lepton_palette.h"
+
+#include <string>
+
+#ifndef STRINGIFY
+    #define STRINGIFY_HELPER(x) #x
+    #define STRINGIFY(x)        STRINGIFY_HELPER(x)
+#endif
 
 /** @brief Image width in pixels.
  */
@@ -41,13 +41,13 @@
 #define LEPTON_IMAGE_HEIGHT 120
 
 /** @brief          Convert a temperature from Kelvin (in Lepton format) into degree Celsius.
- *                  The Lepton sensor returns temperature values in Kelvin * 0.01 format.
- *  @param Kelvin 	Temperature in Lepton format (Kelvin * 0.01)
+ *                  The Lepton sensor returns temperature values in centi-Kelvin (Kelvin * 100).
+ *  @param Kelvin 	Temperature in Lepton format (centi-Kelvin, i.e., Kelvin * 100)
  *  @return			Temperature [Degree Celsius]
  */
 inline __attribute__((always_inline)) float Lepton_KelvinToCelsius(uint32_t Kelvin)
 {
-    return (static_cast<float>(Kelvin) * 100.0) - 273.15;
+    return (static_cast<float>(Kelvin) / 100.0) - 273.15;
 }
 
 /** @brief          Return the capturing status.
@@ -95,7 +95,7 @@ inline __attribute__((always_inline)) int32_t Lepton_GetFrameCounter(Lepton_t* p
 /** @brief  Get the version number of the library.
  *  @return Library version
  */
-inline __attribute__((always_inline)) const std::string Lepton_LibVersion(void)
+inline __attribute__((always_inline)) std::string Lepton_LibVersion(void)
 {
     return std::string(STRINGIFY(ESP32_LEPTON_LIB_MAJOR)) + "." + std::string(STRINGIFY(ESP32_LEPTON_LIB_MINOR)) + "." + std::string(STRINGIFY(ESP32_LEPTON_LIB_BUILD));
 }
@@ -138,7 +138,7 @@ Lepton_Error_t Lepton_SetVideoFormat(Lepton_t* p_Device, Lepton_VideoFormat_t Fo
  *  @param p_Status (Optional) Pointer to device status
  *  @return         LEPTON_ERR_OK when successful
  */
-Lepton_Error_t Lepton_EnableTelemetry(Lepton_t* p_Device, bool Enable, Lepton_Result_t* p_Status);
+Lepton_Error_t Lepton_EnableTelemetry(Lepton_t* p_Device, bool Enable, Lepton_Result_t* p_Status = NULL);
 
 /** @brief          Get the device temperatures.
  *  @param p_Device Pointer to device instance
@@ -184,11 +184,11 @@ Lepton_Error_t Lepton_GetSceneStatistics(Lepton_t* p_Device, Lepton_SceneStatist
 
 /** @brief			Set the spotmeter ROI.
  *  @param p_Device	Pointer to device instance
- *  @param ROI		Lepton ROI object
+ *  @param p_ROI	Pointer to Lepton ROI object
  *  @param p_Status (Optional) Pointer to device status
  *  @return			LEPTON_ERR_OK when successful
  */
-Lepton_Error_t Lepton_SetSpotmeterROI(Lepton_t* p_Device, Lepton_ROI_t ROI, Lepton_Result_t* p_Status = NULL);
+Lepton_Error_t Lepton_SetSpotmeterROI(Lepton_t* p_Device, Lepton_ROI_t* p_ROI, Lepton_Result_t* p_Status = NULL);
 
 /** @brief			Get the spotmeter ROI.
  *  @param p_Device	Pointer to device instance
@@ -214,7 +214,7 @@ Lepton_Error_t Lepton_GetSpotmeter(Lepton_t* p_Device, Lepton_Spotmeter_t* p_Spo
  *  @param p_Status (Optional) Pointer to device status
  *  @return         LEPTON_ERR_OK when successful
  */
-Lepton_Error_t Lepton_SetVideoSource(Lepton_t* p_Device, Lepton_VideoSource_t Source, uint16_t Constant, Lepton_Result_t* p_Status = NULL);
+Lepton_Error_t Lepton_SetVideoSource(Lepton_t* p_Device, Lepton_VideoSource_t Source, uint16_t Constant = 0, Lepton_Result_t* p_Status = NULL);
 
 /** @brief          Get the video source.
  *  @param p_Device Pointer to device instance
@@ -245,7 +245,7 @@ Lepton_Error_t Lepton_StopCapture(Lepton_t* p_Device);
  *  @param p_Output Pointer to RGB output buffer (must be at least 3 bytes)
  *  @param Width    Image width in pixels
  *  @param Height   Image height in pixels
- *  @return         true on success, false on failure
+ *  @return         #true on success, false on failure
  */
 bool Lepton_Raw14ToRGB(uint16_t* p_Input, uint8_t* p_Output, uint16_t Width, uint16_t Height);
 

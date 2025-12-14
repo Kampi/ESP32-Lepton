@@ -89,7 +89,7 @@ Lepton_Error_t Lepton_Emissivity(Lepton_t* p_Device, uint16_t Emissivity, Lepton
         return LEPTON_ERR_NOT_INITIALIZED;
     }
 
-    ESP_LOGI(TAG, "Set Emissivity: %u%%", Emissivity);
+    ESP_LOGD(TAG, "Set Emissivity: %u%%", Emissivity);
 
     if(p_Device->Internal.isRadiometric)
     {
@@ -147,7 +147,7 @@ Lepton_Error_t Lepton_GetSceneStatistics(Lepton_t* p_Device, Lepton_SceneStatist
     return CCI_GetSceneStatistics(&p_Device->Internal.CCI, p_Statistics, p_Status);
 }
 
-Lepton_Error_t Lepton_SetSpotmeterROI(Lepton_t* p_Device, Lepton_ROI_t ROI, Lepton_Result_t* p_Status)
+Lepton_Error_t Lepton_SetSpotmeterROI(Lepton_t* p_Device, Lepton_ROI_t* p_ROI, Lepton_Result_t* p_Status)
 {
     if(p_Device == NULL)
     {
@@ -158,7 +158,7 @@ Lepton_Error_t Lepton_SetSpotmeterROI(Lepton_t* p_Device, Lepton_ROI_t ROI, Lept
         return LEPTON_ERR_NOT_INITIALIZED;
     }
 
-    return CCI_SetSpotmeterROI(&p_Device->Internal.CCI, &ROI, p_Status);
+    return CCI_SetSpotmeterROI(&p_Device->Internal.CCI, p_ROI, p_Status);
 }
 
 Lepton_Error_t Lepton_GetSpotmeterROI(Lepton_t* p_Device, Lepton_ROI_t* p_ROI, Lepton_Result_t* p_Status)

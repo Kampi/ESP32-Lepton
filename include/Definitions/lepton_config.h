@@ -33,10 +33,9 @@
 #endif
 
 /** @brief              Default configuration object for the FLIR Lepton Thermal Imager.
- *  @param I2C_Config   I2C configuration object
+ *  @param I2C_Handle   I2C handle
  */
 #define LEPTON_DEFAULT_CONF(I2C_Handle)                                                {                                                                                \
-                                                                                            .useTelemetry = false,                                                      \
                                                                                             .useAGC = true,                                                             \
                                                                                             .useAGCCalculation = true,                                                  \
                                                                                             .useTLinear = true,                                                         \
@@ -92,18 +91,20 @@
                                                                                                     .intr_flags = 0,                                                    \
                                                                                                 },                                                                      \
                                                                                                 .Host = LEPTON_VOSPI_SPI_HOST,                                          \
+                                                                                                .Handle = NULL,                                                         \
                                                                                                 .DMA = SPI_DMA_CH_AUTO,                                                 \
                                                                                                 .isInitialized = false,                                                 \
                                                                                                 .isResync = false,                                                      \
                                                                                                 .isCapturing = false,                                                   \
-                                                                                                .useTelemetry = false,                                                  \
-                                                                                                .Handle = NULL,                                                         \
+                                                                                                .useTelemetry = true,                                                   \
+                                                                                                .TelemetryPosition = LEPTON_TELEMETRY_LOCATION_HEADER,                  \
                                                                                                 .Packet = NULL,                                                         \
                                                                                                 .ImageHeight = 0,                                                       \
                                                                                                 .ImageWidth = 0,                                                        \
                                                                                                 .BytesPerPixel = 0,                                                     \
                                                                                                 .PacketsPerFrame = 0,                                                   \
                                                                                                 .Image_Buffer = { NULL },                                               \
+                                                                                                .Telemetry_Buffer = { NULL },                                           \
                                                                                                 .CurrentBuffer = 0,                                                     \
                                                                                                 .SyncErrors = 0,                                                        \
                                                                                                 .FrameCounter = 0,                                                      \
