@@ -1,19 +1,23 @@
- /*
+/*
  * lepton_palette.h
  *
- *  Copyright (C) Daniel Kampert, 2025
- *	Website: www.kampis-elektroecke.de
- *  File info: FLIR Lepton thermal imaging sensor driver for ESP32.
+ *  Copyright (C) Daniel Kampert, 2026
+ *  Website: www.kampis-elektroecke.de
+ *  File info: Color palettes for the Lepton thermal camera.
  *
- * Permission is hereby granted,  free of charge,  to any person obtaining a copy of this software and associated documentation files (the "Software"),  
- * to deal in the Software without restriction,  including without limitation the rights to use,  copy,  modify,  merge,  publish,  distribute,  sublicense,  
- * and/or sell copies of the Software,  and to permit persons to whom the Software is furnished to do so,  subject to the following conditions:
- * 
- * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
- * THE SOFTWARE IS PROVIDED "AS IS",  WITHOUT WARRANTY OF ANY KIND,  EXPRESS OR IMPLIED,  INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,  
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,  DAMAGES OR OTHER LIABILITY,  
- * WHETHER IN AN ACTION OF CONTRACT,  TORT OR OTHERWISE,  ARISING FROM,  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ *
  * Errors and commissions should be reported to DanielKampert@kampis-elektroecke.de
  */
 
@@ -24,7 +28,7 @@
 
 /** @brief Iron palette lookup table - optimized for thermal imaging.
  */
-static const uint8_t Lepton_Palette_Iron[256][3] = { 
+static const uint8_t Lepton_Palette_Iron[256][3] = {
     { 0, 0, 0 }, { 0, 0, 9 }, { 2, 0, 16 }, { 4, 0, 24 }, { 6, 0, 31 }, { 8, 0, 38 }, { 10, 0, 45 }, { 12, 0, 53 },
     { 14, 0, 60 }, { 17, 0, 67 }, { 19, 0, 74 }, { 21, 0, 82 }, { 23, 0, 89 }, { 25, 0, 96 }, { 27, 0, 103 }, { 29, 0, 111 },
     { 31, 0, 118 }, { 36, 0, 120 }, { 41, 0, 121 }, { 46, 0, 122 }, { 51, 0, 123 }, { 56, 0, 124 }, { 61, 0, 125 }, { 66, 0, 126 },
@@ -57,11 +61,11 @@ static const uint8_t Lepton_Palette_Iron[256][3] = {
     { 255, 255, 255 }, { 255, 255, 255 }, { 255, 255, 255 }, { 255, 255, 255 }, { 255, 255, 255 }, { 255, 255, 255 }, { 255, 255, 255 }, { 255, 255, 255 },
     { 255, 255, 255 }, { 255, 255, 255 }, { 255, 255, 255 }, { 255, 255, 255 }, { 255, 255, 255 }, { 255, 255, 255 }, { 255, 255, 255 }, { 255, 255, 255 },
     { 255, 255, 255 }, { 255, 255, 255 }, { 255, 255, 255 }, { 255, 255, 255 }, { 255, 255, 255 }, { 255, 255, 255 }, { 255, 255, 255 }, { 255, 255, 255 },
- };
+};
 
 /** @brief Rainbow palette lookup table - optimized for thermal imaging.
  */
-static const uint8_t Lepton_Palette_Rainbow[256][3] = { 
+static const uint8_t Lepton_Palette_Rainbow[256][3] = {
     { 0, 0, 0 }, { 4, 0, 24 }, { 8, 0, 49 }, { 12, 0, 73 }, { 16, 0, 98 }, { 20, 0, 122 }, { 25, 0, 147 }, { 29, 0, 171 },
     { 33, 0, 196 }, { 37, 0, 220 }, { 41, 0, 245 }, { 45, 0, 255 }, { 49, 0, 255 }, { 53, 0, 255 }, { 58, 0, 255 }, { 62, 0, 255 },
     { 66, 0, 255 }, { 70, 0, 255 }, { 74, 0, 255 }, { 78, 0, 255 }, { 82, 0, 255 }, { 86, 0, 255 }, { 90, 0, 255 }, { 95, 0, 255 },
@@ -94,6 +98,6 @@ static const uint8_t Lepton_Palette_Rainbow[256][3] = {
     { 255, 255, 189 }, { 255, 255, 193 }, { 255, 255, 197 }, { 255, 255, 201 }, { 255, 255, 205 }, { 255, 255, 209 }, { 255, 255, 213 }, { 255, 255, 218 },
     { 255, 255, 222 }, { 255, 255, 226 }, { 255, 255, 230 }, { 255, 255, 234 }, { 255, 255, 238 }, { 255, 255, 242 }, { 255, 255, 246 }, { 255, 255, 250 },
     { 255, 255, 255 }, { 255, 255, 255 }, { 255, 255, 255 }, { 255, 255, 255 }, { 255, 255, 255 }, { 255, 255, 255 }, { 255, 255, 255 }, { 255, 255, 255 },
- };
+};
 
 #endif /* LEPTON_PALETTE_H_ */

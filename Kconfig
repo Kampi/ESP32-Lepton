@@ -73,7 +73,7 @@ menu "Lepton"
             depends on LEPTON_CAPTURE_TASK_CORE_AFFINITY
             int "Core used for the capture task"
             range 0 1 if SOC_CPU_CORES_NUM > 1
-            default 0
+            default 1
             help
                 Use a specific core for the capture task.
 

@@ -1,19 +1,23 @@
- /*
+/*
  * vospi.h
  *
- *  Copyright (C) Daniel Kampert, 2025
- *	Website: www.kampis-elektroecke.de
- *  File info: FLIR Lepton thermal imaging sensor driver for ESP32.
+ *  Copyright (C) Daniel Kampert, 2026
+ *  Website: www.kampis-elektroecke.de
+ *  File info: VoSPI interface driver for Lepton.
  *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), 
- * to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, 
- * and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
- * 
- * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, 
- * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ *
  * Errors and commissions should be reported to DanielKampert@kampis-elektroecke.de
  */
 
@@ -46,26 +50,26 @@
  *                      LEPTON_ERR_FAIL when the initialization has failed
  *                      LEPTON_ERR_NO_MEM when no memory is available for the SPI
  */
-Lepton_Error_t VoSPI_Init(VoSPI_t* p_Interface);
+Lepton_Error_t VoSPI_Init(VoSPI_t *p_Interface);
 
 /** @brief              Deinitialise the VoSPI interface.
  *  @param p_Interface  Pointer to VoSPI interface object
- *  @return			    LEPTON_ERR_OK when successful
+ *  @return             LEPTON_ERR_OK when successful
  */
-Lepton_Error_t VoSPI_Deinit(VoSPI_t* p_Interface);
+Lepton_Error_t VoSPI_Deinit(VoSPI_t *p_Interface);
 
 /** @brief              Request a VoSPI resync.
  *                      This holds CS high for ~200ms to reset the Lepton's VoSPI state machine.
  *                      Call this when sync is lost.
  *  @param p_Interface  Pointer to VoSPI interface object
  */
-void VoSPI_RequestResync(VoSPI_t* p_Interface);
+void VoSPI_RequestResync(VoSPI_t *p_Interface);
 
 /** @brief              Check if VoSPI is currently in resync period.
  *  @param p_Interface  Pointer to VoSPI interface object
- *  @return             #true if still resyncing (CS held high), false when ready to capture
+ *  @return             true if still resyncing (CS held high), false when ready to capture
  */
-bool VoSPI_IsResyncing(VoSPI_t* p_Interface);
+bool VoSPI_IsResyncing(VoSPI_t *p_Interface);
 
 /** @brief                  Capture a complete frame from the Lepton.
  *  @param p_Interface      Pointer to VoSPI interface object
@@ -74,6 +78,6 @@ bool VoSPI_IsResyncing(VoSPI_t* p_Interface);
  *                          LEPTON_ERR_NOT_FINISHED when no frame is ready yet (call again)
  *                          LEPTON_ERR_FAIL on sync error (resync will be triggered automatically)
  */
-Lepton_Error_t VoSPI_CaptureImage(VoSPI_t* p_Interface, uint8_t* p_BufferIndex);
+Lepton_Error_t VoSPI_CaptureImage(VoSPI_t *p_Interface, uint8_t *p_BufferIndex);
 
 #endif /* VOSPI_H_ */

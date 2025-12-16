@@ -1,19 +1,23 @@
- /*
+/*
  * lepton_config.h
  *
- *  Copyright (C) Daniel Kampert, 2025
- *	Website: www.kampis-elektroecke.de
- *  File info: FLIR Lepton thermal imaging sensor driver for ESP32.
+ *  Copyright (C) Daniel Kampert, 2026
+ *  Website: www.kampis-elektroecke.de
+ *  File info: Configuration definitions for Lepton driver.
  *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), 
- * to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, 
- * and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
- * 
- * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, 
- * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ *
  * Errors and commissions should be reported to DanielKampert@kampis-elektroecke.de
  */
 
@@ -27,15 +31,14 @@
 #include <sdkconfig.h>
 
 #if defined(CONFIG_LEPTON_VOSPI_SPI2_HOST)
-    #define LEPTON_VOSPI_SPI_HOST                       SPI2_HOST
+#define LEPTON_VOSPI_SPI_HOST                       SPI2_HOST
 #elif defined(CONFIG_LEPTON_VOSPI_SPI3_HOST)
-    #define LEPTON_VOSPI_SPI_HOST                       SPI3_HOST
+#define LEPTON_VOSPI_SPI_HOST                       SPI3_HOST
 #endif
 
-/** @brief              Default configuration object for the FLIR Lepton Thermal Imager.
- *  @param I2C_Handle   I2C handle
+/** @brief Default configuration object for the FLIR Lepton Thermal Imager.
  */
-#define LEPTON_DEFAULT_CONF(I2C_Handle)                                                {                                                                                \
+#define LEPTON_DEFAULT_CONF                                                             {                                                                               \
                                                                                             .useAGC = true,                                                             \
                                                                                             .useAGCCalculation = true,                                                  \
                                                                                             .useTLinear = true,                                                         \
@@ -50,7 +53,7 @@
                                                                                                 .I2C_Read = NULL,                                                       \
                                                                                                 .I2C_Deinit = NULL,                                                     \
                                                                                                 .I2C_Bus_Config = NULL,                                                 \
-                                                                                                .I2C_Bus_Handle = I2C_Handle,                                           \
+                                                                                                .I2C_Bus_Handle = NULL,                                                 \
                                                                                                 .I2C_Dev_Handle = NULL,                                                 \
                                                                                                 .Mutex = NULL,                                                          \
                                                                                                 .isInitialized = false,                                                 \
@@ -132,8 +135,8 @@
  *  @param Conf         Lepton configuration object
  *  @param SDA          I2C SDA pin
  *  @param SCL          I2C SCL pin
- *  @param EnablePullup Set to #true to enable internal pullups for SDA and SCL lines
- *  @param AutoPD       Set to #true to enable automatic power down management
+ *  @param EnablePullup Set to true to enable internal pullups for SDA and SCL lines
+ *  @param AutoPD       Set to true to enable automatic power down management
  */
 #define LEPTON_DEFAULT_I2C(Conf, SDA, SCL, EnablePullup, AutoPD)                        do {                                                                            \
                                                                                             Conf.CCI.I2C_Bus_Config->i2c_port = CONFIG_LEPTON_I2C_HOST;                 \
@@ -147,6 +150,14 @@
                                                                                                 .enable_internal_pullup = EnablePullup,                                 \
                                                                                                 .allow_pd = AutoPD,                                                     \
                                                                                             };                                                                          \
+                                                                                        } while (0)
+
+/** @brief              Assign an I2C bus handle to the Lepton configuration object.
+ *  @param Conf         Lepton configuration object
+ *  @param Handle       I2C bus handle
+ */
+#define LEPTON_ASSIGN_I2C_HANDLE(Conf, Handle)                                          do {                                                                            \
+                                                                                            Conf.CCI.I2C_Bus_Handle = Handle;                                           \
                                                                                         } while (0)
 
 #endif /* LEPTON_CONFIG_H_ */

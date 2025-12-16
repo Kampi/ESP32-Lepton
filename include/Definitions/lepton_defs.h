@@ -1,19 +1,23 @@
- /*
+/*
  * lepton_defs.h
  *
- *  Copyright (C) Daniel Kampert, 2025
- *	Website: www.kampis-elektroecke.de
- *  File info: FLIR Lepton thermal imaging sensor driver for ESP32.
+ *  Copyright (C) Daniel Kampert, 2026
+ *  Website: www.kampis-elektroecke.de
+ *  File info: Type definitions for Lepton driver.
  *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), 
- * to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, 
- * and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
- * 
- * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, 
- * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ *
  * Errors and commissions should be reported to DanielKampert@kampis-elektroecke.de
  */
 
@@ -35,379 +39,375 @@
 
 typedef uint8_t Lepton_BufferIndex_t;
 
-/** @brief 			Set a GPIO to the given level.
+/** @brief          Set a GPIO to the given level.
  *  @param Level    Output state
  */
 typedef void (*GPIO_Set)(bool Level);
 
-/** @brief 				I2C initialization function prototype.
- *  @param p_Config	    Pointer to I2C configuration
+/** @brief              I2C initialization function prototype.
+ *  @param p_Config     Pointer to I2C configuration
  *  @param p_Bus_handle Pointer to I2C bus handle
- *  @return				0 when successful
- * 						-1 when not successful
+ *  @return             0 when successful
+ *                      -1 when not successful
  */
-typedef int32_t (*I2C_Init_t)(i2c_master_bus_config_t* p_Config, i2c_master_bus_handle_t* p_Bus_Handle);
+typedef int32_t (*I2C_Init_t)(i2c_master_bus_config_t *p_Config, i2c_master_bus_handle_t *p_Bus_Handle);
 
-/** @brief 				I2C write function prototype.
+/** @brief              I2C write function prototype.
  *  @param p_Dev_Handle Pointer to I2C device handle
- *  @param p_Buffer		Pointer to data buffer
- *  @param Length		Buffer length
- *  @return				0 when successful
- * 						-1 when not successful
+ *  @param p_Buffer     Pointer to data buffer
+ *  @param Length       Buffer length
+ *  @return             0 when successful
+ *                      -1 when not successful
  */
-typedef int32_t (*I2C_Write_t)(i2c_master_dev_handle_t* p_Dev_Handle, const uint8_t* p_Buffer, uint32_t Length);
+typedef int32_t (*I2C_Write_t)(i2c_master_dev_handle_t *p_Dev_Handle, const uint8_t *p_Buffer, uint32_t Length);
 
-/** @brief 				I2C read function prototype.
+/** @brief              I2C read function prototype.
  *  @param p_Dev_Handle Pointer to I2C device handle
- *  @param p_Buffer		Pointer to data buffer
- *  @param Length		Buffer length
- *  @return				0 when successful
- * 						-1 when not successful
+ *  @param p_Buffer     Pointer to data buffer
+ *  @param Length       Buffer length
+ *  @return             0 when successful
+ *                      -1 when not successful
  */
-typedef int32_t (*I2C_Read_t)(i2c_master_dev_handle_t* p_Dev_Handle, uint8_t* p_Buffer, uint32_t Length);
+typedef int32_t (*I2C_Read_t)(i2c_master_dev_handle_t *p_Dev_Handle, uint8_t *p_Buffer, uint32_t Length);
 
-/** @brief 				I2C deinitialization function prototype.
+/** @brief              I2C deinitialization function prototype.
  *  @param Bus_handle   I2C bus handle
- *  @return				0 when successful
- * 						-1 when not successful
+ *  @return             0 when successful
+ *                      -1 when not successful
  */
 typedef int32_t (*I2C_Deinit_t)(i2c_master_bus_handle_t Bus_handle);
 
 /** @brief Lepton error codes from the software driver (Chapter 2.3 – FLIR LEPTON Software IDD).
  */
-typedef enum
-{
-    LEPTON_ERR_OK 						= 0,	/**< Camera ok. */
-    LEPTON_ERROR 						= -1,	/**< Camera general error. */
-    LEPTON_NOT_READY 					= -2,	/**< Camera not ready error. */
-    LEPTON_RANGE_ERROR 					= -3,	/**< Camera range error. */
-    LEPTON_CHECKSUM_ERROR 				= -4,	/**< Camera checksum error. */
-    LEPTON_BAD_ARG_POINTER_ERROR 		= -5,	/**< Camera Bad argument error. */
-    LEPTON_DATA_SIZE_ERROR 				= -6,	/**< Camera byte count error. */
-    LEPTON_UNDEFINED_FUNCTION_ERROR 	= -7,	/**< Camera undefined function error. */
-    LEPTON_FUNCTION_NOT_SUPPORTED 		= -8,	/**< Camera function not yet supported error. */
-    LEPTON_DATA_OUT_OF_RANGE_ERROR 		= -9,	/**< Camera input DATA is out of valid range error. */
-    LEPTON_COMMAND_NOT_ALLOWED 			= -11,	/**< Camera unable to execute command due to current camera state. */
+typedef enum {
+    LEPTON_ERR_OK                       = 0,    /**< Camera ok. */
+    LEPTON_ERROR                        = -1,   /**< Camera general error. */
+    LEPTON_NOT_READY                    = -2,   /**< Camera not ready error. */
+    LEPTON_RANGE_ERROR                  = -3,   /**< Camera range error. */
+    LEPTON_CHECKSUM_ERROR               = -4,   /**< Camera checksum error. */
+    LEPTON_BAD_ARG_POINTER_ERROR        = -5,   /**< Camera Bad argument error. */
+    LEPTON_DATA_SIZE_ERROR              = -6,   /**< Camera byte count error. */
+    LEPTON_UNDEFINED_FUNCTION_ERROR     = -7,   /**< Camera undefined function error. */
+    LEPTON_FUNCTION_NOT_SUPPORTED       = -8,   /**< Camera function not yet supported error. */
+    LEPTON_DATA_OUT_OF_RANGE_ERROR      = -9,   /**< Camera input DATA is out of valid range error. */
+    LEPTON_COMMAND_NOT_ALLOWED          = -11,  /**< Camera unable to execute command due to current camera state. */
 
     /* OTP access errors */
-    LEPTON_OTP_WRITE_ERROR 				= -15,	/**< Camera OTP write error */
-    LEPTON_OTP_READ_ERROR 				= -16,	/**< double bit error detected (uncorrectible) */
-    LEPTON_OTP_NOT_PROGRAMMED_ERROR 	= -18,	/**< Flag read as non-zero */
+    LEPTON_OTP_WRITE_ERROR              = -15,  /**< Camera OTP write error */
+    LEPTON_OTP_READ_ERROR               = -16,  /**< double bit error detected (uncorrectible) */
+    LEPTON_OTP_NOT_PROGRAMMED_ERROR     = -18,  /**< Flag read as non-zero */
 
     /* I2C Errors */
-    LEPTON_ERROR_I2C_BUS_NOT_READY 		= -20,	/**< I2C Bus Error - Bus Not Avaialble. */
-    LEPTON_ERROR_I2C_BUFFER_OVERFLOW 	= -22, 	/**< I2C Bus Error - Buffer Overflow. */
-    LEPTON_ERROR_I2C_ARBITRATION_LOST 	= -23, 	/**< I2C Bus Error - Bus Arbitration Lost. */
-    LEPTON_ERROR_I2C_BUS_ERROR 			= -24,	/**< I2C Bus Error - General Bus Error. */
-    LEPTON_ERROR_I2C_NACK_RECEIVED 		= -25,	/**< I2C Bus Error - NACK Received. */
-    LEPTON_ERROR_I2C_FAIL 				= -26,	/**< I2C Bus Error - General Failure. */
+    LEPTON_ERROR_I2C_BUS_NOT_READY      = -20,  /**< I2C Bus Error - Bus Not Avaialble. */
+    LEPTON_ERROR_I2C_BUFFER_OVERFLOW    = -22,  /**< I2C Bus Error - Buffer Overflow. */
+    LEPTON_ERROR_I2C_ARBITRATION_LOST   = -23,  /**< I2C Bus Error - Bus Arbitration Lost. */
+    LEPTON_ERROR_I2C_BUS_ERROR          = -24,  /**< I2C Bus Error - General Bus Error. */
+    LEPTON_ERROR_I2C_NACK_RECEIVED      = -25,  /**< I2C Bus Error - NACK Received. */
+    LEPTON_ERROR_I2C_FAIL               = -26,  /**< I2C Bus Error - General Failure. */
 
     /* Processing Errors */
-    LEPTON_DIV_ZERO_ERROR 				= -80,	/**< Attempted div by zero. */
+    LEPTON_DIV_ZERO_ERROR               = -80,  /**< Attempted div by zero. */
 
     /* Comm Errors */
-    LEPTON_COMM_PORT_NOT_OPEN 			= -101,	/**< Comm port not open. */
-    LEPTON_COMM_INVALID_PORT_ERROR 		= -102,	/**< Comm port no such port error. */
-    LEPTON_COMM_RANGE_ERROR 			= -103,	/**< Comm port range error. */
-    LEPTON_ERROR_CREATING_COMM 			= -104,	/**< Error creating comm. */
-    LEPTON_ERROR_STARTING_COMM 			= -105,	/**< Error starting comm. */
-    LEPTON_ERROR_CLOSING_COMM 			= -106,	/**< Error closing comm. */
-    LEPTON_COMM_CHECKSUM_ERROR 			= -107,	/**< Comm checksum error. */
-    LEPTON_COMM_NO_DEV 					= -108,	/**< No comm device. */
-    LEPTON_ERR_TIMEOUT_ERROR 			= -109,	/**< Comm timeout error. */
-    LEPTON_COMM_ERROR_WRITING_COMM 		= -110,	/**< Error writing comm. */
-    LEPTON_COMM_ERROR_READING_COMM 		= -111,	/**< Error reading comm. */
-    LEPTON_COMM_COUNT_ERROR 			= -112,	/**< Comm byte count error. */
+    LEPTON_COMM_PORT_NOT_OPEN           = -101, /**< Comm port not open. */
+    LEPTON_COMM_INVALID_PORT_ERROR      = -102, /**< Comm port no such port error. */
+    LEPTON_COMM_RANGE_ERROR             = -103, /**< Comm port range error. */
+    LEPTON_ERROR_CREATING_COMM          = -104, /**< Error creating comm. */
+    LEPTON_ERROR_STARTING_COMM          = -105, /**< Error starting comm. */
+    LEPTON_ERROR_CLOSING_COMM           = -106, /**< Error closing comm. */
+    LEPTON_COMM_CHECKSUM_ERROR          = -107, /**< Comm checksum error. */
+    LEPTON_COMM_NO_DEV                  = -108, /**< No comm device. */
+    LEPTON_ERR_TIMEOUT_ERROR            = -109, /**< Comm timeout error. */
+    LEPTON_COMM_ERROR_WRITING_COMM      = -110, /**< Error writing comm. */
+    LEPTON_COMM_ERROR_READING_COMM      = -111, /**< Error reading comm. */
+    LEPTON_COMM_COUNT_ERROR             = -112, /**< Comm byte count error. */
 
     /* Other Errors */
-    LEPTON_OPERATION_CANCELED 			= -126,	/**< Camera operation canceled. */
-    LEPTON_UNDEFINED_ERROR_CODE 		= -127	/**< Undefined error. */
+    LEPTON_OPERATION_CANCELED           = -126, /**< Camera operation canceled. */
+    LEPTON_UNDEFINED_ERROR_CODE         = -127  /**< Undefined error. */
 } Lepton_Result_t;
+
+/** @brief TLinear resolution definitions (Chapter 4.8.10 – FLIR LEPTON Software IDD).
+ */
+typedef enum {
+    LEPTON_TLINEAR_0_1_RESOLUTION = 0,      /**< Scale factor 10. */
+    LEPTON_TLINEAR_0_01_RESOLUTION,         /**< Scale factor 100. */
+} Lepton_TLinear_Resolution_t;
 
 /** @brief Shutter position definitions (Chapter 4.5.15 – FLIR LEPTON Software IDD).
  */
-typedef enum
-{
-    LEPTON_SHUTTER_POS_UNKNOWN = -1,		    /**< Unknown shutter position. */
-    LEPTON_SHUTTER_POS_IDLE = 0,				/**< Shutter is idle. */
-    LEPTON_SHUTTER_POS_OPEN,					/**< Shutter is open. */
-    LEPTON_SHUTTER_POS_CLOSED,				    /**< Shutter is closed. */
-    LEPTON_SHUTTER_POS_BRAKE_ON,				/**< Shutter brake is on. */
-    LEPTON_SHUTTER_POS_END,  				    /**< End of shutter positions. */
+typedef enum {
+    LEPTON_SHUTTER_POS_UNKNOWN = -1,            /**< Unknown shutter position. */
+    LEPTON_SHUTTER_POS_IDLE = 0,                /**< Shutter is idle. */
+    LEPTON_SHUTTER_POS_OPEN,                    /**< Shutter is open. */
+    LEPTON_SHUTTER_POS_CLOSED,                  /**< Shutter is closed. */
+    LEPTON_SHUTTER_POS_BRAKE_ON,                /**< Shutter brake is on. */
+    LEPTON_SHUTTER_POS_END,                     /**< End of shutter positions. */
 } Lepton_ShutterPos_t;
 
 /** @brief GPIO mode definitions (Chapter 4.7.15 – FLIR LEPTON Software IDD).
  */
-typedef enum
-{
-    LEPTON_OEM_GPIO_MODE_GPIO,					/**< General Purpose Input/Output mode. */
-    LEPTON_OEM_GPIO_MODE_I2C_MASTER,           	/**< I2C Master mode. */
-    LEPTON_OEM_GPIO_MODE_SPI_MASTER_VLB_DATA,	/**< SPI Master VLB Data mode. */
-    LEPTON_OEM_GPIO_MODE_SPIO_MASTER_REG_DATA, 	/**< SPI Master Register Data mode. */
-    LEPTON_OEM_GPIO_MODE_SPI_SLAVE_VLB_DATA,   	/**< SPI Slave VLB Data mode. */
-    LEPTON_OEM_GPIO_MODE_VSYNC,                	/**< V-Sync mode. */
+typedef enum {
+    LEPTON_OEM_GPIO_MODE_GPIO,                  /**< General Purpose Input/Output mode. */
+    LEPTON_OEM_GPIO_MODE_I2C_MASTER,            /**< I2C Master mode. */
+    LEPTON_OEM_GPIO_MODE_SPI_MASTER_VLB_DATA,   /**< SPI Master VLB Data mode. */
+    LEPTON_OEM_GPIO_MODE_SPIO_MASTER_REG_DATA,  /**< SPI Master Register Data mode. */
+    LEPTON_OEM_GPIO_MODE_SPI_SLAVE_VLB_DATA,    /**< SPI Slave VLB Data mode. */
+    LEPTON_OEM_GPIO_MODE_VSYNC,                 /**< V-Sync mode. */
 } Lepton_GPIO_t;
 
 /** @brief Telemetry location options definitions (Chapter 4.5.8 – FLIR LEPTON Software IDD).
  */
-typedef enum
-{
-    LEPTON_TELEMETRY_LOCATION_HEADER,			/**< Place the telemetry at the image header. */
-    LEPTON_TELEMETRY_LOCATION_FOOTER,			/**< Place the telemetry at the image footer. */
+typedef enum {
+    LEPTON_TELEMETRY_LOCATION_HEADER,           /**< Place the telemetry at the image header. */
+    LEPTON_TELEMETRY_LOCATION_FOOTER,           /**< Place the telemetry at the image footer. */
 } Lepton_TelemetryPos_t;
 
-/** @brief 
+/** @brief
  */
-typedef enum
-{
-    LEPTON_SYS_GAIN_MODE_HIGH,					/**< High gain mode. */
-    LEPTON_SYS_GAIN_MODE_LOW,					/**< Low gain mode. */
-    LEPTON_SYS_GAIN_MODE_AUTO					/**< Automatic gain mode. */
+typedef enum {
+    LEPTON_SYS_GAIN_MODE_HIGH,                  /**< High gain mode. */
+    LEPTON_SYS_GAIN_MODE_LOW,                   /**< Low gain mode. */
+    LEPTON_SYS_GAIN_MODE_AUTO                   /**< Automatic gain mode. */
 } Lepton_Gain_t;
 
 /** @brief Video output format definitions (Chapter 4.6.8 – FLIR LEPTON Software IDD).
  */
-typedef enum
-{
-    LEPTON_FORMAT_RGB888 	= 3,				/**< 24-bit color mode. */
-    LEPTON_FORMAT_RAW14 	= 7,				/**< 14-bit raw data. */
+typedef enum {
+    LEPTON_FORMAT_RGB888    = 3,                /**< 24-bit color mode. */
+    LEPTON_FORMAT_RAW14     = 7,                /**< 14-bit raw data. */
 } Lepton_VideoFormat_t;
 
 /** @brief Video output source definitions (Chapter 4.7.8 – FLIR LEPTON Software IDD).
  */
-typedef enum
-{
-    LEPTON_SOURCE_RAW 		= 0, 				/*< Before video processing. */
-    LEPTON_SOURCE_COOKED, 						/*< Post video processing - Normal mode. */
-    LEPTON_SOURCE_RAMP, 						/*< Software Ramp pattern - Increase in X and Y. */
-    LEPTON_SOURCE_CONSTANT,						/*< Software Constant value pattern. */
-    LEPTON_SOURCE_RAMP_H,						/*< Software Ramp pattern - Increase in X only. */
-    LEPTON_SOURCE_RAMP_V,						/*< Software Ramp pattern - Increase in Y only. */
-    LEPTON_SOURCE_RAMP_CUSTOM,					/*< Software Ramp pattern - Uses custom settings. */
+typedef enum {
+    LEPTON_SOURCE_RAW       = 0,                /*< Before video processing. */
+    LEPTON_SOURCE_COOKED,                       /*< Post video processing - Normal mode. */
+    LEPTON_SOURCE_RAMP,                         /*< Software Ramp pattern - Increase in X and Y. */
+    LEPTON_SOURCE_CONSTANT,                     /*< Software Constant value pattern. */
+    LEPTON_SOURCE_RAMP_H,                       /*< Software Ramp pattern - Increase in X only. */
+    LEPTON_SOURCE_RAMP_V,                       /*< Software Ramp pattern - Increase in Y only. */
+    LEPTON_SOURCE_RAMP_CUSTOM,                  /*< Software Ramp pattern - Uses custom settings. */
 } Lepton_VideoSource_t;
 
 /** @brief Radiometry Flux Linear parameter (Chapter 4.8.7 – FLIR LEPTON Software IDD).
  */
-typedef struct
-{
-    uint16_t sceneEmissivity;					/**< */
-    uint16_t TBkgK;								/**< */
-    uint16_t tauWindow;							/**< */
-    uint16_t TWindowK;							/**< */
-    uint16_t tauAtm;							/**< */
-    uint16_t TAtmK;								/**< */
-    uint16_t reflWindow;						/**< */
-    uint16_t TReflK;							/**< */
+typedef struct {
+    uint16_t sceneEmissivity;                   /**< */
+    uint16_t TBkgK;                             /**< */
+    uint16_t tauWindow;                         /**< */
+    uint16_t TWindowK;                          /**< */
+    uint16_t tauAtm;                            /**< */
+    uint16_t TAtmK;                             /**< */
+    uint16_t reflWindow;                        /**< */
+    uint16_t TReflK;                            /**< */
 } Lepton_FluxLinearParams_t;
 
 /** @brief Buffer definition for the Lepton.
  */
-typedef struct
-{
-    uint16_t Height;							/**< Image buffer height in pixel. */
-    uint16_t Width;								/**< Image buffer width in pixel. */
-    uint8_t BytesPerPixel;						/**< Number of bytes per pixel. */
-    uint16_t* Image_Buffer;						/**< Pointer to memory location for image buffer. */
-    uint16_t* Telemetry_Buffer;                 /**< Pointer to memory location for telemetry buffer. */
+typedef struct {
+    uint16_t Height;                            /**< Image buffer height in pixel. */
+    uint16_t Width;                             /**< Image buffer width in pixel. */
+    uint8_t BytesPerPixel;                      /**< Number of bytes per pixel. */
+    uint16_t *Image_Buffer;                     /**< Pointer to memory location for image buffer. */
+    uint16_t *Telemetry_Buffer;                 /**< Pointer to memory location for telemetry buffer. */
 } Lepton_FrameBuffer_t;
 
 /** @brief Spotmeter object definition (Chapter 4.8.13 – FLIR LEPTON Software IDD).
  */
-typedef struct
-{
-    uint16_t SpotTemperature;                   /**< Spotmeter temperature value in Kelvin. */
+typedef struct {
+    uint16_t Value;                             /**< Spotmeter temperature value in Kelvin. */
     uint16_t Max;                               /**< Minimum temperature value in Kelvin within the spotmeter ROI. */
     uint16_t Min;                               /**< Maximum temperature value in Kelvin within the spotmeter ROI. */
-    uint16_t AverageTemperature;                /**< Average temperature value in Kelvin within the spotmeter ROI. */
+    uint16_t Population;                        /**< Number of pixels within the spotmeter ROI. */
 } Lepton_Spotmeter_t;
+
+/** @brief Spotmeter object definition (Chapter 4.8.13 – FLIR LEPTON Software IDD) with float values.
+ */
+typedef struct {
+    float Value;                                /**< Spotmeter temperature value in Kelvin. */
+    float Max;                                  /**< Minimum temperature value in Kelvin within the spotmeter ROI. */
+    float Min;                                  /**< Maximum temperature value in Kelvin within the spotmeter ROI. */
+    float Population;                           /**< Number of pixels within the spotmeter ROI. */
+} Lepton_Spotmeter_Float_t;
 
 /** @brief Image scene statistics object definition (Chapter 4.5.12 – FLIR LEPTON Software IDD).
  */
-typedef struct
-{
-    uint16_t MeanIntensity;						/**< Mean intensity of the image scene. */
-    uint16_t MaxIntensity;						/**< Maximum intensity of the image scene. */
-    uint16_t MinIntensity;						/**< Minimum intensity of the image scene. */
-    uint16_t Pixels;							/**< Number of pixels in the image scene. */
+typedef struct {
+    uint16_t MeanIntensity;                     /**< Mean intensity of the image scene. */
+    uint16_t MaxIntensity;                      /**< Maximum intensity of the image scene. */
+    uint16_t MinIntensity;                      /**< Minimum intensity of the image scene. */
+    uint16_t Pixels;                            /**< Number of pixels in the image scene. */
 } Lepton_SceneStatistics_t;
 
 /** @brief ROI object definition.
  */
-typedef struct
-{
+typedef struct {
     uint16_t Start_Col;                         /**< Start column of the ROI. */
-    uint16_t Start_Row;					        /**< Start row of the ROI. */
-    uint16_t End_Col;					        /**< End column of the ROI. */
-    uint16_t End_Row;				            /**< End row of the ROI. */
+    uint16_t Start_Row;                         /**< Start row of the ROI. */
+    uint16_t End_Col;                           /**< End column of the ROI. */
+    uint16_t End_Row;                           /**< End row of the ROI. */
 } Lepton_ROI_t;
 
 /** @brief Pixel definition for custom look-up table (Chapter 4.6.2 – FLIR LEPTON Software IDD).
  */
-typedef struct
-{
-    uint8_t Reserved;							/**< Reserved. */
-    uint8_t R;									/**< Red pixel. */
-    uint8_t G;									/**< Green pixel. */
-    uint8_t B;									/**< Blue pixel. */
+typedef struct {
+    uint8_t Reserved;                           /**< Reserved. */
+    uint8_t R;                                  /**< Red pixel. */
+    uint8_t G;                                  /**< Green pixel. */
+    uint8_t B;                                  /**< Blue pixel. */
 } Lepton_LookUp_Pixel_t;
 
 /** @brief Custom look-up table definition (Chapter 4.6.2 – FLIR LEPTON Software IDD).
  */
-typedef struct
-{
-    Lepton_LookUp_Pixel_t Binary[256];			/**< Look-Up table data. */
+typedef struct {
+    Lepton_LookUp_Pixel_t Binary[256];          /**< Look-Up table data. */
 } Lepton_LookUp_t;
 
 /** @brief Lepton Thermal Camera software version object definition (Chapter 4.7.5 – FLIR LEPTON Software IDD).
  */
-typedef struct
-{
-    uint8_t gpp_major;							/**< */
-    uint8_t gpp_minor;							/**< */
-    uint8_t gpp_build;							/**< */
-    uint8_t dsp_major;							/**< */
-    uint8_t dsp_minor;							/**< */
-    uint8_t dsp_build;							/**< */
-    uint16_t Reserved;							/**< Reserved. */
+typedef struct {
+    uint8_t gpp_major;                          /**< */
+    uint8_t gpp_minor;                          /**< */
+    uint8_t gpp_build;                          /**< */
+    uint8_t dsp_major;                          /**< */
+    uint8_t dsp_minor;                          /**< */
+    uint8_t dsp_build;                          /**< */
+    uint16_t Reserved;                          /**< Reserved. */
 } Lepton_Version_t;
 
 /** @brief Lepton CCI communication object.
  */
-typedef struct
-{
-    I2C_Init_t I2C_Init;						/**< I2C initialization function pointer. */
-                                                /**< NOTE: You must set I2C_Bus_Config to use this function! */
-    I2C_Write_t I2C_Write;						/**< I2C write function pointer. */
-    I2C_Read_t I2C_Read;						/**< I2C read function pointer. */
-    I2C_Deinit_t I2C_Deinit;					/**< I2C deinitialization function pointer. */
-    i2c_master_bus_config_t* I2C_Bus_Config;    /**< Pointer to I2C bus configuration. */
-                                                /**< NOTE: Only needed when I2C_Init is used! */
+typedef struct {
+    I2C_Init_t I2C_Init;                        /**< I2C initialization function pointer. */
+    /**< NOTE: You must set I2C_Bus_Config to use this function! */
+    I2C_Write_t I2C_Write;                      /**< I2C write function pointer. */
+    I2C_Read_t I2C_Read;                        /**< I2C read function pointer. */
+    I2C_Deinit_t I2C_Deinit;                    /**< I2C deinitialization function pointer. */
+    i2c_master_bus_config_t *I2C_Bus_Config;    /**< Pointer to I2C bus configuration. */
+    /**< NOTE: Only needed when I2C_Init is used! */
     i2c_master_bus_handle_t I2C_Bus_Handle;     /**< Pointer to I2C bus handle. */
-    i2c_master_dev_handle_t I2C_Dev_Handle;     /**< Pointer to I2C device handle. */    
-    SemaphoreHandle_t Mutex;				    /**< Mutex for the I2C communication.
+    i2c_master_dev_handle_t I2C_Dev_Handle;     /**< Pointer to I2C device handle. */
+    SemaphoreHandle_t Mutex;                    /**< Mutex for the I2C communication.
                                                      NOTE: Managed by the device driver. */
-    bool isInitialized;						    /**< #true when the device is initialized.
+    bool isInitialized;                         /**< true when the device is initialized.
                                                      NOTE: Managed by the device driver. */
 } CCI_t;
 
 /** @brief Lepton VoSPI communication object.
  */
-typedef struct
-{
-    spi_device_interface_config_t Interface;	/**< SPI configuration. */
-    spi_bus_config_t Master;					/**< SPI master configuration. */
-    spi_host_device_t Host;						/**< SPI host interface used by the driver. */
-    spi_device_handle_t Handle;				    /**< SPI device handle for communication.
+typedef struct {
+    spi_device_interface_config_t Interface;    /**< SPI configuration. */
+    spi_bus_config_t Master;                    /**< SPI master configuration. */
+    spi_host_device_t Host;                     /**< SPI host interface used by the driver. */
+    spi_device_handle_t Handle;                 /**< SPI device handle for communication.
                                                      NOTE: Managed by the device driver. */
-    int DMA;									/**< DMA channel used by the VoSPI driver. */
-    bool isInitialized;						    /**< #true when the device is initialized.
+    int DMA;                                    /**< DMA channel used by the VoSPI driver. */
+    bool isInitialized;                         /**< true when the device is initialized.
                                                      NOTE: Managed by the device driver. */
-    bool isResync;                              /**< #true when a resynchronization is in progress.
+    bool isResync;                              /**< true when a resynchronization is in progress.
                                                      NOTE: Managed by the device driver. */
-    bool isCapturing;					        /**< #true when a frame capture is in progress.
+    bool isCapturing;                           /**< true when a frame capture is in progress.
                                                      NOTE: Managed by the device driver. */
-    bool useTelemetry;						    /**< #true when telemetry data is to be captured.
+    bool useTelemetry;                          /**< true when telemetry data is to be captured.
                                                      NOTE: Managed by the device driver. */
     Lepton_TelemetryPos_t TelemetryPosition;    /**< Telemetry position setting.
                                                      NOTE: Managed by the device driver. */
-    uint16_t* Packet;					        /**< Pointer to allocated array to store one Lepton packet (DMA capable).
+    uint16_t *Packet;                           /**< Pointer to allocated array to store one Lepton packet (DMA capable).
                                                      NOTE: Managed by the device driver. */
-    uint16_t ImageHeight;						/**< Image buffer height in pixel. */
-    uint16_t ImageWidth;						/**< Image buffer width in pixel. */
-    uint8_t BytesPerPixel;						/**< Number of bytes per pixel. */
-    uint8_t PacketsPerFrame;					/**< Number of packets per frame. */
-    uint16_t* Image_Buffer[CONFIG_LEPTON_VOSPI_FRAME_BUFFERS];					/**< Pointer to memory location for image buffer. */
-    uint16_t* Telemetry_Buffer[CONFIG_LEPTON_VOSPI_FRAME_BUFFERS];              /**< Pointer to memory location for telemetry buffer. */
-    uint8_t CurrentBuffer;						/**< Current buffer index used by the driver. 
+    uint16_t ImageHeight;                       /**< Image buffer height in pixel. */
+    uint16_t ImageWidth;                        /**< Image buffer width in pixel. */
+    uint8_t BytesPerPixel;                      /**< Number of bytes per pixel. */
+    uint8_t PacketsPerFrame;                    /**< Number of packets per frame. */
+    uint16_t *Image_Buffer[CONFIG_LEPTON_VOSPI_FRAME_BUFFERS];                  /**< Pointer to memory location for image buffer. */
+    uint16_t *Telemetry_Buffer[CONFIG_LEPTON_VOSPI_FRAME_BUFFERS];              /**< Pointer to memory location for telemetry buffer. */
+    uint8_t CurrentBuffer;                      /**< Current buffer index used by the driver.
                                                      NOTE: Managed by the device driver. */
-    uint32_t SyncErrors;						/**< Number of synchronization errors encountered. */
-    uint32_t FrameCounter;						/**< Number of frames captured. */
+    uint32_t SyncErrors;                        /**< Number of synchronization errors encountered. */
+    uint32_t FrameCounter;                      /**< Number of frames captured. */
     int64_t ResyncStartUs;                      /**< Timestamp when the resynchronization started.
                                                      NOTE: Managed by the device driver. */
 } VoSPI_t;
 
 /** @brief Lepton Thermal Camera device object definition.
  */
-typedef struct
-{
-    char PartNumber[33];						/**< Device part number.
+typedef struct {
+    char PartNumber[33];                        /**< Device part number.
                                                      NOTE: Managed by the device driver. */
-    uint8_t SerialNumber[8];					/**< Device serial number.
+    uint8_t SerialNumber[8];                    /**< Device serial number.
                                                      NOTE: Managed by the device driver. */
-    struct
-    {
-        GPIO_Set Reset;						    /**< Function pointer to control the reset line.
+    struct {
+        GPIO_Set Reset;                         /**< Function pointer to control the reset line.
                                                      NOTE: Can be set to NULL to leave it unused. */
-        GPIO_Set PowerDown;					    /**< Function pointer to control the power-down line.
+        GPIO_Set PowerDown;                     /**< Function pointer to control the power-down line.
                                                      NOTE: Can be set to NULL to leave it unused. */
-        gpio_num_t VSync;						/**< Pin uses for the VSync signal. */
-        TaskHandle_t CapHandle;				    /**< Handle for the capture task.
+        gpio_num_t VSync;                       /**< Pin uses for the VSync signal. */
+        TaskHandle_t CapHandle;                 /**< Handle for the capture task.
                                                      NOTE: Managed by the device driver. */
         QueueHandle_t FrameQueue;               /**< Queue for frame ready events.
                                                      NOTE: Managed by the device driver. */
-        bool isInitialized;						/**< #true when the device is initialized.
+        bool isInitialized;                     /**< true when the device is initialized.
                                                      NOTE: Managed by the device driver. */
-        bool isRadiometric;						/**< Read-only flag indicating if the device is a radiometric model.
+        bool isRadiometric;                     /**< Read-only flag indicating if the device is a radiometric model.
                                                      NOTE: Managed by the device driver. */
-        bool useAGC;							/**< #true when Automatic Gain Control (AGC) is enabled.
+        bool useAGC;                            /**< true when Automatic Gain Control (AGC) is enabled.
                                                      NOTE: Managed by the device driver. */
-        bool useAGCCalc;						/**< #true when AGC calculation is enabled.
+        bool useAGCCalc;                        /**< true when AGC calculation is enabled.
                                                      NOTE: Managed by the device driver. */
-        bool isTLinear;							/**< #true when TLinear mode is enabled.
+        bool isTLinear;                         /**< true when TLinear mode is enabled.
                                                      NOTE: Managed by the device driver. */
-        bool isAutoRes;							/**< #true when AutoRes mode is enabled.
+        bool isAutoRes;                         /**< true when AutoRes mode is enabled.
                                                      NOTE: Managed by the device driver. */
-        bool isTLinearAutoRes;					/**< #true when TLinear AutoRes mode is enabled.
+        bool isTLinearAutoRes;                  /**< true when TLinear AutoRes mode is enabled.
                                                      NOTE: Managed by the device driver. */
-        Lepton_Gain_t Gain;						/**< Gain setting for the Lepton sensor.
+        Lepton_Gain_t Gain;                     /**< Gain setting for the Lepton sensor.
                                                       NOTE: Managed by the device driver. */
-        Lepton_VideoFormat_t VideoFormat;		/**< Video format setting for the Lepton sensor.
+        Lepton_VideoFormat_t VideoFormat;       /**< Video format setting for the Lepton sensor.
                                                       NOTE: Managed by the device driver. */
-        CCI_t CCI;								/**< CCI device object used by the camera driver.
+        CCI_t CCI;                              /**< CCI device object used by the camera driver.
                                                       NOTE: Managed by the device driver. */
-        VoSPI_t VoSPI;							/**< VoSPI device object used by the camera driver.
+        VoSPI_t VoSPI;                          /**< VoSPI device object used by the camera driver.
                                                       NOTE: Managed by the device driver. */
     } Internal;
 } Lepton_t;
 
-/** @brief 
+/** @brief
  */
-typedef struct
-{
-    bool useAGC;								/**< Set to #true to enable Automatic Gain Control (AGC). */
-    bool useAGCCalculation;						/**< Set to #true to enable AGC calculation. */
-    bool useTLinear;							/**< Set to #true to enable TLinear mode. */
-    Lepton_Gain_t Gain;							/**< Gain setting for the Lepton sensor. */
-    Lepton_VideoFormat_t VideoFormat;			/**< Video format setting for the Lepton sensor. */
-    gpio_num_t VSync;							/**< Pin used for the VSync signal. */
-    GPIO_Set Reset;						        /**< Function pointer to control the reset line.
+typedef struct {
+    bool useAGC;                                /**< Set to true to enable Automatic Gain Control (AGC). */
+    bool useAGCCalculation;                     /**< Set to true to enable AGC calculation. */
+    bool useTLinear;                            /**< Set to true to enable TLinear mode. */
+    Lepton_Gain_t Gain;                         /**< Gain setting for the Lepton sensor. */
+    Lepton_VideoFormat_t VideoFormat;           /**< Video format setting for the Lepton sensor. */
+    gpio_num_t VSync;                           /**< Pin used for the VSync signal. */
+    GPIO_Set Reset;                             /**< Function pointer to control the reset line.
                                                      NOTE: Can be set to NULL to leave it unused. */
-    GPIO_Set PowerDown;					        /**< Function pointer to control the power-down line.
+    GPIO_Set PowerDown;                         /**< Function pointer to control the power-down line.
                                                      NOTE: Can be set to NULL to leave it unused. */
-    CCI_t CCI;									/**< CCI initialization object used by the camera driver. */
-    VoSPI_t VoSPI;								/**< VoSPI initialization object used by the camera driver. */
+    CCI_t CCI;                                  /**< CCI initialization object used by the camera driver. */
+    VoSPI_t VoSPI;                              /**< VoSPI initialization object used by the camera driver. */
 } Lepton_Conf_t;
 
 /** @brief Lepton Telemetry Data (Table 3 – Engineering Datasheet Rev. 200).
  */
-typedef struct
-{
-    uint16_t Reserved:3;                        /**< Reserved. */
-    uint16_t FFC_Desired:1;                     /**< 0 = FFC not desired, 1 = FFC desired. */
-    uint16_t FFC_State:2;                       /**< 00 = FFC never commanded, 01 = FFC imminent, 10 = FFC in progress, 11 = FFC complete. */
-    uint16_t Reserved1:6;                       /**< Reserved. */
-    uint16_t AGC_State:1;                       /**< 0 = AGC ndisabled, 1 = AGC enabled. */
-    uint16_t Reserved2:2;                       /**< Reserved. */
-    uint16_t Shutter_Lockout:1;                 /**< 0 = Shutter not locked out, 1 = Shutter locked out (outside of valid temperature range, -10°C to 80°C)). */
-    uint16_t Reserved3:4;                       /**< Reserved. */
-    uint16_t Overtemp_Shutdown:1;               /**< Goes true 10 seconds before shutdown. */
-    uint16_t Reserved4:11;                      /**< Reserved. */
+typedef struct {
+    uint16_t Reserved: 3;                       /**< Reserved. */
+    uint16_t FFC_Desired: 1;                    /**< 0 = FFC not desired, 1 = FFC desired. */
+uint16_t FFC_State:
+    2;                      /**< 00 = FFC never commanded, 01 = FFC imminent, 10 = FFC in progress, 11 = FFC complete. */
+    uint16_t Reserved1: 6;                      /**< Reserved. */
+    uint16_t AGC_State: 1;                      /**< 0 = AGC ndisabled, 1 = AGC enabled. */
+    uint16_t Reserved2: 2;                      /**< Reserved. */
+uint16_t Shutter_Lockout:
+    1;                /**< 0 = Shutter not locked out, 1 = Shutter locked out (outside of valid temperature range, -10°C to 80°C)). */
+    uint16_t Reserved3: 4;                      /**< Reserved. */
+    uint16_t Overtemp_Shutdown: 1;              /**< Goes true 10 seconds before shutdown. */
+    uint16_t Reserved4: 11;                     /**< Reserved. */
 } __attribute__((packed)) Lepton_TelemetryStatus_t;
 
 /** @brief Lepton Telemetry Data (Table 2 – Engineering Datasheet Rev. 200).
  */
-typedef struct
-{
+typedef struct {
     /* -------- Row A -------- */
     uint16_t Revision;                          /**< Telemetry revision (Major = Byte 1, Minor = Byte 0). */
     uint32_t TimeCounter;                       /**< Time counter in milliseconds. */
