@@ -1,12 +1,17 @@
 menu "Lepton"
     menu "GPIO"
         menu "V-Sync"
+            config LEPTON_GPIO_USE_VSYNC
+                bool "Use V-Sync"
+                default n
+
             config LEPTON_GPIO_VSYNC_PIN
+                depends on LEPTON_GPIO_USE_VSYNC
                 int "V-Sync pin"
-                range -1 48
-                default -1
+                range 0 48
 
             config LEPTON_VSYNC_PLACE_IRAM
+                depends on LEPTON_GPIO_USE_VSYNC
                 bool "Place the V-Sync ISR in the IRAM"
                 default y
         endmenu

@@ -190,6 +190,13 @@ typedef enum {
     LEPTON_SOURCE_RAMP_CUSTOM,                  /*< Software Ramp pattern - Uses custom settings. */
 } Lepton_VideoSource_t;
 
+/** @brief AGC Policy definitions (Chapter 4.4.2 – FLIR LEPTON Software IDD).
+ */
+typedef enum {
+    LEPTON_AGC_LINEAR   = 0,                    /**< Linear AGC mode. */
+    LEPTON_AGC_HEQ,                             /**< Histogram Equalization AGC mode. */
+} Lepton_AGC_Mode_t;
+
 /** @brief Radiometry Flux Linear parameter (Chapter 4.8.7 – FLIR LEPTON Software IDD).
  */
 typedef struct {
@@ -202,6 +209,15 @@ typedef struct {
     uint16_t reflWindow;                        /**< */
     uint16_t TReflK;                            /**< */
 } Lepton_FluxLinearParams_t;
+
+/** @brief AGC Histogram statistics (Chapter 4.4.4 – FLIR LEPTON Software IDD).
+ */
+typedef struct {
+    uint32_t Intensity_Min;                     /**< Minimum intensity value. */
+    uint32_t Intensity_Max;                     /**< Maximum intensity value. */
+    uint32_t Intensity_Avg;                     /**< Average intensity value. */
+    uint32_t Pixels;                            /**< Total number of pixels counted in the histogram (19200). */
+} Lepton_AGC_Histogram_Statistics_t;
 
 /** @brief Buffer definition for the Lepton.
  */
@@ -354,7 +370,7 @@ typedef struct {
                                                      NOTE: Managed by the device driver. */
         bool useAGCCalc;                        /**< true when AGC calculation is enabled.
                                                      NOTE: Managed by the device driver. */
-        bool isTLinear;                         /**< true when TLinear mode is enabled.
+        bool useTLinear;                         /**< true when TLinear mode is enabled.
                                                      NOTE: Managed by the device driver. */
         bool isAutoRes;                         /**< true when AutoRes mode is enabled.
                                                      NOTE: Managed by the device driver. */
@@ -363,6 +379,8 @@ typedef struct {
         Lepton_Gain_t Gain;                     /**< Gain setting for the Lepton sensor.
                                                       NOTE: Managed by the device driver. */
         Lepton_VideoFormat_t VideoFormat;       /**< Video format setting for the Lepton sensor.
+                                                      NOTE: Managed by the device driver. */                                       
+        Lepton_AGC_Mode_t AGCPolicy;            /**< AGC policy setting for the Lepton sensor.
                                                       NOTE: Managed by the device driver. */
         CCI_t CCI;                              /**< CCI device object used by the camera driver.
                                                       NOTE: Managed by the device driver. */
@@ -379,6 +397,7 @@ typedef struct {
     bool useTLinear;                            /**< Set to true to enable TLinear mode. */
     Lepton_Gain_t Gain;                         /**< Gain setting for the Lepton sensor. */
     Lepton_VideoFormat_t VideoFormat;           /**< Video format setting for the Lepton sensor. */
+    Lepton_AGC_Mode_t AGCPolicy;                /**< AGC policy setting for the Lepton sensor. */
     gpio_num_t VSync;                           /**< Pin used for the VSync signal. */
     GPIO_Set Reset;                             /**< Function pointer to control the reset line.
                                                      NOTE: Can be set to NULL to leave it unused. */

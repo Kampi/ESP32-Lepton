@@ -3,7 +3,7 @@
 High-performance ESP-IDF driver for [FLIR Lepton 3.x](https://www.flir.de/products/lepton/?vertical=lwir&segment=oem) thermal imaging cameras.
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
-[![ESP-IDF](https://img.shields.io/badge/ESP--IDF-v5.0+-blue.svg)](https://github.com/espressif/esp-idf)
+[![ESP-IDF](https://img.shields.io/badge/ESP--IDF-v5.1+-blue.svg)](https://github.com/espressif/esp-idf)
 
 ## Table of Contents
 
@@ -45,17 +45,17 @@ High-performance ESP-IDF driver for [FLIR Lepton 3.x](https://www.flir.de/produc
 
 ## Features
 
-- ✅ Full support for **Lepton 3.5** (160x120 resolution)
-- ✅ **VoSPI** (Video over SPI) high-speed frame capture
-- ✅ **CCI** (Command & Control Interface) via I2C
-- ✅ Dual-core optimization (ESP32-S3)
-- ✅ AGC (Automatic Gain Control) support
-- ✅ FFC (Flat Field Correction) control
-- ✅ Radiometry support (temperature measurement)
-- ✅ Multiple color palettes (Iron, Rainbow, Grayscale)
-- ✅ Hardware abstraction for easy porting
-- ✅ Comprehensive error handling
-- ✅ Example applications included
+- Full support for **Lepton 3.5** (160x120 resolution)
+- **VoSPI** (Video over SPI) high-speed frame capture
+- **CCI** (Command & Control Interface) via I2C
+- Dual-core optimization (ESP32-S3)
+- AGC (Automatic Gain Control) support
+- FFC (Flat Field Correction) control
+- Radiometry support (temperature measurement)
+- Multiple color palettes (Iron, Rainbow, Grayscale)
+- Hardware abstraction for easy porting
+- Comprehensive error handling
+- Example applications included
 
 ## Hardware Support
 
@@ -113,7 +113,7 @@ git clone https://github.com/Kampi/ESP32-Lepton.git
 #include "lepton.h"
 
 // Define configuration
-Lepton_Config_t config;
+Lepton_Conf_t config;
 config = LEPTON_DEFAULT_CONF;
 LEPTON_ASSIGN_FUNC(config, I2CM_Init, I2CM_Deinit, I2CM_Write, I2CM_Read);
 
@@ -124,7 +124,7 @@ LEPTON_ASSIGN_I2C_HANDLE(config, I2C_Handle);
 // Initialize device
 Lepton_t device;
 Lepton_Error_t error = Lepton_Init(&device, &config);
-if (error != LEPTON_OK) {
+if (error != LEPTON_ERR_OK) {
     ESP_LOGE(TAG, "Failed to initialize Lepton: %d", error);
     return;
 }
@@ -137,7 +137,7 @@ uint16_t *frame = (uint16_t*)heap_caps_malloc(
 
 // Capture frame
 error = Lepton_CaptureFrameData(&device, frame);
-if (error == LEPTON_OK) {
+if (error == LEPTON_ERR_OK) {
     ESP_LOGI(TAG, "Frame captured successfully!");
     // Process frame data...
 }
@@ -154,7 +154,7 @@ Lepton_Deinit(&device);
 #### `Lepton_Init()`
 
 ```c
-Lepton_Error_t Lepton_Init(Lepton_t *p_Device, const Lepton_Config_t *p_Config);
+Lepton_Error_t Lepton_Init(Lepton_t *p_Device, const Lepton_Conf_t *p_Config, Lepton_Result_t *p_Status);
 ```
 
 Initialize Lepton camera with specified configuration.
@@ -164,14 +164,14 @@ Initialize Lepton camera with specified configuration.
 - `p_Device`: Pointer to device structure
 - `p_Config`: Pointer to configuration structure
 
-**Returns:** `LEPTON_OK` on success, error code otherwise
+**Returns:** `LEPTON_ERR_OK` on success, error code otherwise
 
 ---
 
 #### `Lepton_Deinit()`
 
 ```c
-Lepton_Error_t Lepton_Deinit(Lepton_t *p_Device);
+void Lepton_Deinit(Lepton_t *p_Device);
 ```
 
 Deinitialize Lepton camera and free resources.
@@ -191,7 +191,7 @@ Capture raw 14-bit thermal frame data.
 - `p_Device`: Pointer to initialized device
 - `p_Buffer`: Buffer for frame data (must be DMA-capable)
 
-**Returns:** `LEPTON_OK` on success
+**Returns:** `LEPTON_ERR_OK` on success
 
 ---
 
@@ -271,7 +271,7 @@ Component config → ESP32-Lepton Configuration
 
 ### Pin Configuration
 
-Adjust GPIO pins in your `Lepton_Config_t`:
+Adjust GPIO pins in your `Lepton_Conf_t`:
 
 ```c
 // Recommended ESP32-S3 pins
@@ -297,9 +297,7 @@ Built-in palettes for thermal visualization:
 **Usage:**
 
 ```c
-extern const Lepton_RGB_t Lepton_Palette_Iron;
-extern const Lepton_RGB_t Lepton_Palette_Rainbow;
-extern const Lepton_RGB_t Lepton_Palette_Grayscale;
+#include "lepton_palette.h"
 
 Lepton_CaptureFrameRGB(&device, rgb_buffer, &Lepton_Palette_Iron);
 ```
@@ -378,24 +376,13 @@ Lepton_Init(&device, &config);
 
 See the [`examples/`](examples/) directory:
 
-- **basic_capture**: Simple frame capture and serial output
-- **rgb_display**: Convert to RGB and display on screen
-- **temperature**: Read FPA/AUX temperatures
-- **agc_control**: Automatic gain control demo
-- **ffc_trigger**: Flat field correction example
+- **basic_init**: Basic initialization of the Lepton camera
 
 ## License
 
 This project is licensed under the **GNU General Public License v3.0**.
 
 See [LICENSE](LICENSE) for full text.
-
-**Key Points:**
-
-- ✅ Free to use, modify, and distribute
-- ✅ Source code must remain open
-- ✅ Derivative works must use GPL v3
-- ❌ No warranty provided
 
 ## Maintainer
 

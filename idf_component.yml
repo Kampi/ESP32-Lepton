@@ -8,6 +8,7 @@ tags:
   - flir
   - lepton
 targets:
+  - esp32
   - esp32s3
 maintainers:
   - "Daniel Kampert <DanielKampert@kampis-elektroecke.de>"

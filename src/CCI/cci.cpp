@@ -3,7 +3,7 @@
  *
  *  Copyright (C) Daniel Kampert, 2026
  *  Website: www.kampis-elektroecke.de
- *  File info: CCI interface implementation.
+ *  File info: Lepton 3.5 CCI interface implementation.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -66,9 +66,9 @@
  */
 #define CCI_CMD_SDK_MODULE_AGC                      0x0100
 #define CCI_CMD_AGC_GET_ENABLE                      (CCI_CMD_SDK_MODULE_AGC + 0x00)
-#define CCI_CMD_AGC_SET_POLICY                      (CCI_CMD_SDK_MODULE_AGC + 0x01)
+#define CCI_CMD_AGC_SET_ENABLE                      (CCI_CMD_SDK_MODULE_AGC + 0x01)
 #define CCI_CMD_AGC_GET_POLICY                      (CCI_CMD_SDK_MODULE_AGC + 0x04)
-#define CCI_CMD_AGC_SET_ENABLE                      (CCI_CMD_SDK_MODULE_AGC + 0x05)
+#define CCI_CMD_AGC_SET_POLICY                      (CCI_CMD_SDK_MODULE_AGC + 0x05)
 #define CCI_CMD_AGC_GET_ROI                         (CCI_CMD_SDK_MODULE_AGC + 0x08)
 #define CCI_CMD_AGC_SET_ROI                         (CCI_CMD_SDK_MODULE_AGC + 0x09)
 #define CCI_CMD_AGC_GET_HISTOGRAM_STATISTICS        (CCI_CMD_SDK_MODULE_AGC + 0x0C)
@@ -695,7 +695,7 @@ Lepton_Error_t CCI_GetRadiometry(CCI_t *p_Interface, bool *p_Enable, Lepton_Resu
     return LEPTON_ERR_OK;
 }
 
-Lepton_Error_t CCI_SetAGC(CCI_t *p_Interface, bool Enable, Lepton_Result_t *p_Status)
+Lepton_Error_t CCI_SetAGCEnabled(CCI_t *p_Interface, bool Enable, Lepton_Result_t *p_Status)
 {
     LEPTON_ERROR_CHECK(CCI_WaitBusy(p_Interface, p_Status));
     LEPTON_ERROR_CHECK(CCI_WriteRegister(p_Interface, CCI_REG_DATA_0, Enable & 0xFFFF));
@@ -706,7 +706,7 @@ Lepton_Error_t CCI_SetAGC(CCI_t *p_Interface, bool Enable, Lepton_Result_t *p_St
     return CCI_WaitBusy(p_Interface, p_Status);
 }
 
-Lepton_Error_t CCI_GetAGC(CCI_t *p_Interface, bool *p_Enable, Lepton_Result_t *p_Status)
+Lepton_Error_t CCI_GetAGCEnabled(CCI_t *p_Interface, bool *p_Enable, Lepton_Result_t *p_Status)
 {
     uint16_t Low;
     uint16_t High;
@@ -1262,6 +1262,39 @@ Lepton_Error_t CCI_GetTLinearResolution(CCI_t *p_Interface, Lepton_TLinear_Resol
     LEPTON_ERROR_CHECK(CCI_WaitBusy(p_Interface, p_Status));
 
     *p_Resolution = static_cast<Lepton_TLinear_Resolution_t>((High << 16) | Low);
+
+    return LEPTON_ERR_OK;
+}
+
+Lepton_Error_t CCI_SetAGCPolicy(CCI_t *p_Interface, Lepton_AGC_Mode_t Policy, Lepton_Result_t *p_Status)
+{
+    LEPTON_ERROR_CHECK(CCI_WaitBusy(p_Interface, p_Status));
+    LEPTON_ERROR_CHECK(CCI_WriteRegister(p_Interface, CCI_REG_DATA_0, Policy & 0xFFFF));
+    LEPTON_ERROR_CHECK(CCI_WriteRegister(p_Interface, CCI_REG_DATA_1, (Policy >> 16) & 0xFFFF));
+    LEPTON_ERROR_CHECK(CCI_WriteRegister(p_Interface, CCI_REG_DATA_LENGTH, 2));
+    LEPTON_ERROR_CHECK(CCI_WriteRegister(p_Interface, CCI_REG_COMMAND, CCI_CMD_AGC_SET_POLICY));
+
+    return CCI_WaitBusy(p_Interface, p_Status);
+}
+
+Lepton_Error_t CCI_GetAGCPolicy(CCI_t *p_Interface, Lepton_AGC_Mode_t *p_Policy, Lepton_Result_t *p_Status)
+{
+    uint16_t Low;
+    uint16_t High;
+
+    if (p_Policy == NULL) {
+        return LEPTON_ERR_INVALID_ARG;
+    }
+
+    LEPTON_ERROR_CHECK(CCI_WaitBusy(p_Interface, p_Status));
+    LEPTON_ERROR_CHECK(CCI_WriteRegister(p_Interface, CCI_REG_DATA_LENGTH, 2));
+    LEPTON_ERROR_CHECK(CCI_WriteRegister(p_Interface, CCI_REG_COMMAND, CCI_CMD_AGC_GET_POLICY));
+    LEPTON_ERROR_CHECK(CCI_WaitBusy(p_Interface, p_Status));
+    LEPTON_ERROR_CHECK(CCI_ReadRegister(p_Interface, CCI_REG_DATA_0, &Low));
+    LEPTON_ERROR_CHECK(CCI_ReadRegister(p_Interface, CCI_REG_DATA_1, &High));
+    LEPTON_ERROR_CHECK(CCI_WaitBusy(p_Interface, p_Status));
+
+    *p_Policy = static_cast<Lepton_AGC_Mode_t>((High << 16) | Low);
 
     return LEPTON_ERR_OK;
 }

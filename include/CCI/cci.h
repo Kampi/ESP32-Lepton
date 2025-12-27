@@ -3,7 +3,7 @@
  *
  *  Copyright (C) Daniel Kampert, 2026
  *  Website: www.kampis-elektroecke.de
- *  File info: CCI interface driver for Lepton.
+ *  File info: Lepton 3.5 CCI interface driver.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -156,21 +156,21 @@ Lepton_Error_t CCI_SetRadiometry(CCI_t *p_Interface, bool Enable, Lepton_Result_
  */
 Lepton_Error_t CCI_GetRadiometry(CCI_t *p_Interface, bool *p_Enable, Lepton_Result_t *p_Status = NULL);
 
-/** @brief              Enable / Disable AGC.
+/** @brief              Set the AGC enabled state.
  *  @param p_Interface  Pointer to CCI interface object
  *  @param Enable       Enable / Disable
  *  @param p_Status     (Optional) Pointer to device status
  *  @return             LEPTON_ERR_OK when successful
  */
-Lepton_Error_t CCI_SetAGC(CCI_t *p_Interface, bool Enable, Lepton_Result_t *p_Status = NULL);
+Lepton_Error_t CCI_SetAGCEnabled(CCI_t *p_Interface, bool Enable, Lepton_Result_t *p_Status = NULL);
 
-/** @brief              Get the AGC state.
+/** @brief              Get the AGC enabled state.
  *  @param p_Interface  Pointer to CCI interface object
  *  @param p_Enable     Pointer to state
  *  @param p_Status     (Optional) Pointer to device status
  *  @return             LEPTON_ERR_OK when successful
  */
-Lepton_Error_t CCI_GetAGC(CCI_t *p_Interface, bool *p_Enable, Lepton_Result_t *p_Status = NULL);
+Lepton_Error_t CCI_GetAGCEnabled(CCI_t *p_Interface, bool *p_Enable, Lepton_Result_t *p_Status = NULL);
 
 /** @brief              Enable / Disable AGC calculation.
  *  @param p_Interface  Pointer to CCI interface object
@@ -423,5 +423,21 @@ Lepton_Error_t CCI_SetTLinearResolution(CCI_t *p_Interface, Lepton_TLinear_Resol
  */
 Lepton_Error_t CCI_GetTLinearResolution(CCI_t *p_Interface, Lepton_TLinear_Resolution_t *p_Resolution,
                                         Lepton_Result_t *p_Status = NULL);
+
+/** @brief              Set the AGC policy.
+ *  @param p_Interface  Pointer to CCI interface object
+ *  @param Policy       AGC policy
+ *  @param p_Status     (Optional) Pointer to device status
+ *  @return             LEPTON_ERR_OK when successful
+ */
+Lepton_Error_t CCI_SetAGCPolicy(CCI_t *p_Interface, Lepton_AGC_Mode_t Policy, Lepton_Result_t *p_Status = NULL);
+
+/** @brief              Set the AGC policy.
+ *  @param p_Interface  Pointer to CCI interface object
+ *  @param p_Policy     Pointer to AGC policy
+ *  @param p_Status     (Optional) Pointer to device status
+ *  @return             LEPTON_ERR_OK when successful
+ */
+Lepton_Error_t CCI_GetAGCPolicy(CCI_t *p_Interface, Lepton_AGC_Mode_t *p_Policy, Lepton_Result_t *p_Status = NULL);
 
 #endif /* CCI_H_ */

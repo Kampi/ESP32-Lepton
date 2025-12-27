@@ -104,7 +104,7 @@ Lepton_Error_t Lepton_Init(Lepton_t *p_Device, const Lepton_Conf_t *const p_Init
     }
 
     if ((CCI_GetSerialNumber(&p_Device->Internal.CCI, p_Device->SerialNumber, p_Status) != LEPTON_ERR_OK) ||
-        (CCI_SetVideoSource(&p_Device->Internal.CCI, LEPTON_SOURCE_COOKED) != LEPTON_ERR_OK)) {
+        (CCI_SetVideoSource(&p_Device->Internal.CCI, LEPTON_SOURCE_COOKED, 0, p_Status) != LEPTON_ERR_OK)) {
         Error = LEPTON_ERR_FAIL;
 
         goto Lepton_Init_Error_1;
@@ -116,17 +116,6 @@ Lepton_Error_t Lepton_Init(Lepton_t *p_Device, const Lepton_Conf_t *const p_Init
         goto Lepton_Init_Error_1;
     }
     ESP_LOGD(TAG, " Lepton Radiometry: %u", p_Device->Internal.isRadiometric);
-
-    // TLinear depends on AGC
-    /*
-    val = (lep_stP->agc_set_enabled) ? CCI_RADIOMETRY_TLINEAR_DISABLED : CCI_RADIOMETRY_TLINEAR_ENABLED;
-    cci_set_radiometry_tlinear_enable_state(val);
-    rsp = cci_get_radiometry_tlinear_enable_state();
-    ESP_LOGD(TAG, "Lepton Radiometry TLinear = %d", rsp);
-    if (rsp != val) {
-        ESP_LOGE(TAG, "Lepton communication failed (%d)", rsp);
-          return ESP_FAIL;
-    }*/
 
     if ((CCI_SetTelemetry(&p_Device->Internal.CCI, p_Init->VoSPI.useTelemetry, p_Status) != LEPTON_ERR_OK) ||
         (CCI_GetTelemetry(&p_Device->Internal.CCI, &p_Device->Internal.VoSPI.useTelemetry, p_Status) != LEPTON_ERR_OK)) {
@@ -141,6 +130,12 @@ Lepton_Error_t Lepton_Init(Lepton_t *p_Device, const Lepton_Conf_t *const p_Init
     }
     ESP_LOGD(TAG, " Telemetry Position: %u", p_Device->Internal.VoSPI.TelemetryPosition);
 
+   if ((CCI_SetTLinearEnabled(&p_Device->Internal.CCI, p_Init->useTLinear, p_Status) != LEPTON_ERR_OK) ||
+       (CCI_GetTLinearEnabled(&p_Device->Internal.CCI, &p_Device->Internal.useTLinear, p_Status) != LEPTON_ERR_OK)) {
+        goto Lepton_Init_Error_1;
+    }
+    ESP_LOGD(TAG, " T-Linear enabled: %s", p_Device->Internal.useTLinear ? "true" : "false");
+
     if ((CCI_SetRadiometryTLinearAutoRes(&p_Device->Internal.CCI, p_Init->useTLinear, p_Status) != LEPTON_ERR_OK) ||
         (CCI_GetRadiometryTLinearAutoRes(&p_Device->Internal.CCI, &p_Device->Internal.isTLinearAutoRes,
                                          p_Status) != LEPTON_ERR_OK)) {
@@ -148,17 +143,23 @@ Lepton_Error_t Lepton_Init(Lepton_t *p_Device, const Lepton_Conf_t *const p_Init
     }
     ESP_LOGD(TAG, " Radiometry Auto Resolution: %s", p_Device->Internal.isTLinearAutoRes ? "true" : "false");
 
+    if ((CCI_SetAGCEnabled(&p_Device->Internal.CCI, p_Init->useAGC, p_Status) != LEPTON_ERR_OK) ||
+        (CCI_GetAGCEnabled(&p_Device->Internal.CCI, &p_Device->Internal.useAGC, p_Status) != LEPTON_ERR_OK)) {
+        goto Lepton_Init_Error_1;
+    }
+    ESP_LOGD(TAG, " AGC enabled: %s", p_Device->Internal.useAGC ? "true" : "false");
+
     if ((CCI_SetAGCCalc(&p_Device->Internal.CCI, p_Init->useAGCCalculation, p_Status) != LEPTON_ERR_OK) ||
         (CCI_GetAGCCalc(&p_Device->Internal.CCI, &p_Device->Internal.useAGCCalc, p_Status) != LEPTON_ERR_OK)) {
         goto Lepton_Init_Error_1;
     }
     ESP_LOGD(TAG, " Use AGC calculation: %s", p_Device->Internal.useAGCCalc ? "true" : "false");
 
-    if ((CCI_SetAGC(&p_Device->Internal.CCI, p_Init->useAGC, p_Status) != LEPTON_ERR_OK) ||
-        (CCI_GetAGC(&p_Device->Internal.CCI, &p_Device->Internal.useAGC, p_Status) != LEPTON_ERR_OK)) {
+    if ((CCI_SetAGCPolicy(&p_Device->Internal.CCI, p_Init->AGCPolicy, p_Status) != LEPTON_ERR_OK) ||
+        (CCI_GetAGCPolicy(&p_Device->Internal.CCI, &p_Device->Internal.AGCPolicy, p_Status) != LEPTON_ERR_OK)) {
         goto Lepton_Init_Error_1;
     }
-    ESP_LOGD(TAG, " AGC enabled: %s", p_Device->Internal.useAGC ? "true" : "false");
+    ESP_LOGD(TAG, " AGC Policy: %u", p_Device->Internal.AGCPolicy);
 
     if ((CCI_SetGainMode(&p_Device->Internal.CCI, p_Init->Gain, p_Status) != LEPTON_ERR_OK) ||
         (CCI_GetGainMode(&p_Device->Internal.CCI, &p_Device->Internal.Gain, p_Status) != LEPTON_ERR_OK)) {
@@ -168,21 +169,9 @@ Lepton_Error_t Lepton_Init(Lepton_t *p_Device, const Lepton_Conf_t *const p_Init
 
     p_Device->Internal.isInitialized = true;
 
-    Error = Lepton_SetVideoFormat(p_Device, p_Init->VideoFormat, p_Status);
     if (Error != LEPTON_ERR_OK) {
         goto Lepton_Init_Error_1;
     }
-
-    /*
-    if(p_Device->Internal.isRadiometric)
-    {
-        Error = Lepton_Emissivity(p_Device, 100);
-        if(Error != LEPTON_ERR_OK)
-        {
-            goto Lepton_Init_Error_1;
-        }
-    }
-    */
 
 #if CONFIG_LEPTON_GPIO_VSYNC_PIN >= 0
     Error = CCI_SetGPIOMode(&p_Device->Internal.CCI, LEPTON_OEM_GPIO_MODE_VSYNC, p_Status);
@@ -191,7 +180,9 @@ Lepton_Error_t Lepton_Init(Lepton_t *p_Device, const Lepton_Conf_t *const p_Init
     }
 #endif
 
-    return LEPTON_ERR_OK;
+    Error = Lepton_SetVideoFormat(p_Device, p_Init->VideoFormat, p_Status);
+
+    return Error;
 
 Lepton_Init_Error_1:
     CCI_Deinit(&p_Device->Internal.CCI);
@@ -275,7 +266,7 @@ Lepton_Error_t Lepton_SetVideoFormat(Lepton_t *p_Device, Lepton_VideoFormat_t Fo
         p_Device->Internal.VoSPI.PacketsPerFrame = 60;
 
         if (p_Device->Internal.VoSPI.useTelemetry) {
-            ESP_LOGE(TAG, "Please disable telemtry!");
+            ESP_LOGE(TAG, "Please disable telemetry!");
             return LEPTON_ERR_INVALID_ARG;
         }
     } else {
@@ -334,4 +325,49 @@ Lepton_Error_t Lepton_EnableTelemetry(Lepton_t *p_Device, bool Enable, Lepton_Re
     /* We must reinitialize the VoSPI interface to apply telemetry changes */
     VoSPI_Deinit(&p_Device->Internal.VoSPI);
     return VoSPI_Init(&p_Device->Internal.VoSPI);
+}
+
+Lepton_Error_t Lepton_GetPixelTemperature(Lepton_t *p_Device, uint16_t PixelValue, float *p_Temperature)
+{
+    float TemperatureKelvin;
+    Lepton_TLinear_Resolution_t Resolution;
+
+    if ((p_Device == NULL) || (p_Temperature == NULL)) {
+        return LEPTON_ERR_INVALID_ARG;
+    } else if (p_Device->Internal.isInitialized == false) {
+        return LEPTON_ERR_NOT_INITIALIZED;
+    } else if (p_Device->Internal.isRadiometric == false) {
+        return LEPTON_ERR_NOT_SUPPORTED;
+    } else if (p_Device->Internal.useTLinear == false) {
+        /* TLinear must be enabled for temperature conversion */
+        return LEPTON_ERR_NOT_SUPPORTED;
+    }
+
+    LEPTON_ERROR_CHECK(CCI_GetTLinearResolution(&p_Device->Internal.CCI, &Resolution));
+
+    /* Convert raw pixel value to temperature in Celsius using TLinear mode
+     * 
+     * For Lepton 3.5 radiometric with TLinear enabled:
+     * - Pixel values are in centi-Kelvin (Kelvin * 100)
+     * - Resolution depends on TLinear resolution setting:
+     *   - 0.1K resolution: value / 10 = Kelvin
+     *   - 0.01K resolution: value / 100 = Kelvin
+     * 
+     * The default TLinear resolution is 0.1K (scale factor 10)
+     */
+
+    if (Resolution == LEPTON_TLINEAR_0_01_RESOLUTION) {
+        /* With auto resolution, use 0.01K (scale factor 100) */
+        TemperatureKelvin = static_cast<float>(PixelValue) / 100.0f;
+    } else if (Resolution == LEPTON_TLINEAR_0_1_RESOLUTION) {
+        /* Standard resolution is 0.1K (scale factor 10) */
+        TemperatureKelvin = static_cast<float>(PixelValue) / 10.0f;
+    } else {
+        return LEPTON_ERR_FAIL;
+    }
+
+    /* Convert Kelvin to Celsius */
+    *p_Temperature = TemperatureKelvin - 273.15f;
+
+    return LEPTON_ERR_OK;
 }

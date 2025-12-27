@@ -358,10 +358,11 @@ Lepton_Error_t VoSPI_CaptureImage(VoSPI_t *p_Interface, uint8_t *p_BufferIndex)
 
     /* Switch to next buffer for next frame */
     p_Interface->CurrentBuffer = (p_Interface->CurrentBuffer + 1) % CONFIG_LEPTON_VOSPI_FRAME_BUFFERS;
-    p_Interface->FrameCounter++;
 
     ESP_LOGD(TAG, "Frame captured successfully to buffer %u (total: %" PRIu32 ")", p_Interface->CurrentBuffer,
              p_Interface->FrameCounter);
+
+    p_Interface->FrameCounter++;
 
     return LEPTON_ERR_OK;
 }

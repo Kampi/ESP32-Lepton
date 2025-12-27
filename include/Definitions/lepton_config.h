@@ -3,7 +3,7 @@
  *
  *  Copyright (C) Daniel Kampert, 2026
  *  Website: www.kampis-elektroecke.de
- *  File info: Configuration definitions for Lepton driver.
+ *  File info: Configuration definitions for the Lepton 3.5 driver.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,6 +34,14 @@
 #define LEPTON_VOSPI_SPI_HOST                       SPI2_HOST
 #elif defined(CONFIG_LEPTON_VOSPI_SPI3_HOST)
 #define LEPTON_VOSPI_SPI_HOST                       SPI3_HOST
+#else
+#error "No VoSPI SPI host selected in menuconfig!"
+#endif
+
+#if defined(CONFIG_LEPTON_GPIO_USE_VSYNC)
+#define LEPTON_GPIO_VSYNC_PIN                       CONFIG_LEPTON_GPIO_VSYNC_PIN
+#else
+#define LEPTON_GPIO_VSYNC_PIN                       GPIO_NUM_NC
 #endif
 
 /** @brief Default configuration object for the FLIR Lepton Thermal Imager.
@@ -44,7 +52,8 @@
                                                                                             .useTLinear = true,                                                         \
                                                                                             .Gain = static_cast<Lepton_Gain_t>(LEPTON_SYS_GAIN_MODE_AUTO),              \
                                                                                             .VideoFormat = static_cast<Lepton_VideoFormat_t>(LEPTON_FORMAT_RAW14),      \
-                                                                                            .VSync = static_cast<gpio_num_t>(CONFIG_LEPTON_GPIO_VSYNC_PIN),             \
+                                                                                            .AGCPolicy = static_cast<Lepton_AGC_Mode_t>(LEPTON_AGC_HEQ),                \
+                                                                                            .VSync = static_cast<gpio_num_t>(LEPTON_GPIO_VSYNC_PIN),                    \
                                                                                             .Reset = NULL,                                                              \
                                                                                             .PowerDown = NULL,                                                          \
                                                                                             .CCI = {                                                                    \
@@ -133,13 +142,14 @@
 
 /** @brief              Add a default I2C configuration to the Lepton configuration object.
  *  @param Conf         Lepton configuration object
+ *  @param Host         I2C host port
  *  @param SDA          I2C SDA pin
  *  @param SCL          I2C SCL pin
  *  @param EnablePullup Set to true to enable internal pullups for SDA and SCL lines
  *  @param AutoPD       Set to true to enable automatic power down management
  */
-#define LEPTON_DEFAULT_I2C(Conf, SDA, SCL, EnablePullup, AutoPD)                        do {                                                                            \
-                                                                                            Conf.CCI.I2C_Bus_Config->i2c_port = CONFIG_LEPTON_I2C_HOST;                 \
+#define LEPTON_DEFAULT_I2C(Conf, Host, SDA, SCL, EnablePullup, AutoPD)                  do {                                                                            \
+                                                                                            Conf.CCI.I2C_Bus_Config->i2c_port = Host;                                   \
                                                                                             Conf.CCI.I2C_Bus_Config->sda_io_num = SDA;                                  \
                                                                                             Conf.CCI.I2C_Bus_Config->scl_io_num = SCL;                                  \
                                                                                             Conf.CCI.I2C_Bus_Config->clk_source = I2C_CLK_SRC_DEFAULT;                  \
@@ -152,9 +162,9 @@
                                                                                             };                                                                          \
                                                                                         } while (0)
 
-/** @brief              Assign an I2C bus handle to the Lepton configuration object.
- *  @param Conf         Lepton configuration object
- *  @param Handle       I2C bus handle
+/** @brief          Assign an I2C bus handle to the Lepton configuration object.
+ *  @param Conf     Lepton configuration object
+ *  @param Handle   I2C bus handle
  */
 #define LEPTON_ASSIGN_I2C_HANDLE(Conf, Handle)                                          do {                                                                            \
                                                                                             Conf.CCI.I2C_Bus_Handle = Handle;                                           \

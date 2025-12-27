@@ -51,19 +51,19 @@ Lepton_Error_t Lepton_EnableAGC(Lepton_t *p_Device, bool Enable, Lepton_Result_t
         if (p_Device->Internal.isRadiometric) {
             LEPTON_ERROR_CHECK(CCI_SetTLinearEnabled(&p_Device->Internal.CCI, false, p_Status));
 
-            p_Device->Internal.isTLinear = false;
+            p_Device->Internal.useTLinear = false;
         }
 
-        LEPTON_ERROR_CHECK(CCI_SetAGC(&p_Device->Internal.CCI, true, p_Status));
-        LEPTON_ERROR_CHECK(CCI_GetAGC(&p_Device->Internal.CCI, &p_Device->Internal.useAGC, p_Status));
+        LEPTON_ERROR_CHECK(CCI_SetAGCEnabled(&p_Device->Internal.CCI, true, p_Status));
+        LEPTON_ERROR_CHECK(CCI_GetAGCEnabled(&p_Device->Internal.CCI, &p_Device->Internal.useAGC, p_Status));
     } else {
         if (p_Device->Internal.isRadiometric) {
             LEPTON_ERROR_CHECK(CCI_SetTLinearEnabled(&p_Device->Internal.CCI, true, p_Status));
-            LEPTON_ERROR_CHECK(CCI_GetTLinearEnabled(&p_Device->Internal.CCI, &p_Device->Internal.isTLinear, p_Status));
+            LEPTON_ERROR_CHECK(CCI_GetTLinearEnabled(&p_Device->Internal.CCI, &p_Device->Internal.useTLinear, p_Status));
         }
 
-        LEPTON_ERROR_CHECK(CCI_SetAGC(&p_Device->Internal.CCI, false, p_Status));
-        LEPTON_ERROR_CHECK(CCI_GetAGC(&p_Device->Internal.CCI, &p_Device->Internal.useAGC, p_Status));
+        LEPTON_ERROR_CHECK(CCI_SetAGCEnabled(&p_Device->Internal.CCI, false, p_Status));
+        LEPTON_ERROR_CHECK(CCI_GetAGCEnabled(&p_Device->Internal.CCI, &p_Device->Internal.useAGC, p_Status));
     }
 
     return LEPTON_ERR_OK;
@@ -171,6 +171,8 @@ Lepton_Error_t Lepton_GetSpotmeter(Lepton_t *p_Device, Lepton_Spotmeter_Float_t 
     ESP_LOGD(TAG, "Spotmeter Resolution: %u", Resolution);
     ESP_LOGD(TAG, "Spotmeter Raw Values - Value: %u, Min: %u, Max: %u, Population: %u",
              Spotmeter.Value, Spotmeter.Min, Spotmeter.Max, Spotmeter.Population);
+
+    p_Spot->Population = Spotmeter.Population;
 
     if (Resolution == LEPTON_TLINEAR_0_1_RESOLUTION) {
         ESP_LOGD(TAG, "Spotmeter values in 0.1K resolution, converting to K");

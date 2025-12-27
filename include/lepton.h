@@ -265,11 +265,24 @@ Lepton_Error_t Lepton_StartCapture(Lepton_t *p_Device, QueueHandle_t p_Queue);
  */
 Lepton_Error_t Lepton_StopCapture(Lepton_t *p_Device);
 
+/** @brief              Convert a raw 14-bit pixel value to temperature in Celsius.
+ *                      This function converts radiometric pixel values to actual temperature using TLinear mode.
+ *                      Only works with radiometric Lepton modules (3.5) and requires TLinear to be enabled.
+ *  @param p_Device     Pointer to device instance
+ *  @param PixelValue   Raw 14-bit pixel value from the thermal image
+ *  @param p_Temperature Pointer to output temperature in degrees Celsius
+ *  @return             LEPTON_ERR_OK when successful
+ *                      LEPTON_ERR_INVALID_ARG when parameters are NULL
+ *                      LEPTON_ERR_NOT_INITIALIZED when device is not initialized
+ *                      LEPTON_ERR_NOT_SUPPORTED when device is not radiometric or TLinear is disabled
+ */
+Lepton_Error_t Lepton_GetPixelTemperature(Lepton_t *p_Device, uint16_t PixelValue, float *p_Temperature);
+
 /** @brief          Convert a thermal value to RGB color using iron palette.
  *                  The function applies an iron palette pseudocolor mapping optimized for thermal imaging.
  *                  Color mapping: blue (cold) -> cyan -> green -> yellow -> red (hot)
  *  @param p_Input  Pointer to input buffer containing thermal values (14-bit per pixel)
- *  @param p_Output Pointer to RGB output buffer (must be at least 3 bytes)
+ *  @param p_Output Pointer to RGB output buffer
  *  @param Width    Image width in pixels
  *  @param Height   Image height in pixels
  *  @return         true on success, false on failure

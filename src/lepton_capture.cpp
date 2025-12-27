@@ -50,7 +50,7 @@
 
 static const char *TAG = "Lepton-Capture";
 
-#if CONFIG_LEPTON_GPIO_VSYNC_PIN >= 0
+#if defined(CONFIG_LEPTON_GPIO_USE_VSYNC)
 /** @brief
  *  @param p_Args
  */
@@ -187,7 +187,7 @@ Lepton_Error_t Lepton_StartCapture(Lepton_t *p_Device, QueueHandle_t p_Queue)
     ESP_LOGD(TAG, "Capture task created successfully");
 
     /* V-Sync is a high-level signal. So we need to add a positive edge interrupt */
-#if CONFIG_LEPTON_GPIO_VSYNC_PIN >= 0
+#if defined(CONFIG_LEPTON_GPIO_USE_VSYNC)
     gpio_set_direction(p_Device->Internal.VSync, GPIO_MODE_INPUT);
     gpio_set_pull_mode(p_Device->Internal.VSync, GPIO_PULLDOWN_ONLY);
     gpio_set_intr_type(p_Device->Internal.VSync, GPIO_INTR_POSEDGE);

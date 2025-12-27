@@ -90,9 +90,9 @@ typedef uint32_t Lepton_Error_t;
                                                                     Lepton_Error_t Error = Func;                                                    \
                                                                     if(Error != LEPTON_ERR_OK)                                                      \
                                                                     {                                                                               \
-                                                                        ESP_LOGI("Lepton_Error", "Error: 0x%X", static_cast<unsigned int>(Error));  \
+                                                                        ESP_LOGE("Lepton_Error", "Error: 0x%X", static_cast<unsigned int>(Error));  \
                                                                         return Error;                                                               \
                                                                     }                                                                               \
-                                                                } while(0);
+                                                                } while(0)
 
 #endif /* LEPTON_ERRORS_H_ */
