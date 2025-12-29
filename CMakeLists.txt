@@ -24,10 +24,4 @@ if((IDF_TARGET STREQUAL "esp32s3"))
 	list(APPEND COMPONENT_PRIV_REQUIRES esp_timer)
 endif()
 
-#add_definitions(
-#    -DESP32_LEPTON_LIB_MAJOR=1
-#    -DESP32_LEPTON_LIB_MINOR=0
-#    -DESP32_LEPTON_LIB_BUILD=0
-#)
-
 register_component()
