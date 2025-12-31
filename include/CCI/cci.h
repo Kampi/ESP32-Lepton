@@ -440,4 +440,20 @@ Lepton_Error_t CCI_SetAGCPolicy(CCI_t *p_Interface, Lepton_AGC_Mode_t Policy, Le
  */
 Lepton_Error_t CCI_GetAGCPolicy(CCI_t *p_Interface, Lepton_AGC_Mode_t *p_Policy, Lepton_Result_t *p_Status = NULL);
 
+/** @brief              Enable / Disable the video freeze.
+ *  @param p_Interface  Pointer to CCI interface object
+ *  @param Freeze       Enable or disable video freeze
+ *  @param p_Status     (Optional) Pointer to device status
+ *  @return             LEPTON_ERR_OK when successful
+ */
+Lepton_Error_t CCI_SetVideoFreeze(CCI_t *p_Interface, bool Freeze, Lepton_Result_t *p_Status);
+
+/** @brief              Get the status of the video freeze.
+ *  @param p_Interface  Pointer to CCI interface object
+ *  @param p_Freeze     Pointer to video freeze state
+ *  @param p_Status     (Optional) Pointer to device status
+ *  @return             LEPTON_ERR_OK when successful
+ */
+Lepton_Error_t CCI_GetVideoFreeze(CCI_t *p_Interface, bool *p_Freeze, Lepton_Result_t *p_Status);
+
 #endif /* CCI_H_ */
