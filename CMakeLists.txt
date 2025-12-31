@@ -1,3 +1,8 @@
+# Version information
+set(ESP32_LEPTON_LIB_MAJOR=0)
+set(ESP32_LEPTON_LIB_MINOR=0)
+set(ESP32_LEPTON_LIB_BUILD=2)
+
 set(COMPONENT_SRCS
     "src/lepton.cpp"
     "src/lepton_cci.cpp"
@@ -25,3 +30,10 @@ if((IDF_TARGET STREQUAL "esp32s3"))
 endif()
 
 register_component()
+
+# Add version definitions to the component
+target_compile_definitions(${COMPONENT_LIB} PUBLIC
+    ESP32_LEPTON_LIB_MAJOR=${ESP32_LEPTON_LIB_MAJOR}
+    ESP32_LEPTON_LIB_MINOR=${ESP32_LEPTON_LIB_MINOR}
+    ESP32_LEPTON_LIB_BUILD=${ESP32_LEPTON_LIB_BUILD}
+)
