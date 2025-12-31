@@ -123,7 +123,7 @@ static void Lepton_CaptureTask(void *p_Args)
                 /* Use overwrite to always update with latest frame */
                 xQueueOverwrite(Device->Internal.FrameQueue, &FrameBuffer);
             } else {
-                ESP_LOGW(TAG, "Frame queue is NULL!");
+                ESP_LOGE(TAG, "Frame queue is NULL!");
             }
         } else if (Error == LEPTON_ERR_FAIL) {
             /* Sync error - already handled in VoSPI_CaptureImage */
