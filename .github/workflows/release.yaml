@@ -30,6 +30,12 @@ jobs:
         with:
           fetch-depth: 0
           ref: ${{ github.ref }}
+      
+      - name: Extract version from tag
+        run: |
+          TAG_NAME="${GITHUB_REF_NAME}"
+          echo "VERSION=${TAG_NAME}" >> ${GITHUB_ENV}
+          echo "Using version from tag: ${TAG_NAME}"
 
       - name: ZIP artifact
         shell: bash
@@ -56,7 +62,7 @@ jobs:
             ${GITHUB_REF_NAME}.zip
   
   generate_outputs:
-    if: github.ref_type == 'branch'
+    if: github.ref_type == 'branch' && github.ref_name != 'main'
     runs-on: ubuntu-latest
 
     steps:
@@ -72,9 +78,17 @@ jobs:
         run: |
           BRANCH_NAME="${GITHUB_REF_NAME}"
           echo "BRANCH_NAME=${BRANCH_NAME}"
+          
+          # Extract version from branch name (format: x.y.z_Dev or x.y_Dev)
           BASE_VERSION="${BRANCH_NAME%%_*}"
-
+          
+          # Split version into components
           IFS='.' read -r MAJOR MINOR BUILD <<< "${BASE_VERSION}"
+          
+          # Handle optional BUILD number
+          if [ -z "$BUILD" ]; then
+            BUILD=0
+          fi
 
           echo "MAJOR=${MAJOR}" >> ${GITHUB_ENV}
           echo "MINOR=${MINOR}" >> ${GITHUB_ENV}
@@ -85,10 +99,13 @@ jobs:
         shell: bash
         run: |
           echo "Using version: ${{ env.VERSION }}"
-          sed -i -E "s/(LEPTON_LIB_MAJOR=)[0-9]+/\1${{ env.MAJOR }}/" CMakeLists.txt
-          sed -i -E "s/(LEPTON_LIB_MINOR=)[0-9]+/\1${{ env.MINOR }}/" CMakeLists.txt
-          sed -i -E "s/(LEPTON_LIB_BUILD=)[0-9]+/\1${{ env.BUILD }}/" CMakeLists.txt
-          sed -i "s/^## \[Unreleased\]/## [${{ env.VERSION }}] - $(date +'%Y-%m-%d')/" CHANGELOG.md
+          
+          # Update CMakeLists.txt version definitions
+          sed -i -E "s/(ESP32_LEPTON_LIB_MAJOR=)[0-9]+/\1${{ env.MAJOR }}/" CMakeLists.txt
+          sed -i -E "s/(ESP32_LEPTON_LIB_MINOR=)[0-9]+/\1${{ env.MINOR }}/" CMakeLists.txt
+          sed -i -E "s/(ESP32_LEPTON_LIB_BUILD=)[0-9]+/\1${{ env.BUILD }}/" CMakeLists.txt
+          
+          # Update idf_component.yml version field
           sed -i -E "s/^version: \".*\"/version: \"${{ env.VERSION }}\"/" idf_component.yml
 
       - name: Push outputs
@@ -96,3 +113,49 @@ jobs:
         with:
           branch: ${{ github.ref_name }}
           commit_message: Push outputs from CI/CD (${{ env.DATE }})
+  
+  release_changelog_update:
+    if: github.ref_type == 'branch' && github.ref_name == 'main'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Initialize
+        run: |
+          mkdir -p log
+          echo "DATE=$(date +'%Y-%m-%d %H:%M:%S')" >> "${GITHUB_ENV}"
+
+      - name: Get release version from CMakeLists.txt
+        run: |
+          # Extract version from CMakeLists.txt
+          MAJOR=$(grep -oP 'ESP32_LEPTON_LIB_MAJOR=\K[0-9]+' CMakeLists.txt)
+          MINOR=$(grep -oP 'ESP32_LEPTON_LIB_MINOR=\K[0-9]+' CMakeLists.txt)
+          BUILD=$(grep -oP 'ESP32_LEPTON_LIB_BUILD=\K[0-9]+' CMakeLists.txt)
+          
+          VERSION="${MAJOR}.${MINOR}.${BUILD}"
+          
+          echo "MAJOR=${MAJOR}" >> ${GITHUB_ENV}
+          echo "MINOR=${MINOR}" >> ${GITHUB_ENV}
+          echo "BUILD=${BUILD}" >> ${GITHUB_ENV}
+          echo "VERSION=${VERSION}" >> ${GITHUB_ENV}
+          
+          echo "Extracted version: ${VERSION}"
+
+      - name: Update CHANGELOG for release
+        shell: bash
+        run: |
+          echo "Updating CHANGELOG with version: ${{ env.VERSION }}"
+          
+          # Replace ## [Unreleased] with version and date
+          sed -i "s/^## \[Unreleased\]/## [${{ env.VERSION }}] - $(date +'%Y-%m-%d')/" CHANGELOG.md
+          
+          # Add new [Unreleased] section at the top
+          sed -i '/^# CHANGELOG/a \\n## [Unreleased]' CHANGELOG.md
+
+      - name: Push CHANGELOG update
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          branch: ${{ github.ref_name }}
+          commit_message: Release ${{ env.VERSION }} - Update CHANGELOG (${{ env.DATE }})

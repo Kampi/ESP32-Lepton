@@ -412,15 +412,13 @@ typedef struct {
 typedef struct {
     uint16_t Reserved: 3;                       /**< Reserved. */
     uint16_t FFC_Desired: 1;                    /**< 0 = FFC not desired, 1 = FFC desired. */
-uint16_t FFC_State:
-    2;                      /**< 00 = FFC never commanded, 01 = FFC imminent, 10 = FFC in progress, 11 = FFC complete. */
+    uint16_t FFC_State:2;                       /**< 00 = FFC never commanded, 01 = FFC imminent, 10 = FFC in progress, 11 = FFC complete. */
     uint16_t Reserved1: 6;                      /**< Reserved. */
-    uint16_t AGC_State: 1;                      /**< 0 = AGC ndisabled, 1 = AGC enabled. */
+    uint16_t AGC_State: 1;                      /**< 0 = AGC disabled, 1 = AGC enabled. */
     uint16_t Reserved2: 2;                      /**< Reserved. */
-uint16_t Shutter_Lockout:
-    1;                /**< 0 = Shutter not locked out, 1 = Shutter locked out (outside of valid temperature range, -10°C to 80°C)). */
+    uint16_t Shutter_Lockout:1;                 /**< 0 = Shutter not locked out, 1 = Shutter locked out (outside of valid temperature range, -10°C to 80°C)). */
     uint16_t Reserved3: 4;                      /**< Reserved. */
-    uint16_t Overtemp_Shutdown: 1;              /**< Goes true 10 seconds before shutdown. */
+    uint16_t Overtemp_Shutdown:1;               /**< Goes true 10 seconds before shutdown. */
     uint16_t Reserved4: 11;                     /**< Reserved. */
 } __attribute__((packed)) Lepton_TelemetryStatus_t;
 
