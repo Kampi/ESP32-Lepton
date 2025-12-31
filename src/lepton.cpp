@@ -90,10 +90,10 @@ Lepton_Error_t Lepton_Init(Lepton_t *p_Device, const Lepton_Conf_t *const p_Init
     }
 
     LEPTON_ERROR_CHECK(CCI_GetPartNumber(&p_Device->Internal.CCI, p_Device->PartNumber, p_Status));
-    if (strncmp(p_Device->PartNumber, "500-0771-01", 32) == 0) {
+    if (strncmp(p_Device->PartNumber, "500-0771-01", sizeof(p_Device->PartNumber)) == 0) {
         ESP_LOGD(TAG, "  Radiometric Lepton 3.5");
         p_Device->Internal.isRadiometric = true;
-    } else if (strncmp(p_Device->PartNumber, "500-0726-01", 32) == 0) {
+    } else if (strncmp(p_Device->PartNumber, "500-0726-01", sizeof(p_Device->PartNumber)) == 0) {
         ESP_LOGD(TAG, "  Non-radiometric Lepton 3.0");
         p_Device->Internal.isRadiometric = false;
     } else {
@@ -109,6 +109,8 @@ Lepton_Error_t Lepton_Init(Lepton_t *p_Device, const Lepton_Conf_t *const p_Init
 
         goto Lepton_Init_Error_1;
     }
+
+    LEPTON_ERROR_CHECK(CCI_GetSoftwareVersion(&p_Device->Internal.CCI, &p_Device->SoftwareVersion, p_Status));
 
     ESP_LOGD(TAG, "Sync configuration with Lepton:");
     if ((CCI_SetRadiometry(&p_Device->Internal.CCI, p_Device->Internal.isRadiometric, p_Status) != LEPTON_ERR_OK) ||
@@ -166,6 +168,20 @@ Lepton_Error_t Lepton_Init(Lepton_t *p_Device, const Lepton_Conf_t *const p_Init
         goto Lepton_Init_Error_1;
     }
     ESP_LOGD(TAG, " Gain Mode: %u", p_Device->Internal.Gain);
+
+    if (CCI_GetVideoFreeze(&p_Device->Internal.CCI, &p_Device->Internal.isVideoFreezeEnabled, p_Status) != LEPTON_ERR_OK) {
+        goto Lepton_Init_Error_1;
+    }
+    ESP_LOGD(TAG, " Video Freeze enabled: %s", p_Device->Internal.isVideoFreezeEnabled ? "true" : "false");
+
+    if (p_Device->Internal.isVideoFreezeEnabled) {
+        ESP_LOGD(TAG, " Disabling Video Freeze...");
+        if (CCI_SetVideoFreeze(&p_Device->Internal.CCI, false, p_Status) != LEPTON_ERR_OK) {
+            goto Lepton_Init_Error_1;
+        }
+
+        p_Device->Internal.isVideoFreezeEnabled = false;
+    }
 
     p_Device->Internal.isInitialized = true;
 

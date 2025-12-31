@@ -131,6 +131,7 @@ void Lepton_HardReset(Lepton_t *p_Device) __attribute__((weak));
 void Lepton_EnablePowerDown(Lepton_t *p_Device, bool Enable) __attribute__((weak));
 
 /** @brief          Set the video output format.
+ *                  NOTE: This function triggers a resynchronization of the VoSPI interface.
  *  @param p_Device Pointer to device instance
  *  @param Format   Video format
  *  @param p_Status (Optional) Pointer to device status
@@ -251,9 +252,22 @@ Lepton_Error_t Lepton_SetTLinearResolution(Lepton_t *p_Device, Lepton_TLinear_Re
 Lepton_Error_t Lepton_GetTLinearResolution(Lepton_t *p_Device, Lepton_TLinear_Resolution_t *p_Resolution,
                                            Lepton_Result_t *p_Status = NULL);
 
+/** @brief          Enable / Disable video freeze.
+ *  @param p_Device Pointer to device instance
+ *  @param Freeze   true to enable video freeze, false to disable
+ *  @param p_Status (Optional) Pointer to device status
+ *  @return         LEPTON_ERR_OK when successful
+ */
+Lepton_Error_t Lepton_FreezeVideo(Lepton_t *p_Device, bool Freeze, Lepton_Result_t *p_Status = NULL);
+
 /** @brief          Start the capture task to read new frames from the camera.
  *  @param p_Device Pointer to device instance
- *  @param p_Queue  Queue handle for frame ready events
+ *  @param p_Queue  Queue handle to reveive frames from the capture task.
+ *                  The queue must uses the type Lepton_FrameBuffer_t that contains a pointer to the frame
+ *                  buffer which becomes ready. Make sure the queue is large enough to hold multiple
+ *                  frames or process the frames fast enough to avoid frame drops. You can use
+ *                  If required, you can use CONFIG_LEPTON_VOSPI_FRAME_BUFFERS to increase the amount of
+ *                  frame buffers in the VoSPI driver to reduce the chance of frame drops.
  *  @return         LEPTON_ERR_OK when successful
  *                  LEPTON_ERR_NO_MEM when either the capture task nor the capture ISR can be initialized
  */

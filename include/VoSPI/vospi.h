@@ -44,7 +44,7 @@
  */
 #define LEPTON_VOSPI_SEGMENTS_PER_FRAME         4
 
-/** @brief              Initialise the VoSPI interface.
+/** @brief              Initialize the VoSPI interface and trigger a resynchronization.
  *  @param p_Interface  Pointer to VoSPI interface object
  *  @return             LEPTON_ERR_OK when successful
  *                      LEPTON_ERR_FAIL when the initialization has failed
@@ -52,7 +52,7 @@
  */
 Lepton_Error_t VoSPI_Init(VoSPI_t *p_Interface);
 
-/** @brief              Deinitialise the VoSPI interface.
+/** @brief              Deinitialize the VoSPI interface.
  *  @param p_Interface  Pointer to VoSPI interface object
  *  @return             LEPTON_ERR_OK when successful
  */

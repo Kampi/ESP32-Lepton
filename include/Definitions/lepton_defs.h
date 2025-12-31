@@ -77,7 +77,7 @@ typedef int32_t (*I2C_Read_t)(i2c_master_dev_handle_t *p_Dev_Handle, uint8_t *p_
  */
 typedef int32_t (*I2C_Deinit_t)(i2c_master_bus_handle_t Bus_handle);
 
-/** @brief Lepton error codes from the software driver (Chapter 2.3 – FLIR LEPTON Software IDD).
+/** @brief Lepton error codes from the software driver (Chapter 2.3 - FLIR LEPTON Software IDD).
  */
 typedef enum {
     LEPTON_ERR_OK                       = 0,    /**< Camera ok. */
@@ -127,14 +127,14 @@ typedef enum {
     LEPTON_UNDEFINED_ERROR_CODE         = -127  /**< Undefined error. */
 } Lepton_Result_t;
 
-/** @brief TLinear resolution definitions (Chapter 4.8.10 – FLIR LEPTON Software IDD).
+/** @brief TLinear resolution definitions (Chapter 4.8.10 - FLIR LEPTON Software IDD).
  */
 typedef enum {
     LEPTON_TLINEAR_0_1_RESOLUTION = 0,      /**< Scale factor 10. */
     LEPTON_TLINEAR_0_01_RESOLUTION,         /**< Scale factor 100. */
 } Lepton_TLinear_Resolution_t;
 
-/** @brief Shutter position definitions (Chapter 4.5.15 – FLIR LEPTON Software IDD).
+/** @brief Shutter position definitions (Chapter 4.5.15 - FLIR LEPTON Software IDD).
  */
 typedef enum {
     LEPTON_SHUTTER_POS_UNKNOWN = -1,            /**< Unknown shutter position. */
@@ -145,7 +145,7 @@ typedef enum {
     LEPTON_SHUTTER_POS_END,                     /**< End of shutter positions. */
 } Lepton_ShutterPos_t;
 
-/** @brief GPIO mode definitions (Chapter 4.7.15 – FLIR LEPTON Software IDD).
+/** @brief GPIO mode definitions (Chapter 4.7.15 - FLIR LEPTON Software IDD).
  */
 typedef enum {
     LEPTON_OEM_GPIO_MODE_GPIO,                  /**< General Purpose Input/Output mode. */
@@ -156,7 +156,7 @@ typedef enum {
     LEPTON_OEM_GPIO_MODE_VSYNC,                 /**< V-Sync mode. */
 } Lepton_GPIO_t;
 
-/** @brief Telemetry location options definitions (Chapter 4.5.8 – FLIR LEPTON Software IDD).
+/** @brief Telemetry location options definitions (Chapter 4.5.8 - FLIR LEPTON Software IDD).
  */
 typedef enum {
     LEPTON_TELEMETRY_LOCATION_HEADER,           /**< Place the telemetry at the image header. */
@@ -171,14 +171,14 @@ typedef enum {
     LEPTON_SYS_GAIN_MODE_AUTO                   /**< Automatic gain mode. */
 } Lepton_Gain_t;
 
-/** @brief Video output format definitions (Chapter 4.6.8 – FLIR LEPTON Software IDD).
+/** @brief Video output format definitions (Chapter 4.6.8 - FLIR LEPTON Software IDD).
  */
 typedef enum {
     LEPTON_FORMAT_RGB888    = 3,                /**< 24-bit color mode. */
     LEPTON_FORMAT_RAW14     = 7,                /**< 14-bit raw data. */
 } Lepton_VideoFormat_t;
 
-/** @brief Video output source definitions (Chapter 4.7.8 – FLIR LEPTON Software IDD).
+/** @brief Video output source definitions (Chapter 4.7.8 - FLIR LEPTON Software IDD).
  */
 typedef enum {
     LEPTON_SOURCE_RAW       = 0,                /*< Before video processing. */
@@ -190,14 +190,14 @@ typedef enum {
     LEPTON_SOURCE_RAMP_CUSTOM,                  /*< Software Ramp pattern - Uses custom settings. */
 } Lepton_VideoSource_t;
 
-/** @brief AGC Policy definitions (Chapter 4.4.2 – FLIR LEPTON Software IDD).
+/** @brief AGC Policy definitions (Chapter 4.4.2 - FLIR LEPTON Software IDD).
  */
 typedef enum {
     LEPTON_AGC_LINEAR   = 0,                    /**< Linear AGC mode. */
     LEPTON_AGC_HEQ,                             /**< Histogram Equalization AGC mode. */
 } Lepton_AGC_Mode_t;
 
-/** @brief Radiometry Flux Linear parameter (Chapter 4.8.7 – FLIR LEPTON Software IDD).
+/** @brief Radiometry Flux Linear parameter (Chapter 4.8.7 - FLIR LEPTON Software IDD).
  */
 typedef struct {
     uint16_t sceneEmissivity;                   /**< */
@@ -210,7 +210,7 @@ typedef struct {
     uint16_t TReflK;                            /**< */
 } Lepton_FluxLinearParams_t;
 
-/** @brief AGC Histogram statistics (Chapter 4.4.4 – FLIR LEPTON Software IDD).
+/** @brief AGC Histogram statistics (Chapter 4.4.4 - FLIR LEPTON Software IDD).
  */
 typedef struct {
     uint32_t Intensity_Min;                     /**< Minimum intensity value. */
@@ -229,7 +229,7 @@ typedef struct {
     uint16_t *Telemetry_Buffer;                 /**< Pointer to memory location for telemetry buffer. */
 } Lepton_FrameBuffer_t;
 
-/** @brief Spotmeter object definition (Chapter 4.8.13 – FLIR LEPTON Software IDD).
+/** @brief Spotmeter object definition (Chapter 4.8.13 - FLIR LEPTON Software IDD).
  */
 typedef struct {
     uint16_t Value;                             /**< Spotmeter temperature value in Kelvin. */
@@ -238,7 +238,7 @@ typedef struct {
     uint16_t Population;                        /**< Number of pixels within the spotmeter ROI. */
 } Lepton_Spotmeter_t;
 
-/** @brief Spotmeter object definition (Chapter 4.8.13 – FLIR LEPTON Software IDD) with float values.
+/** @brief Spotmeter object definition (Chapter 4.8.13 - FLIR LEPTON Software IDD) with float values.
  */
 typedef struct {
     float Value;                                /**< Spotmeter temperature value in Kelvin. */
@@ -247,7 +247,7 @@ typedef struct {
     float Population;                           /**< Number of pixels within the spotmeter ROI. */
 } Lepton_Spotmeter_Float_t;
 
-/** @brief Image scene statistics object definition (Chapter 4.5.12 – FLIR LEPTON Software IDD).
+/** @brief Image scene statistics object definition (Chapter 4.5.12 - FLIR LEPTON Software IDD).
  */
 typedef struct {
     uint16_t MeanIntensity;                     /**< Mean intensity of the image scene. */
@@ -265,7 +265,7 @@ typedef struct {
     uint16_t End_Row;                           /**< End row of the ROI. */
 } Lepton_ROI_t;
 
-/** @brief Pixel definition for custom look-up table (Chapter 4.6.2 – FLIR LEPTON Software IDD).
+/** @brief Pixel definition for custom look-up table (Chapter 4.6.2 - FLIR LEPTON Software IDD).
  */
 typedef struct {
     uint8_t Reserved;                           /**< Reserved. */
@@ -274,13 +274,13 @@ typedef struct {
     uint8_t B;                                  /**< Blue pixel. */
 } Lepton_LookUp_Pixel_t;
 
-/** @brief Custom look-up table definition (Chapter 4.6.2 – FLIR LEPTON Software IDD).
+/** @brief Custom look-up table definition (Chapter 4.6.2 - FLIR LEPTON Software IDD).
  */
 typedef struct {
     Lepton_LookUp_Pixel_t Binary[256];          /**< Look-Up table data. */
 } Lepton_LookUp_t;
 
-/** @brief Lepton Thermal Camera software version object definition (Chapter 4.7.5 – FLIR LEPTON Software IDD).
+/** @brief Lepton Thermal Camera software revision object definition (Chapter 4.7.5 - FLIR LEPTON Software IDD).
  */
 typedef struct {
     uint8_t gpp_major;                          /**< */
@@ -352,6 +352,8 @@ typedef struct {
                                                      NOTE: Managed by the device driver. */
     uint8_t SerialNumber[8];                    /**< Device serial number.
                                                      NOTE: Managed by the device driver. */
+    Lepton_Version_t SoftwareVersion;           /**< Device software version.
+                                                     NOTE: Managed by the device driver. */
     struct {
         GPIO_Set Reset;                         /**< Function pointer to control the reset line.
                                                      NOTE: Can be set to NULL to leave it unused. */
@@ -375,6 +377,8 @@ typedef struct {
         bool isAutoRes;                         /**< true when AutoRes mode is enabled.
                                                      NOTE: Managed by the device driver. */
         bool isTLinearAutoRes;                  /**< true when TLinear AutoRes mode is enabled.
+                                                     NOTE: Managed by the device driver. */
+        bool isVideoFreezeEnabled;              /**< true when Video Freeze is enabled.
                                                      NOTE: Managed by the device driver. */
         Lepton_Gain_t Gain;                     /**< Gain setting for the Lepton sensor.
                                                       NOTE: Managed by the device driver. */
@@ -407,7 +411,7 @@ typedef struct {
     VoSPI_t VoSPI;                              /**< VoSPI initialization object used by the camera driver. */
 } Lepton_Conf_t;
 
-/** @brief Lepton Telemetry Data (Table 3 – Engineering Datasheet Rev. 200).
+/** @brief Lepton Telemetry Data (Table 3 - Engineering Datasheet Rev. 200).
  */
 typedef struct {
     uint16_t Reserved: 3;                       /**< Reserved. */
@@ -422,7 +426,7 @@ typedef struct {
     uint16_t Reserved4: 11;                     /**< Reserved. */
 } __attribute__((packed)) Lepton_TelemetryStatus_t;
 
-/** @brief Lepton Telemetry Data (Table 2 – Engineering Datasheet Rev. 200).
+/** @brief Lepton Telemetry Data (Table 2 - Engineering Datasheet Rev. 200).
  */
 typedef struct {
     /* -------- Row A -------- */
