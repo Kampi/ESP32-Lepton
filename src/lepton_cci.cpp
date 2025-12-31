@@ -237,3 +237,20 @@ Lepton_Error_t Lepton_GetTLinearResolution(Lepton_t *p_Device, Lepton_TLinear_Re
 
     return CCI_GetTLinearResolution(&p_Device->Internal.CCI, p_Resolution, p_Status);
 }
+
+Lepton_Error_t Lepton_FrezeVideo(Lepton_t *p_Device, bool Freeze, Lepton_Result_t *p_Status)
+{
+    if (p_Device == NULL) {
+        return LEPTON_ERR_INVALID_ARG;
+    } else if (p_Device->Internal.isInitialized == false) {
+        return LEPTON_ERR_NOT_INITIALIZED;
+    } else if (p_Device->Internal.isVideoFreezeEnabled == Freeze) {
+        return LEPTON_ERR_OK;
+    }
+
+    LEPTON_ERROR_CHECK(CCI_SetVideoFreeze(&p_Device->Internal.CCI, Freeze, p_Status));
+
+    p_Device->Internal.isVideoFreezeEnabled = Freeze;
+
+    return LEPTON_ERR_OK;
+}

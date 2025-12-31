@@ -1298,3 +1298,36 @@ Lepton_Error_t CCI_GetAGCPolicy(CCI_t *p_Interface, Lepton_AGC_Mode_t *p_Policy,
 
     return LEPTON_ERR_OK;
 }
+
+Lepton_Error_t CCI_SetVideoFreeze(CCI_t *p_Interface, bool Freeze, Lepton_Result_t *p_Status)
+{
+    LEPTON_ERROR_CHECK(CCI_WaitBusy(p_Interface, p_Status));
+    LEPTON_ERROR_CHECK(CCI_WriteRegister(p_Interface, CCI_REG_DATA_0, Freeze & 0xFFFF));
+    LEPTON_ERROR_CHECK(CCI_WriteRegister(p_Interface, CCI_REG_DATA_1, (Freeze >> 16) & 0xFFFF));
+    LEPTON_ERROR_CHECK(CCI_WriteRegister(p_Interface, CCI_REG_DATA_LENGTH, 2));
+    LEPTON_ERROR_CHECK(CCI_WriteRegister(p_Interface, CCI_REG_COMMAND, CCI_CMD_VID_SET_VIDEO_FREEZE));
+
+    return CCI_WaitBusy(p_Interface, p_Status);
+}
+
+Lepton_Error_t CCI_GetVideoFreeze(CCI_t *p_Interface, bool *p_Freeze, Lepton_Result_t *p_Status)
+{
+    uint16_t Low;
+    uint16_t High;
+
+    if (p_Freeze == NULL) {
+        return LEPTON_ERR_INVALID_ARG;
+    }
+
+    LEPTON_ERROR_CHECK(CCI_WaitBusy(p_Interface, p_Status));
+    LEPTON_ERROR_CHECK(CCI_WriteRegister(p_Interface, CCI_REG_DATA_LENGTH, 2));
+    LEPTON_ERROR_CHECK(CCI_WriteRegister(p_Interface, CCI_REG_COMMAND, CCI_CMD_VID_GET_VIDEO_FREEZE));
+    LEPTON_ERROR_CHECK(CCI_WaitBusy(p_Interface, p_Status));
+    LEPTON_ERROR_CHECK(CCI_ReadRegister(p_Interface, CCI_REG_DATA_0, &Low));
+    LEPTON_ERROR_CHECK(CCI_ReadRegister(p_Interface, CCI_REG_DATA_1, &High));
+    LEPTON_ERROR_CHECK(CCI_WaitBusy(p_Interface, p_Status));
+
+    *p_Freeze = static_cast<bool>((High << 16) | Low);
+
+    return LEPTON_ERR_OK;
+}
