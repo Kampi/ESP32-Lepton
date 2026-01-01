@@ -41,6 +41,7 @@ static const char *TAG = "Lepton";
 
 Lepton_Error_t Lepton_Init(Lepton_t *p_Device, const Lepton_Conf_t *const p_Init, Lepton_Result_t *p_Status)
 {
+    bool useTelemetry;
     Lepton_Error_t Error;
 
     if ((p_Device == NULL) || (p_Init == NULL) || (p_Init->CCI.I2C_Read == NULL) || (p_Init->CCI.I2C_Write == NULL)) {
@@ -119,7 +120,13 @@ Lepton_Error_t Lepton_Init(Lepton_t *p_Device, const Lepton_Conf_t *const p_Init
     }
     ESP_LOGD(TAG, " Lepton Radiometry: %u", p_Device->Internal.isRadiometric);
 
-    if ((CCI_SetTelemetry(&p_Device->Internal.CCI, p_Init->VoSPI.useTelemetry, p_Status) != LEPTON_ERR_OK) ||
+    /* Make sure telemetry is disabled when using RGB888 format */
+    useTelemetry = p_Init->VoSPI.useTelemetry;
+    if (p_Init->VideoFormat == LEPTON_FORMAT_RGB888) {
+        useTelemetry = false;
+    }
+
+    if ((CCI_SetTelemetry(&p_Device->Internal.CCI, useTelemetry, p_Status) != LEPTON_ERR_OK) ||
         (CCI_GetTelemetry(&p_Device->Internal.CCI, &p_Device->Internal.VoSPI.useTelemetry, p_Status) != LEPTON_ERR_OK)) {
         goto Lepton_Init_Error_1;
     }
