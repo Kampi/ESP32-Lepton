@@ -38,7 +38,7 @@
 #error "No VoSPI SPI host selected in menuconfig!"
 #endif
 
-#if defined(CONFIG_LEPTON_GPIO_USE_VSYNC)
+#ifdef CONFIG_LEPTON_GPIO_USE_VSYNC
 #define LEPTON_GPIO_VSYNC_PIN                       CONFIG_LEPTON_GPIO_VSYNC_PIN
 #else
 #define LEPTON_GPIO_VSYNC_PIN                       GPIO_NUM_NC

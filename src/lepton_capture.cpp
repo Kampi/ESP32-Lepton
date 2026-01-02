@@ -44,15 +44,15 @@
 
 #ifndef CONFIG_LEPTON_CAPTURE_TASK_CORE_AFFINITY
 #ifndef CONFIG_LEPTON_CAPTURE_TASK_CORE
-#define CONFIG_LEPTON_CAPTURE_TASK_CORE             1
+#define CONFIG_LEPTON_CAPTURE_TASK_CORE                 1
 #endif
 #endif
 
 static const char *TAG = "Lepton-Capture";
 
-#if defined(CONFIG_LEPTON_GPIO_USE_VSYNC)
-/** @brief
- *  @param p_Args
+#ifdef CONFIG_LEPTON_GPIO_USE_VSYNC
+/** @brief          VSync interrupt handler.
+ *  @param p_Args   Pointer to task arguments
  */
 #ifdef CONFIG_LEPTON_VSYNC_PLACE_IRAM
 static void IRAM_ATTR Lepton_VSync_ISR_Handler(void *p_Args)
@@ -89,9 +89,16 @@ static void Lepton_CaptureTask(void *p_Args)
 
         esp_task_wdt_reset();
 
+#ifdef CONFIG_LEPTON_GPIO_USE_VSYNC
+        uint32_t ulNotificationValue;
+        if (xTaskNotifyWait(0x00, 0xFFFFFFFF, &ulNotificationValue, portMAX_DELAY) != pdTRUE) {
+            ESP_LOGW(TAG, "VSync wait failed!");
+            continue;
+        }
+#endif
+
         /* Capture the frame */
         Error = VoSPI_CaptureImage(&Device->Internal.VoSPI, &BufferIndex);
-
         if (Error == LEPTON_ERR_OK) {
             ConsecutiveErrors = 0;
 
@@ -177,17 +184,17 @@ Lepton_Error_t Lepton_StartCapture(Lepton_t *p_Device, QueueHandle_t p_Queue)
 #endif
 
     if (p_Device->Internal.CapHandle == NULL) {
-        Error = LEPTON_ERR_NO_MEM;
         ESP_LOGE(TAG, "Failed to create capture task!");
         p_Device->Internal.VoSPI.isCapturing = false;
         p_Device->Internal.FrameQueue = NULL;
+        Error = LEPTON_ERR_NO_MEM;
         goto Lepton_StartCapture_Error_1;
     }
 
     ESP_LOGD(TAG, "Capture task created successfully");
 
     /* V-Sync is a high-level signal. So we need to add a positive edge interrupt */
-#if defined(CONFIG_LEPTON_GPIO_USE_VSYNC)
+#ifdef CONFIG_LEPTON_GPIO_USE_VSYNC
     gpio_set_direction(p_Device->Internal.VSync, GPIO_MODE_INPUT);
     gpio_set_pull_mode(p_Device->Internal.VSync, GPIO_PULLDOWN_ONLY);
     gpio_set_intr_type(p_Device->Internal.VSync, GPIO_INTR_POSEDGE);
@@ -200,7 +207,6 @@ Lepton_Error_t Lepton_StartCapture(Lepton_t *p_Device, QueueHandle_t p_Queue)
 
     /* Hook ISR handler for specific GPIO */
     gpio_isr_handler_add(p_Device->Internal.VSync, Lepton_VSync_ISR_Handler, p_Device->Internal.CapHandle);
-#error "Untested"
 #endif
 
     ESP_LOGD(TAG, "Capture started successfully");
