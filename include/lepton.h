@@ -48,6 +48,23 @@
 extern "C" {
 #endif
 
+/** @brief          Return the current video format.
+ *  @param p_Device Pointer to device instance
+ *  @param p_Format Pointer to output video format
+ *  @return         LEPTON_ERR_OK when successful
+ */
+inline __attribute__((always_inline)) Lepton_Error_t Lepton_GetVideoFormat(Lepton_t *p_Device, Lepton_VideoFormat_t *p_Format)
+{
+    if (p_Device == NULL || p_Format == NULL) {
+        return LEPTON_ERR_INVALID_ARG;
+    }
+
+    *p_Format = p_Device->Internal.VideoFormat;
+
+    return LEPTON_ERR_OK;
+}
+
+
 /** @brief          Convert a temperature from Kelvin (in Lepton format) into degree Celsius.
  *                  The Lepton sensor returns temperature values in centi-Kelvin (Kelvin * 100).
  *  @param Kelvin   Temperature in Lepton format (centi-Kelvin, i.e., Kelvin * 100)

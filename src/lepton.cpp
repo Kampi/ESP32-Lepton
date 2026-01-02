@@ -272,21 +272,18 @@ Lepton_Error_t Lepton_SetVideoFormat(Lepton_t *p_Device, Lepton_VideoFormat_t Fo
         return LEPTON_ERR_FAIL;
     }
 
+    p_Device->Internal.VoSPI.ImageWidth = 160;
+    p_Device->Internal.VoSPI.ImageHeight = 120;
+    p_Device->Internal.VoSPI.PacketsPerFrame = 60;
+
     if (Format == LEPTON_FORMAT_RAW14) {
-        p_Device->Internal.VoSPI.ImageWidth = 160;
-        p_Device->Internal.VoSPI.ImageHeight = 120;
         p_Device->Internal.VoSPI.BytesPerPixel = 2;
 
         if (p_Device->Internal.VoSPI.useTelemetry) {
             p_Device->Internal.VoSPI.PacketsPerFrame = 61;
-        } else {
-            p_Device->Internal.VoSPI.PacketsPerFrame = 60;
         }
     } else if (Format == LEPTON_FORMAT_RGB888) {
-        p_Device->Internal.VoSPI.ImageWidth = 240;
-        p_Device->Internal.VoSPI.ImageHeight = 120;
         p_Device->Internal.VoSPI.BytesPerPixel = 3;
-        p_Device->Internal.VoSPI.PacketsPerFrame = 60;
 
         if (p_Device->Internal.VoSPI.useTelemetry) {
             ESP_LOGE(TAG, "Please disable telemetry!");
@@ -297,11 +294,11 @@ Lepton_Error_t Lepton_SetVideoFormat(Lepton_t *p_Device, Lepton_VideoFormat_t Fo
         return LEPTON_ERR_INVALID_ARG;
     }
 
-    ESP_LOGD(TAG, "Video Format: %u", p_Device->Internal.VideoFormat);
-    ESP_LOGD(TAG, " Width: %u", p_Device->Internal.VoSPI.ImageWidth);
-    ESP_LOGD(TAG, " Height: %u", p_Device->Internal.VoSPI.ImageHeight);
-    ESP_LOGD(TAG, " Bytes Per Pixel: %u", p_Device->Internal.VoSPI.BytesPerPixel);
-    ESP_LOGD(TAG, " Packets Per Frame: %u", p_Device->Internal.VoSPI.PacketsPerFrame);
+    ESP_LOGI(TAG, "Video Format: %u", p_Device->Internal.VideoFormat);
+    ESP_LOGI(TAG, " Width: %u", p_Device->Internal.VoSPI.ImageWidth);
+    ESP_LOGI(TAG, " Height: %u", p_Device->Internal.VoSPI.ImageHeight);
+    ESP_LOGI(TAG, " Bytes Per Pixel: %u", p_Device->Internal.VoSPI.BytesPerPixel);
+    ESP_LOGI(TAG, " Packets Per Frame: %u", p_Device->Internal.VoSPI.PacketsPerFrame);
 
     /* We must reinitialize the VoSPI interface to apply images changes */
     VoSPI_Deinit(&p_Device->Internal.VoSPI);

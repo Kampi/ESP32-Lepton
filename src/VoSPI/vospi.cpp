@@ -44,9 +44,15 @@ static esp_err_t VoSPI_ReadPacket(VoSPI_t *p_Interface, uint16_t *p_Header, uint
     uint8_t *RawPacket;
     esp_err_t Error;
     spi_transaction_t Trans;
+    size_t PacketSize;
+
+    /* Calculate packet size based on format:
+     * RAW14: 4 bytes header/CRC + 160 bytes payload (80 pixels × 2 bytes)
+     * RGB888: 4 bytes header/CRC + 240 bytes payload (80 pixels × 3 bytes) */
+    PacketSize = 4 + (VOSPI_PIXELS_PER_PACKET * p_Interface->BytesPerPixel);
 
     memset(&Trans, 0, sizeof(Trans));
-    Trans.rxlength = (p_Interface->ImageWidth + 4) * 8;  /* Bits */
+    Trans.rxlength = PacketSize * 8;  /* Bits */
     Trans.rx_buffer = p_Interface->Packet;
     Trans.tx_buffer = NULL;
 
@@ -73,6 +79,7 @@ static esp_err_t VoSPI_ReadPacket(VoSPI_t *p_Interface, uint16_t *p_Header, uint
 Lepton_Error_t VoSPI_Init(VoSPI_t *p_Interface)
 {
     Lepton_Error_t Error;
+    size_t PacketBufferSize;
 
     if (p_Interface == NULL) {
         return LEPTON_ERR_INVALID_ARG;
@@ -92,9 +99,11 @@ Lepton_Error_t VoSPI_Init(VoSPI_t *p_Interface)
         goto VoSPI_Init_Error_1;
     }
 
-    /* Allocate DMA-capable packet buffer (4 bytes header + 160 / 240 bytes payload) */
-    p_Interface->Packet = reinterpret_cast<uint16_t *>(
-                              heap_caps_malloc(p_Interface->ImageWidth + 4, MALLOC_CAP_DMA));
+    /* Allocate DMA-capable packet buffer (4 bytes header/CRC + payload)
+     * RAW14: 4 + 160 = 164 bytes
+     * RGB888: 4 + 240 = 244 bytes */
+    PacketBufferSize = 4 + (VOSPI_PIXELS_PER_PACKET * p_Interface->BytesPerPixel);
+    p_Interface->Packet = reinterpret_cast<uint16_t *>(heap_caps_malloc(PacketBufferSize, MALLOC_CAP_DMA));
     if (p_Interface->Packet == NULL) {
         ESP_LOGE(TAG, "Failed to allocate DMA packet buffer!");
         Error = LEPTON_ERR_NO_MEM;
@@ -334,13 +343,23 @@ Lepton_Error_t VoSPI_CaptureImage(VoSPI_t *p_Interface, uint8_t *p_BufferIndex)
                 }
                 /* Otherwise use the regular calculation */
                 else {
+                    p_Interface->Telemetry_Buffer[p_Interface->CurrentBuffer] = NULL;
                     FrameOffset = ((Segment - 1) * p_Interface->PacketsPerFrame + packet) * VOSPI_PIXELS_PER_PACKET;
                     Dest = &p_Interface->Image_Buffer[p_Interface->CurrentBuffer][FrameOffset];
                 }
 
-                /* Copy packet data from the SPI buffer to the output buffer (big-endian to little-endian conversion) */
-                for (size_t i = 0; i < VOSPI_PIXELS_PER_PACKET; i++) {
-                    Dest[i] = (static_cast<uint16_t>(PacketData[i * 2]) << 8) | PacketData[i * 2 + 1];
+                /* Copy packet data from the SPI buffer to the output buffer */
+                if (p_Interface->BytesPerPixel == 3) {
+                    /* RGB888 mode: Data is already in byte format (R, G, B), copy directly as bytes
+                     * Need to recalculate byte offset since Image_Buffer is uint16_t* but contains RGB bytes */
+                    size_t ByteOffset = ((Segment - 1) * p_Interface->PacketsPerFrame + packet) * VOSPI_PIXELS_PER_PACKET * 3;
+                    uint8_t *ImageBufferBytes = reinterpret_cast<uint8_t *>(p_Interface->Image_Buffer[p_Interface->CurrentBuffer]);
+                    memcpy(&ImageBufferBytes[ByteOffset], PacketData, VOSPI_PIXELS_PER_PACKET * 3);
+                } else {
+                    /* RAW14 mode: Convert big-endian 16-bit values to little-endian */
+                    for (size_t i = 0; i < VOSPI_PIXELS_PER_PACKET; i++) {
+                        Dest[i] = (static_cast<uint16_t>(PacketData[i * 2]) << 8) | PacketData[i * 2 + 1];
+                    }
                 }
             }
         }
