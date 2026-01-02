@@ -386,6 +386,58 @@ CCI_ReadBurst_Exit:
     return Error;
 }
 
+/** @brief              Sets a ROI structure to the camera.
+ *  @param p_Interface  Pointer to CCI interface object
+ *  @param Command      Command to set the ROI
+ *  @param p_ROI        Pointer to ROI structure
+ *  @param p_Status     (Optional) Response error code from the camera
+ *  @return             LEPTON_ERR_OK when successful
+ */
+static Lepton_Error_t CCI_SetROI(CCI_t *p_Interface, uint16_t Command, const Lepton_ROI_t *p_ROI, Lepton_Result_t *p_Status)
+{
+    uint16_t Buffer[4];
+
+    if (p_ROI == NULL) {
+        return LEPTON_ERR_INVALID_ARG;
+    }
+
+    Buffer[0] = p_ROI->Start_Col;
+    Buffer[1] = p_ROI->Start_Row;
+    Buffer[2] = p_ROI->End_Row;
+    Buffer[3] = p_ROI->End_Col;
+
+    return CCI_Set(p_Interface, Command, 4, Buffer, p_Status);
+}
+
+/** @brief              Gets a ROI structure from the camera.
+ *  @param p_Interface  Pointer to CCI interface object
+ *  @param Command      Command to set the ROI
+ *  @param p_ROI        Pointer to ROI structure
+ *  @param p_Status     (Optional) Response error code from the camera
+ *  @return             LEPTON_ERR_OK when successful
+ */
+static Lepton_Error_t CCI_GetROI(CCI_t *p_Interface, uint16_t Command, Lepton_ROI_t *p_ROI, Lepton_Result_t *p_Status)
+{
+    uint16_t Buffer[4];
+    Lepton_Error_t Error;
+
+    if (p_ROI == NULL) {
+        return LEPTON_ERR_INVALID_ARG;
+    }
+
+    Error = CCI_Get(p_Interface, CCI_CMD_AGC_GET_ROI, 4, Buffer, p_Status);
+    if (Error != LEPTON_ERR_OK) {
+        return Error;
+    }
+
+    p_ROI->Start_Col = Buffer[0];
+    p_ROI->Start_Row = Buffer[1];
+    p_ROI->End_Row = Buffer[2];
+    p_ROI->End_Col = Buffer[3];
+
+    return LEPTON_ERR_OK;
+}
+
 Lepton_Error_t CCI_Init(CCI_t *p_Interface)
 {
     if (p_Interface == NULL) {
@@ -1021,15 +1073,20 @@ Lepton_Error_t CCI_SetVideoSource(CCI_t *p_Interface, Lepton_VideoSource_t Sourc
     LEPTON_ERROR_CHECK(CCI_WriteRegister(p_Interface, CCI_REG_DATA_LENGTH, 2));
     LEPTON_ERROR_CHECK(CCI_WriteRegister(p_Interface, CCI_REG_COMMAND, CCI_CMD_OEM_SET_VIDEO_OUTPUT_SOURCE));
 
+    /* Wait for VIDEO_OUTPUT_SOURCE command to complete */
+    LEPTON_ERROR_CHECK(CCI_WaitBusy(p_Interface, p_Status));
+
     if (Source == LEPTON_SOURCE_CONSTANT) {
-        LEPTON_ERROR_CHECK(CCI_WaitBusy(p_Interface, p_Status));
         LEPTON_ERROR_CHECK(CCI_WriteRegister(p_Interface, CCI_REG_DATA_0, Constant & 0xFFFF));
         LEPTON_ERROR_CHECK(CCI_WriteRegister(p_Interface, CCI_REG_DATA_1, (Constant >> 16) & 0xFFFF));
         LEPTON_ERROR_CHECK(CCI_WriteRegister(p_Interface, CCI_REG_DATA_LENGTH, 2));
         LEPTON_ERROR_CHECK(CCI_WriteRegister(p_Interface, CCI_REG_COMMAND, CCI_CMD_OEM_SET_VIDEO_OUTPUT_CONSTANT));
+
+        /* Wait for VIDEO_OUTPUT_CONSTANT command to complete */
+        return CCI_WaitBusy(p_Interface, p_Status);
     }
 
-    return CCI_WaitBusy(p_Interface, p_Status);
+    return LEPTON_ERR_OK;
 }
 
 Lepton_Error_t CCI_GetVideoSource(CCI_t *p_Interface, Lepton_VideoSource_t *p_Source, Lepton_Result_t *p_Status)
@@ -1089,122 +1146,32 @@ Lepton_Error_t CCI_GetShutterPosition(CCI_t *p_Interface, Lepton_ShutterPos_t *p
 
 Lepton_Error_t CCI_SetAGCROI(CCI_t *p_Interface, const Lepton_ROI_t *p_ROI, Lepton_Result_t *p_Status)
 {
-    uint16_t Buffer[4];
-
-    if (p_ROI == NULL) {
-        return LEPTON_ERR_INVALID_ARG;
-    }
-
-    /* Lepton expects: startRow, startCol, endRow, endCol */
-    Buffer[0] = p_ROI->Start_Row;
-    Buffer[1] = p_ROI->Start_Col;
-    Buffer[2] = p_ROI->End_Row;
-    Buffer[3] = p_ROI->End_Col;
-
-    return CCI_Set(p_Interface, CCI_CMD_AGC_SET_ROI, 4, Buffer, p_Status);
+    return CCI_SetROI(p_Interface, CCI_CMD_AGC_SET_ROI, p_ROI, p_Status);
 }
 
 Lepton_Error_t CCI_GetAGCROI(CCI_t *p_Interface, Lepton_ROI_t *p_ROI, Lepton_Result_t *p_Status)
 {
-    uint16_t Buffer[4];
-    Lepton_Error_t Error;
-
-    if (p_ROI == NULL) {
-        return LEPTON_ERR_INVALID_ARG;
-    }
-
-    Error = CCI_Get(p_Interface, CCI_CMD_AGC_GET_ROI, 4, Buffer, p_Status);
-    if (Error != LEPTON_ERR_OK) {
-        return Error;
-    }
-
-    /* Lepton returns: startRow, startCol, endRow, endCol */
-    p_ROI->Start_Row = Buffer[0];
-    p_ROI->Start_Col = Buffer[1];
-    p_ROI->End_Row = Buffer[2];
-    p_ROI->End_Col = Buffer[3];
-
-    return LEPTON_ERR_OK;
+    return CCI_GetROI(p_Interface,CCI_CMD_AGC_GET_ROI, p_ROI, p_Status);
 }
 
 Lepton_Error_t CCI_SetSceneROI(CCI_t *p_Interface, const Lepton_ROI_t *p_ROI, Lepton_Result_t *p_Status)
 {
-    uint16_t Buffer[4];
-
-    if (p_ROI == NULL) {
-        return LEPTON_ERR_INVALID_ARG;
-    }
-
-    /* Lepton expects: startRow, startCol, endRow, endCol */
-    Buffer[0] = p_ROI->Start_Row;
-    Buffer[1] = p_ROI->Start_Col;
-    Buffer[2] = p_ROI->End_Row;
-    Buffer[3] = p_ROI->End_Col;
-
-    return CCI_Set(p_Interface, CCI_CMD_SYS_SET_SCENE_ROI, 4, Buffer, p_Status);
+    return CCI_SetROI(p_Interface, CCI_CMD_SYS_SET_SCENE_ROI, p_ROI, p_Status);
 }
 
 Lepton_Error_t CCI_GetSceneROI(CCI_t *p_Interface, Lepton_ROI_t *p_ROI, Lepton_Result_t *p_Status)
 {
-    uint16_t Buffer[4];
-    Lepton_Error_t Error;
-
-    if (p_ROI == NULL) {
-        return LEPTON_ERR_INVALID_ARG;
-    }
-
-    Error = CCI_Get(p_Interface, CCI_CMD_SYS_GET_SCENE_ROI, 4, Buffer, p_Status);
-    if (Error != LEPTON_ERR_OK) {
-        return Error;
-    }
-
-    /* Lepton returns: startRow, startCol, endRow, endCol */
-    p_ROI->Start_Row = Buffer[0];
-    p_ROI->Start_Col = Buffer[1];
-    p_ROI->End_Row = Buffer[2];
-    p_ROI->End_Col = Buffer[3];
-
-    return LEPTON_ERR_OK;
+    return CCI_GetROI(p_Interface, CCI_CMD_SYS_GET_SCENE_ROI, p_ROI, p_Status);
 }
 
 Lepton_Error_t CCI_SetSpotmeterROI(CCI_t *p_Interface, const Lepton_ROI_t *p_ROI, Lepton_Result_t *p_Status)
 {
-    uint16_t Buffer[4];
-
-    if (p_ROI == NULL) {
-        return LEPTON_ERR_INVALID_ARG;
-    }
-
-    /* Lepton expects: startRow, startCol, endRow, endCol */
-    Buffer[0] = p_ROI->Start_Row;
-    Buffer[1] = p_ROI->Start_Col;
-    Buffer[2] = p_ROI->End_Row;
-    Buffer[3] = p_ROI->End_Col;
-
-    return CCI_Set(p_Interface, CCI_CMD_RAD_SET_SPOT_ROI, 4, Buffer, p_Status);
+    return CCI_SetROI(p_Interface, CCI_CMD_RAD_SET_SPOT_ROI, p_ROI, p_Status);
 }
 
 Lepton_Error_t CCI_GetSpotmeterROI(CCI_t *p_Interface, Lepton_ROI_t *p_ROI, Lepton_Result_t *p_Status)
 {
-    uint16_t Buffer[4];
-    Lepton_Error_t Error;
-
-    if (p_ROI == NULL) {
-        return LEPTON_ERR_INVALID_ARG;
-    }
-
-    Error = CCI_Get(p_Interface, CCI_CMD_RAD_GET_SPOT_ROI, 4, Buffer, p_Status);
-    if (Error != LEPTON_ERR_OK) {
-        return Error;
-    }
-
-    /* Lepton returns: startRow, startCol, endRow, endCol */
-    p_ROI->Start_Row = Buffer[0];
-    p_ROI->Start_Col = Buffer[1];
-    p_ROI->End_Row = Buffer[2];
-    p_ROI->End_Col = Buffer[3];
-
-    return LEPTON_ERR_OK;
+    return CCI_GetROI(p_Interface, CCI_CMD_RAD_GET_SPOT_ROI, p_ROI, p_Status);
 }
 
 Lepton_Error_t CCI_GetSpotmeter(CCI_t *p_Interface, Lepton_Spotmeter_t *p_Spot, Lepton_Result_t *p_Status)
@@ -1228,7 +1195,24 @@ Lepton_Error_t CCI_GetSpotmeter(CCI_t *p_Interface, Lepton_Spotmeter_t *p_Spot, 
 Lepton_Error_t CCI_GetSceneStatistics(CCI_t *p_Interface, Lepton_SceneStatistics_t *p_Statistics,
                                       Lepton_Result_t *p_Status)
 {
-    return LEPTON_ERR_FAIL;
+    uint16_t Buffer[4];
+    Lepton_Error_t Error;
+
+    if (p_Statistics == NULL) {
+        return LEPTON_ERR_INVALID_ARG;
+    }
+
+    Error = CCI_Get(p_Interface, CCI_CMD_SYS_GET_SCENE_STATISTICS, 4, Buffer, p_Status);
+    if (Error != LEPTON_ERR_OK) {
+        return Error;
+    }
+
+    p_Statistics->MinIntensity = Buffer[0];
+    p_Statistics->MaxIntensity= Buffer[1];
+    p_Statistics->MeanIntensity = Buffer[2];
+    p_Statistics->Pixels= Buffer[3];
+
+    return LEPTON_ERR_OK;
 }
 
 Lepton_Error_t CCI_SetTLinearResolution(CCI_t *p_Interface, Lepton_TLinear_Resolution_t Resolution,
