@@ -232,27 +232,18 @@ typedef struct {
 /** @brief Spotmeter object definition (Chapter 4.8.13 - FLIR LEPTON Software IDD).
  */
 typedef struct {
-    uint16_t Value;                             /**< Spotmeter temperature value in Kelvin. */
-    uint16_t Max;                               /**< Minimum temperature value in Kelvin within the spotmeter ROI. */
-    uint16_t Min;                               /**< Maximum temperature value in Kelvin within the spotmeter ROI. */
-    uint16_t Population;                        /**< Number of pixels within the spotmeter ROI. */
-} Lepton_Spotmeter_t;
-
-/** @brief Spotmeter object definition (Chapter 4.8.13 - FLIR LEPTON Software IDD) with float values.
- */
-typedef struct {
     float Value;                                /**< Spotmeter temperature value in Kelvin. */
     float Max;                                  /**< Minimum temperature value in Kelvin within the spotmeter ROI. */
     float Min;                                  /**< Maximum temperature value in Kelvin within the spotmeter ROI. */
-    float Population;                           /**< Number of pixels within the spotmeter ROI. */
-} Lepton_Spotmeter_Float_t;
+    uint16_t Population;                        /**< Number of pixels within the spotmeter ROI. */
+} Lepton_Spotmeter_t;
 
 /** @brief Image scene statistics object definition (Chapter 4.5.12 - FLIR LEPTON Software IDD).
  */
 typedef struct {
-    uint16_t MeanIntensity;                     /**< Mean intensity of the image scene. */
-    uint16_t MaxIntensity;                      /**< Maximum intensity of the image scene. */
-    uint16_t MinIntensity;                      /**< Minimum intensity of the image scene. */
+    float MeanIntensity;                        /**< Mean intensity of the image scene. */
+    float MaxIntensity;                         /**< Maximum intensity of the image scene. */
+    float MinIntensity;                         /**< Minimum intensity of the image scene. */
     uint16_t Pixels;                            /**< Number of pixels in the image scene. */
 } Lepton_SceneStatistics_t;
 

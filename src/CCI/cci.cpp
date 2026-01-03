@@ -1180,15 +1180,21 @@ Lepton_Error_t CCI_GetSpotmeter(CCI_t *p_Interface, Lepton_Spotmeter_t *p_Spot, 
         return LEPTON_ERR_INVALID_ARG;
     }
 
+    uint16_t temp_value, temp_max, temp_min;
+    
     LEPTON_ERROR_CHECK(CCI_WaitBusy(p_Interface, p_Status));
     LEPTON_ERROR_CHECK(CCI_WriteRegister(p_Interface, CCI_REG_DATA_LENGTH, 8));
     LEPTON_ERROR_CHECK(CCI_WriteRegister(p_Interface, CCI_REG_COMMAND, CCI_CMD_RAD_GET_SPOT));
     LEPTON_ERROR_CHECK(CCI_WaitBusy(p_Interface, p_Status));
-    LEPTON_ERROR_CHECK(CCI_ReadRegister(p_Interface, CCI_REG_DATA_0, &p_Spot->Value));
-    LEPTON_ERROR_CHECK(CCI_ReadRegister(p_Interface, CCI_REG_DATA_1, &p_Spot->Max));
-    LEPTON_ERROR_CHECK(CCI_ReadRegister(p_Interface, CCI_REG_DATA_2, &p_Spot->Min));
+    LEPTON_ERROR_CHECK(CCI_ReadRegister(p_Interface, CCI_REG_DATA_0, &temp_value));
+    LEPTON_ERROR_CHECK(CCI_ReadRegister(p_Interface, CCI_REG_DATA_1, &temp_max));
+    LEPTON_ERROR_CHECK(CCI_ReadRegister(p_Interface, CCI_REG_DATA_2, &temp_min));
     LEPTON_ERROR_CHECK(CCI_ReadRegister(p_Interface, CCI_REG_DATA_3, &p_Spot->Population));
-
+    
+    p_Spot->Value = temp_value;
+    p_Spot->Max = temp_max;
+    p_Spot->Min = temp_min;
+    
     return CCI_WaitBusy(p_Interface, p_Status);
 }
 
@@ -1210,7 +1216,7 @@ Lepton_Error_t CCI_GetSceneStatistics(CCI_t *p_Interface, Lepton_SceneStatistics
     p_Statistics->MinIntensity = Buffer[0];
     p_Statistics->MaxIntensity= Buffer[1];
     p_Statistics->MeanIntensity = Buffer[2];
-    p_Statistics->Pixels= Buffer[3];
+    p_Statistics->Pixels = Buffer[3];
 
     return LEPTON_ERR_OK;
 }
