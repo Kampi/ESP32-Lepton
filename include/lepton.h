@@ -198,7 +198,7 @@ Lepton_Error_t Lepton_Emissivity(Lepton_t *p_Device, uint16_t Emissivity, Lepton
  */
 uint32_t Lepton_GetUptime(Lepton_t *p_Device, Lepton_Result_t *p_Status = NULL);
 
-/** @brief              Get the scene statistics of the current image.
+/** @brief              Get the scene statistics of the current image. Convert the values to Kelvin when TLinear is active.
  *  @param p_Device     Pointer to device instance
  *  @param p_Statistics Pointer to scene statistics object
  *  @param p_Status     (Optional) Pointer to device status
@@ -229,7 +229,7 @@ Lepton_Error_t Lepton_GetSpotmeterROI(Lepton_t *p_Device, Lepton_ROI_t *p_ROI, L
  *  @param p_Status (Optional) Pointer to device status
  *  @return         LEPTON_ERR_OK when successful
  */
-Lepton_Error_t Lepton_GetSpotmeter(Lepton_t *p_Device, Lepton_Spotmeter_Float_t *p_Spot, Lepton_Result_t *p_Status = NULL);
+Lepton_Error_t Lepton_GetSpotmeter(Lepton_t *p_Device, Lepton_Spotmeter_t *p_Spot, Lepton_Result_t *p_Status = NULL);
 
 /** @brief          Set the video source.
  *  @param p_Device Pointer to device instance
@@ -314,11 +314,13 @@ Lepton_Error_t Lepton_GetPixelTemperature(Lepton_t *p_Device, uint16_t PixelValu
  *                  Color mapping: blue (cold) -> cyan -> green -> yellow -> red (hot)
  *  @param p_Input  Pointer to input buffer containing thermal values (14-bit per pixel)
  *  @param p_Output Pointer to RGB output buffer
+ *  @param p_Min    Pointer to minimum value in the image
+ *  @param p_Max    Pointer to maximum value in the image
  *  @param Width    Image width in pixels
  *  @param Height   Image height in pixels
  *  @return         true on success, false on failure
  */
-bool Lepton_Raw14ToRGB(uint16_t *p_Input, uint8_t *p_Output, uint16_t Width, uint16_t Height);
+bool Lepton_Raw14ToRGB(uint16_t *p_Input, uint8_t *p_Output, int16_t *p_Min, int16_t *p_Max, uint16_t Width, uint16_t Height);
 
 #ifdef __cplusplus
 }

@@ -237,7 +237,7 @@ Lepton_Error_t Lepton_StopCapture(Lepton_t *p_Device)
     return LEPTON_ERR_OK;
 }
 
-bool Lepton_Raw14ToRGB(uint16_t *p_Input, uint8_t *p_Output, uint16_t Width, uint16_t Height)
+bool Lepton_Raw14ToRGB(uint16_t *p_Input, uint8_t *p_Output, int16_t *p_Min, int16_t *p_Max, uint16_t Width, uint16_t Height)
 {
     static uint16_t min_smooth = 0;
     static uint16_t max_smooth = 16383;
@@ -300,6 +300,14 @@ bool Lepton_Raw14ToRGB(uint16_t *p_Input, uint8_t *p_Output, uint16_t Width, uin
         if ((i & 0x3FF) == 0) { /* Every 1024 pixels */
             esp_task_wdt_reset();
         }
+    }
+
+    if (p_Min != NULL) {
+        *p_Min = static_cast<int16_t>(min);
+    }
+
+    if (p_Max != NULL) {
+        *p_Max = static_cast<int16_t>(max);
     }
 
     return true;

@@ -129,7 +129,22 @@ Lepton_Error_t Lepton_GetSceneStatistics(Lepton_t *p_Device, Lepton_SceneStatist
         return LEPTON_ERR_NOT_INITIALIZED;
     }
 
-    return CCI_GetSceneStatistics(&p_Device->Internal.CCI, p_Statistics, p_Status);
+    LEPTON_ERROR_CHECK(CCI_GetSceneStatistics(&p_Device->Internal.CCI, p_Statistics, p_Status));
+
+    /* The values are handled in Kelvin when TLinear is active. See Lepton documentation Chapter 4.5.12 for details. */
+    if (p_Device->Internal.useTLinear) {
+        p_Statistics->MeanIntensity = ((float)p_Statistics->MeanIntensity) / 100.0f;
+        p_Statistics->MaxIntensity = ((float)p_Statistics->MaxIntensity) / 100.0f;
+        p_Statistics->MinIntensity = ((float)p_Statistics->MinIntensity) / 100.0f;
+    }
+
+    ESP_LOGD(TAG, "Scene Statistics - Min: %.2f, Max: %.2f, Mean: %.2f, Pixels: %u",
+             p_Statistics->MinIntensity,
+             p_Statistics->MaxIntensity,
+             p_Statistics->MeanIntensity,
+             p_Statistics->Pixels);
+
+    return LEPTON_ERR_OK;
 }
 
 Lepton_Error_t Lepton_SetSpotmeterROI(Lepton_t *p_Device, Lepton_ROI_t *p_ROI, Lepton_Result_t *p_Status)
@@ -154,7 +169,7 @@ Lepton_Error_t Lepton_GetSpotmeterROI(Lepton_t *p_Device, Lepton_ROI_t *p_ROI, L
     return CCI_GetSpotmeterROI(&p_Device->Internal.CCI, p_ROI, p_Status);
 }
 
-Lepton_Error_t Lepton_GetSpotmeter(Lepton_t *p_Device, Lepton_Spotmeter_Float_t *p_Spot, Lepton_Result_t *p_Status)
+Lepton_Error_t Lepton_GetSpotmeter(Lepton_t *p_Device, Lepton_Spotmeter_t *p_Spot, Lepton_Result_t *p_Status)
 {
     Lepton_TLinear_Resolution_t Resolution;
     Lepton_Spotmeter_t Spotmeter;
