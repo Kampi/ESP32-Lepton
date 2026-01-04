@@ -46,7 +46,7 @@ jobs:
           fi
           
           # Run astyle on all files
-          FORMATTED=$(astyle --options=.astylerc --dry-run --formatted "$FILES" 2>&1 || true)
+          FORMATTED=$(astyle --options=.astyle.cfg --dry-run --formatted "$FILES" 2>&1 || true)
           
           if [ -n "$FORMATTED" ]; then
             echo "⚠️  Code style issues found in the following files:"
