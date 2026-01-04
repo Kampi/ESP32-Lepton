@@ -216,7 +216,8 @@ static Lepton_Error_t CCI_WaitBusy(CCI_t *p_Interface, Lepton_Result_t *p_Status
         TimeoutCounter += 10;
 
         if (TimeoutCounter >= Timeout) {
-            ESP_LOGE(TAG, "Timeout waiting for camera ready (Status: 0x%02X%02X, Expected: 0xXX06)", _CCI_Buffer[0], _CCI_Buffer[1]);
+            ESP_LOGE(TAG, "Timeout waiting for camera ready (Status: 0x%02X%02X, Expected: 0xXX06)", _CCI_Buffer[0],
+                     _CCI_Buffer[1]);
             return LEPTON_ERR_TIMEOUT;
         }
     } while ((_CCI_Buffer[1] & 0x07) != ((0x01 << CCI_BIT_BOOT_STATUS_BIT) | (0x01 << CCI_BIT_BOOT_MODE_BIT)));
@@ -393,7 +394,8 @@ CCI_ReadBurst_Exit:
  *  @param p_Status     (Optional) Response error code from the camera
  *  @return             LEPTON_ERR_OK when successful
  */
-static Lepton_Error_t CCI_SetROI(CCI_t *p_Interface, uint16_t Command, const Lepton_ROI_t *p_ROI, Lepton_Result_t *p_Status)
+static Lepton_Error_t CCI_SetROI(CCI_t *p_Interface, uint16_t Command, const Lepton_ROI_t *p_ROI,
+                                 Lepton_Result_t *p_Status)
 {
     uint16_t Buffer[4];
 
@@ -425,7 +427,7 @@ static Lepton_Error_t CCI_GetROI(CCI_t *p_Interface, uint16_t Command, Lepton_RO
         return LEPTON_ERR_INVALID_ARG;
     }
 
-    Error = CCI_Get(p_Interface, CCI_CMD_AGC_GET_ROI, 4, Buffer, p_Status);
+    Error = CCI_Get(p_Interface, Command, 4, Buffer, p_Status);
     if (Error != LEPTON_ERR_OK) {
         return Error;
     }
@@ -1151,7 +1153,7 @@ Lepton_Error_t CCI_SetAGCROI(CCI_t *p_Interface, const Lepton_ROI_t *p_ROI, Lept
 
 Lepton_Error_t CCI_GetAGCROI(CCI_t *p_Interface, Lepton_ROI_t *p_ROI, Lepton_Result_t *p_Status)
 {
-    return CCI_GetROI(p_Interface,CCI_CMD_AGC_GET_ROI, p_ROI, p_Status);
+    return CCI_GetROI(p_Interface, CCI_CMD_AGC_GET_ROI, p_ROI, p_Status);
 }
 
 Lepton_Error_t CCI_SetSceneROI(CCI_t *p_Interface, const Lepton_ROI_t *p_ROI, Lepton_Result_t *p_Status)
@@ -1163,6 +1165,17 @@ Lepton_Error_t CCI_GetSceneROI(CCI_t *p_Interface, Lepton_ROI_t *p_ROI, Lepton_R
 {
     return CCI_GetROI(p_Interface, CCI_CMD_SYS_GET_SCENE_ROI, p_ROI, p_Status);
 }
+
+Lepton_Error_t CCI_SetVideoFocusROI(CCI_t *p_Interface, const Lepton_ROI_t *p_ROI, Lepton_Result_t *p_Status)
+{
+    return CCI_SetROI(p_Interface, CCI_CMD_VID_SET_VIDEO_FOCUS_ROI, p_ROI, p_Status);
+}
+
+Lepton_Error_t CCI_GetVideoFocusROI(CCI_t *p_Interface, Lepton_ROI_t *p_ROI, Lepton_Result_t *p_Status)
+{
+    return CCI_GetROI(p_Interface, CCI_CMD_VID_GET_VIDEO_FOCUS_ROI, p_ROI, p_Status);
+}
+
 
 Lepton_Error_t CCI_SetSpotmeterROI(CCI_t *p_Interface, const Lepton_ROI_t *p_ROI, Lepton_Result_t *p_Status)
 {
@@ -1181,7 +1194,7 @@ Lepton_Error_t CCI_GetSpotmeter(CCI_t *p_Interface, Lepton_Spotmeter_t *p_Spot, 
     }
 
     uint16_t temp_value, temp_max, temp_min;
-    
+
     LEPTON_ERROR_CHECK(CCI_WaitBusy(p_Interface, p_Status));
     LEPTON_ERROR_CHECK(CCI_WriteRegister(p_Interface, CCI_REG_DATA_LENGTH, 8));
     LEPTON_ERROR_CHECK(CCI_WriteRegister(p_Interface, CCI_REG_COMMAND, CCI_CMD_RAD_GET_SPOT));
@@ -1190,11 +1203,11 @@ Lepton_Error_t CCI_GetSpotmeter(CCI_t *p_Interface, Lepton_Spotmeter_t *p_Spot, 
     LEPTON_ERROR_CHECK(CCI_ReadRegister(p_Interface, CCI_REG_DATA_1, &temp_max));
     LEPTON_ERROR_CHECK(CCI_ReadRegister(p_Interface, CCI_REG_DATA_2, &temp_min));
     LEPTON_ERROR_CHECK(CCI_ReadRegister(p_Interface, CCI_REG_DATA_3, &p_Spot->Population));
-    
+
     p_Spot->Value = temp_value;
     p_Spot->Max = temp_max;
     p_Spot->Min = temp_min;
-    
+
     return CCI_WaitBusy(p_Interface, p_Status);
 }
 
@@ -1214,7 +1227,7 @@ Lepton_Error_t CCI_GetSceneStatistics(CCI_t *p_Interface, Lepton_SceneStatistics
     }
 
     p_Statistics->MinIntensity = Buffer[0];
-    p_Statistics->MaxIntensity= Buffer[1];
+    p_Statistics->MaxIntensity = Buffer[1];
     p_Statistics->MeanIntensity = Buffer[2];
     p_Statistics->Pixels = Buffer[3];
 

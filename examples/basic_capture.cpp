@@ -41,7 +41,7 @@ static Lepton_FrameBuffer_t RawFrame;
 static uint8_t CurrentReadBuffer;
 static uint8_t *RGB_Buffer[2];
 
-static const char* TAG = "Lepton-Example";
+static const char *TAG = "Lepton-Example";
 
 extern "C" void app_main(void)
 {
@@ -75,9 +75,9 @@ extern "C" void app_main(void)
 
     /* Allocate 2 RGB buffers for ping-pong buffering */
     RGB_Buffer[0] = reinterpret_cast<uint8_t *>(heap_caps_malloc(LEPTON_IMAGE_WIDTH * LEPTON_IMAGE_HEIGHT
-                                                                                   * 3, MALLOC_CAP_SPIRAM));
+                                                                 * 3, MALLOC_CAP_SPIRAM));
     RGB_Buffer[1] = reinterpret_cast<uint8_t *>(heap_caps_malloc(LEPTON_IMAGE_WIDTH * LEPTON_IMAGE_HEIGHT
-                                                                                   * 3, MALLOC_CAP_SPIRAM));
+                                                                 * 3, MALLOC_CAP_SPIRAM));
     if ((RGB_Buffer[0] == NULL) || (RGB_Buffer[1] == NULL)) {
         ESP_LOGE(TAG, "Can not allocate RGB buffers!");
 
@@ -109,8 +109,7 @@ extern "C" void app_main(void)
     }
 
     Lepton_Error_t Error = Lepton_Init(&Device, &Config);
-    if (Error != LEPTON_ERR_OK)
-    {
+    if (Error != LEPTON_ERR_OK) {
         ESP_LOGE(TAG, "Failed to initialize Lepton: %d!", Error);
 
         vQueueDelete(RawFrameQueue);
@@ -132,7 +131,7 @@ extern "C" void app_main(void)
         ESP_LOGE(TAG, "Can not start image capturing!");
     }
 
-    while(1) {
+    while (1) {
         esp_task_wdt_reset();
 
         /* Wait for a new raw frame with longer timeout to avoid busy waiting */
@@ -165,8 +164,7 @@ extern "C" void app_main(void)
                 continue;
             }
 
-            Lepton_Raw14ToRGB(RawFrame.Image_Buffer, WriteBuffer, RawFrame.Width,
-                              RawFrame.Height);
+            Lepton_Raw14ToRGB(RawFrame.Image_Buffer, WriteBuffer, NULL, NULL, RawFrame.Width, RawFrame.Height);
 
             /* Mark buffer as ready and update read buffer index */
             if (xSemaphoreTake(BufferMutex, 100 / portTICK_PERIOD_MS) == pdTRUE) {

@@ -24,11 +24,11 @@ jobs:
         run: |
           sudo apt-get update && sudo apt-get install -y lbzip2 build-essential cmake pkg-config libsdl2-dev || true
           sudo apt-get install -f -y
-          wget https://sourceforge.net/projects/astyle/files/astyle/astyle%203.4/astyle-3.4.10.tar.bz2/download -O astyle.tar.bz2
+          wget https://sourceforge.net/projects/astyle/files/astyle/astyle%203.6/astyle-3.6.13.tar.bz2/download -O astyle.tar.bz2
           tar -xf astyle.tar.bz2
-          cd astyle-3.4.10
-          mkdir -p as-gcc-exe
-          cd as-gcc-exe
+          cd astyle-3.6.13/
+          mkdir -p build
+          cd build
           cmake ../
           make
           sudo make install
@@ -45,15 +45,17 @@ jobs:
             exit 0
           fi
           
-          # Run astyle on all files
-          FORMATTED=$(astyle --options=.astyle.cfg --dry-run --formatted "$FILES" 2>&1 || true)
+          # Run astyle and check if any files would be formatted
+          echo "$FILES" | xargs astyle --options=.astyle.cfg
           
-          if [ -n "$FORMATTED" ]; then
-            echo "⚠️  Code style issues found in the following files:"
-            echo "$FORMATTED"
+          # Check if any files were modified
+          if ! git diff --quiet; then
+            echo "⚠️  Code style issues found. The following files need formatting:"
+            git diff --name-only
             echo ""
             echo "To fix formatting, run:"
-            echo "  astyle --options=.astyle.cfg --recursive *.c,*.cpp,*.h"
+            echo "  astyle --options=.astyle.cfg --recursive 'src/*.cpp,src/*.h,include/*.cpp,include/*.h'"
+            git checkout .
             exit 1
           else
             echo "✅ All files are properly formatted!"

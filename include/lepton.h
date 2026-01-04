@@ -53,7 +53,8 @@ extern "C" {
  *  @param p_Format Pointer to output video format
  *  @return         LEPTON_ERR_OK when successful
  */
-inline __attribute__((always_inline)) Lepton_Error_t Lepton_GetVideoFormat(Lepton_t *p_Device, Lepton_VideoFormat_t *p_Format)
+inline __attribute__((always_inline)) Lepton_Error_t Lepton_GetVideoFormat(Lepton_t *p_Device,
+                                                                           Lepton_VideoFormat_t *p_Format)
 {
     if (p_Device == NULL || p_Format == NULL) {
         return LEPTON_ERR_INVALID_ARG;
@@ -171,7 +172,8 @@ Lepton_Error_t Lepton_EnableTelemetry(Lepton_t *p_Device, bool Enable, Lepton_Re
  *  @param p_Status (Optional) Pointer to device status
  *  @return         LEPTON_ERR_OK when successful
  */
-Lepton_Error_t Lepton_GetTemp(Lepton_t *p_Device, uint16_t *p_FPA, uint16_t *p_AUX, Lepton_Result_t *p_Status = NULL);
+Lepton_Error_t Lepton_GetTemperature(Lepton_t *p_Device, uint16_t *p_FPA, uint16_t *p_AUX,
+                                     Lepton_Result_t *p_Status = NULL);
 
 /** @brief          Enable / Disable the automatic gain control.
  *  @param p_Device Pointer to device instance
@@ -207,13 +209,13 @@ uint32_t Lepton_GetUptime(Lepton_t *p_Device, Lepton_Result_t *p_Status = NULL);
 Lepton_Error_t Lepton_GetSceneStatistics(Lepton_t *p_Device, Lepton_SceneStatistics_t *p_Statistics,
                                          Lepton_Result_t *p_Status = NULL);
 
-/** @brief          Set the spotmeter ROI.
+/** @brief          Get the spotmeter values.
  *  @param p_Device Pointer to device instance
- *  @param p_ROI    Pointer to Lepton ROI object
+ *  @param p_Spot   Pointer to spotmeter object
  *  @param p_Status (Optional) Pointer to device status
  *  @return         LEPTON_ERR_OK when successful
  */
-Lepton_Error_t Lepton_SetSpotmeterROI(Lepton_t *p_Device, Lepton_ROI_t *p_ROI, Lepton_Result_t *p_Status = NULL);
+Lepton_Error_t Lepton_GetSpotmeter(Lepton_t *p_Device, Lepton_Spotmeter_t *p_Spot, Lepton_Result_t *p_Status = NULL);
 
 /** @brief          Get the spotmeter ROI.
  *  @param p_Device Pointer to device instance
@@ -223,13 +225,61 @@ Lepton_Error_t Lepton_SetSpotmeterROI(Lepton_t *p_Device, Lepton_ROI_t *p_ROI, L
  */
 Lepton_Error_t Lepton_GetSpotmeterROI(Lepton_t *p_Device, Lepton_ROI_t *p_ROI, Lepton_Result_t *p_Status = NULL);
 
-/** @brief          Get the spotmeter values.
+/** @brief          Set the spotmeter ROI.
  *  @param p_Device Pointer to device instance
- *  @param p_Spot   Pointer to spotmeter object
+ *  @param p_ROI    Pointer to Lepton ROI object
  *  @param p_Status (Optional) Pointer to device status
  *  @return         LEPTON_ERR_OK when successful
  */
-Lepton_Error_t Lepton_GetSpotmeter(Lepton_t *p_Device, Lepton_Spotmeter_t *p_Spot, Lepton_Result_t *p_Status = NULL);
+Lepton_Error_t Lepton_SetSpotmeterROI(Lepton_t *p_Device, Lepton_ROI_t *p_ROI, Lepton_Result_t *p_Status = NULL);
+
+/** @brief          Get the scene ROI.
+ *  @param p_Device Pointer to device instance
+ *  @param p_ROI    Pointer to Lepton ROI object
+ *  @param p_Status (Optional) Pointer to device status
+ *  @return         LEPTON_ERR_OK when successful
+ */
+Lepton_Error_t Lepton_GetSceneROI(Lepton_t *p_Device, Lepton_ROI_t *p_ROI, Lepton_Result_t *p_Status = NULL);
+
+/** @brief          Set the scene ROI.
+ *  @param p_Device Pointer to device instance
+ *  @param p_ROI    Pointer to Lepton ROI object
+ *  @param p_Status (Optional) Pointer to device status
+ *  @return         LEPTON_ERR_OK when successful
+ */
+Lepton_Error_t Lepton_SetSceneROI(Lepton_t *p_Device, Lepton_ROI_t *p_ROI, Lepton_Result_t *p_Status = NULL);
+
+/** @brief          Get the AGC ROI.
+ *  @param p_Device Pointer to device instance
+ *  @param p_ROI    Pointer to Lepton ROI object
+ *  @param p_Status (Optional) Pointer to device status
+ *  @return         LEPTON_ERR_OK when successful
+ */
+Lepton_Error_t Lepton_GetAGCROI(Lepton_t *p_Device, Lepton_ROI_t *p_ROI, Lepton_Result_t *p_Status = NULL);
+
+/** @brief          Set the AGC ROI.
+ *  @param p_Device Pointer to device instance
+ *  @param p_ROI    Pointer to Lepton ROI object
+ *  @param p_Status (Optional) Pointer to device status
+ *  @return         LEPTON_ERR_OK when successful
+ */
+Lepton_Error_t Lepton_SetAGCROI(Lepton_t *p_Device, Lepton_ROI_t *p_ROI, Lepton_Result_t *p_Status = NULL);
+
+/** @brief          Get the video focus ROI.
+ *  @param p_Device Pointer to device instance
+ *  @param p_ROI    Pointer to Lepton ROI object
+ *  @param p_Status (Optional) Pointer to device status
+ *  @return         LEPTON_ERR_OK when successful
+ */
+Lepton_Error_t Lepton_GetVideoFocusROI(Lepton_t *p_Device, Lepton_ROI_t *p_ROI, Lepton_Result_t *p_Status = NULL);
+
+/** @brief          Set the video focus ROI.
+ *  @param p_Device Pointer to device instance
+ *  @param p_ROI    Pointer to Lepton ROI object
+ *  @param p_Status (Optional) Pointer to device status
+ *  @return         LEPTON_ERR_OK when successful
+ */
+Lepton_Error_t Lepton_SetVideoFocusROI(Lepton_t *p_Device, Lepton_ROI_t *p_ROI, Lepton_Result_t *p_Status = NULL);
 
 /** @brief          Set the video source.
  *  @param p_Device Pointer to device instance
@@ -279,7 +329,7 @@ Lepton_Error_t Lepton_FreezeVideo(Lepton_t *p_Device, bool Freeze, Lepton_Result
 
 /** @brief          Start the capture task to read new frames from the camera.
  *  @param p_Device Pointer to device instance
- *  @param p_Queue  Queue handle to reveive frames from the capture task.
+ *  @param p_Queue  Queue handle to receive frames from the capture task.
  *                  The queue must uses the type Lepton_FrameBuffer_t that contains a pointer to the frame
  *                  buffer which becomes ready. Make sure the queue is large enough to hold multiple
  *                  frames or process the frames fast enough to avoid frame drops. You can use
@@ -320,7 +370,8 @@ Lepton_Error_t Lepton_GetPixelTemperature(Lepton_t *p_Device, uint16_t PixelValu
  *  @param Height   Image height in pixels
  *  @return         true on success, false on failure
  */
-bool Lepton_Raw14ToRGB(uint16_t *p_Input, uint8_t *p_Output, int16_t *p_Min, int16_t *p_Max, uint16_t Width, uint16_t Height);
+bool Lepton_Raw14ToRGB(uint16_t *p_Input, uint8_t *p_Output, int16_t *p_Min, int16_t *p_Max, uint16_t Width,
+                       uint16_t Height);
 
 #ifdef __cplusplus
 }

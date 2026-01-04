@@ -139,8 +139,8 @@ Lepton_Error_t Lepton_Init(Lepton_t *p_Device, const Lepton_Conf_t *const p_Init
     }
     ESP_LOGD(TAG, " Telemetry Position: %u", p_Device->Internal.VoSPI.TelemetryPosition);
 
-   if ((CCI_SetTLinearEnabled(&p_Device->Internal.CCI, p_Init->useTLinear, p_Status) != LEPTON_ERR_OK) ||
-       (CCI_GetTLinearEnabled(&p_Device->Internal.CCI, &p_Device->Internal.useTLinear, p_Status) != LEPTON_ERR_OK)) {
+    if ((CCI_SetTLinearEnabled(&p_Device->Internal.CCI, p_Init->useTLinear, p_Status) != LEPTON_ERR_OK) ||
+        (CCI_GetTLinearEnabled(&p_Device->Internal.CCI, &p_Device->Internal.useTLinear, p_Status) != LEPTON_ERR_OK)) {
         goto Lepton_Init_Error_1;
     }
     ESP_LOGD(TAG, " T-Linear enabled: %s", p_Device->Internal.useTLinear ? "true" : "false");
@@ -366,13 +366,13 @@ Lepton_Error_t Lepton_GetPixelTemperature(Lepton_t *p_Device, uint16_t PixelValu
     LEPTON_ERROR_CHECK(CCI_GetTLinearResolution(&p_Device->Internal.CCI, &Resolution));
 
     /* Convert raw pixel value to temperature in Celsius using TLinear mode
-     * 
+     *
      * For Lepton 3.5 radiometric with TLinear enabled:
      * - Pixel values are in centi-Kelvin (Kelvin * 100)
      * - Resolution depends on TLinear resolution setting:
      *   - 0.1K resolution: value / 10 = Kelvin
      *   - 0.01K resolution: value / 100 = Kelvin
-     * 
+     *
      * The default TLinear resolution is 0.1K (scale factor 10)
      */
 

@@ -26,7 +26,7 @@
 
 static const char *TAG          = "Lepton-CCI";
 
-Lepton_Error_t Lepton_GetTemp(Lepton_t *p_Device, uint16_t *p_FPA, uint16_t *p_AUX, Lepton_Result_t *p_Status)
+Lepton_Error_t Lepton_GetTemperature(Lepton_t *p_Device, uint16_t *p_FPA, uint16_t *p_AUX, Lepton_Result_t *p_Status)
 {
     if (p_Device == NULL) {
         return LEPTON_ERR_INVALID_ARG;
@@ -133,9 +133,9 @@ Lepton_Error_t Lepton_GetSceneStatistics(Lepton_t *p_Device, Lepton_SceneStatist
 
     /* The values are handled in Kelvin when TLinear is active. See Lepton documentation Chapter 4.5.12 for details. */
     if (p_Device->Internal.useTLinear) {
-        p_Statistics->MeanIntensity = ((float)p_Statistics->MeanIntensity) / 100.0f;
-        p_Statistics->MaxIntensity = ((float)p_Statistics->MaxIntensity) / 100.0f;
-        p_Statistics->MinIntensity = ((float)p_Statistics->MinIntensity) / 100.0f;
+        p_Statistics->MeanIntensity = p_Statistics->MeanIntensity / 100.0f;
+        p_Statistics->MaxIntensity = p_Statistics->MaxIntensity / 100.0f;
+        p_Statistics->MinIntensity = p_Statistics->MinIntensity / 100.0f;
     }
 
     ESP_LOGD(TAG, "Scene Statistics - Min: %.2f, Max: %.2f, Mean: %.2f, Pixels: %u",
@@ -145,28 +145,6 @@ Lepton_Error_t Lepton_GetSceneStatistics(Lepton_t *p_Device, Lepton_SceneStatist
              p_Statistics->Pixels);
 
     return LEPTON_ERR_OK;
-}
-
-Lepton_Error_t Lepton_SetSpotmeterROI(Lepton_t *p_Device, Lepton_ROI_t *p_ROI, Lepton_Result_t *p_Status)
-{
-    if (p_Device == NULL) {
-        return LEPTON_ERR_INVALID_ARG;
-    } else if (p_Device->Internal.isInitialized == false) {
-        return LEPTON_ERR_NOT_INITIALIZED;
-    }
-
-    return CCI_SetSpotmeterROI(&p_Device->Internal.CCI, p_ROI, p_Status);
-}
-
-Lepton_Error_t Lepton_GetSpotmeterROI(Lepton_t *p_Device, Lepton_ROI_t *p_ROI, Lepton_Result_t *p_Status)
-{
-    if (p_Device == NULL) {
-        return LEPTON_ERR_INVALID_ARG;
-    } else if (p_Device->Internal.isInitialized == false) {
-        return LEPTON_ERR_NOT_INITIALIZED;
-    }
-
-    return CCI_GetSpotmeterROI(&p_Device->Internal.CCI, p_ROI, p_Status);
 }
 
 Lepton_Error_t Lepton_GetSpotmeter(Lepton_t *p_Device, Lepton_Spotmeter_t *p_Spot, Lepton_Result_t *p_Status)
@@ -204,6 +182,94 @@ Lepton_Error_t Lepton_GetSpotmeter(Lepton_t *p_Device, Lepton_Spotmeter_t *p_Spo
     }
 
     return LEPTON_ERR_OK;
+}
+
+Lepton_Error_t Lepton_GetSpotmeterROI(Lepton_t *p_Device, Lepton_ROI_t *p_ROI, Lepton_Result_t *p_Status)
+{
+    if (p_Device == NULL) {
+        return LEPTON_ERR_INVALID_ARG;
+    } else if (p_Device->Internal.isInitialized == false) {
+        return LEPTON_ERR_NOT_INITIALIZED;
+    }
+
+    return CCI_GetSpotmeterROI(&p_Device->Internal.CCI, p_ROI, p_Status);
+}
+
+Lepton_Error_t Lepton_SetSpotmeterROI(Lepton_t *p_Device, Lepton_ROI_t *p_ROI, Lepton_Result_t *p_Status)
+{
+    if (p_Device == NULL) {
+        return LEPTON_ERR_INVALID_ARG;
+    } else if (p_Device->Internal.isInitialized == false) {
+        return LEPTON_ERR_NOT_INITIALIZED;
+    }
+
+    return CCI_SetSpotmeterROI(&p_Device->Internal.CCI, p_ROI, p_Status);
+}
+
+Lepton_Error_t Lepton_GetSceneROI(Lepton_t *p_Device, Lepton_ROI_t *p_ROI, Lepton_Result_t *p_Status)
+{
+    if (p_Device == NULL) {
+        return LEPTON_ERR_INVALID_ARG;
+    } else if (p_Device->Internal.isInitialized == false) {
+        return LEPTON_ERR_NOT_INITIALIZED;
+    }
+
+    return CCI_GetSceneROI(&p_Device->Internal.CCI, p_ROI, p_Status);
+}
+
+Lepton_Error_t Lepton_SetSceneROI(Lepton_t *p_Device, Lepton_ROI_t *p_ROI, Lepton_Result_t *p_Status)
+{
+    if (p_Device == NULL) {
+        return LEPTON_ERR_INVALID_ARG;
+    } else if (p_Device->Internal.isInitialized == false) {
+        return LEPTON_ERR_NOT_INITIALIZED;
+    }
+
+    return CCI_SetSceneROI(&p_Device->Internal.CCI, p_ROI, p_Status);
+}
+
+Lepton_Error_t Lepton_GetAGCROI(Lepton_t *p_Device, Lepton_ROI_t *p_ROI, Lepton_Result_t *p_Status)
+{
+    if (p_Device == NULL) {
+        return LEPTON_ERR_INVALID_ARG;
+    } else if (p_Device->Internal.isInitialized == false) {
+        return LEPTON_ERR_NOT_INITIALIZED;
+    }
+
+    return CCI_GetAGCROI(&p_Device->Internal.CCI, p_ROI, p_Status);
+}
+
+Lepton_Error_t Lepton_SetAGCROI(Lepton_t *p_Device, Lepton_ROI_t *p_ROI, Lepton_Result_t *p_Status)
+{
+    if (p_Device == NULL) {
+        return LEPTON_ERR_INVALID_ARG;
+    } else if (p_Device->Internal.isInitialized == false) {
+        return LEPTON_ERR_NOT_INITIALIZED;
+    }
+
+    return CCI_SetAGCROI(&p_Device->Internal.CCI, p_ROI, p_Status);
+}
+
+Lepton_Error_t Lepton_GetVideoFocusROI(Lepton_t *p_Device, Lepton_ROI_t *p_ROI, Lepton_Result_t *p_Status)
+{
+    if (p_Device == NULL) {
+        return LEPTON_ERR_INVALID_ARG;
+    } else if (p_Device->Internal.isInitialized == false) {
+        return LEPTON_ERR_NOT_INITIALIZED;
+    }
+
+    return CCI_GetVideoFocusROI(&p_Device->Internal.CCI, p_ROI, p_Status);
+}
+
+Lepton_Error_t Lepton_SetVideoFocusROI(Lepton_t *p_Device, Lepton_ROI_t *p_ROI, Lepton_Result_t *p_Status)
+{
+    if (p_Device == NULL) {
+        return LEPTON_ERR_INVALID_ARG;
+    } else if (p_Device->Internal.isInitialized == false) {
+        return LEPTON_ERR_NOT_INITIALIZED;
+    }
+
+    return CCI_SetVideoFocusROI(&p_Device->Internal.CCI, p_ROI, p_Status);
 }
 
 Lepton_Error_t Lepton_SetVideoSource(Lepton_t *p_Device, Lepton_VideoSource_t Source, uint16_t Constant,
@@ -253,7 +319,7 @@ Lepton_Error_t Lepton_GetTLinearResolution(Lepton_t *p_Device, Lepton_TLinear_Re
     return CCI_GetTLinearResolution(&p_Device->Internal.CCI, p_Resolution, p_Status);
 }
 
-Lepton_Error_t Lepton_FrezeVideo(Lepton_t *p_Device, bool Freeze, Lepton_Result_t *p_Status)
+Lepton_Error_t Lepton_FreezeVideo(Lepton_t *p_Device, bool Freeze, Lepton_Result_t *p_Status)
 {
     if (p_Device == NULL) {
         return LEPTON_ERR_INVALID_ARG;
