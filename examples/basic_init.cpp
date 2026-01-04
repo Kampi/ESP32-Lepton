@@ -29,7 +29,7 @@
 #include "lepton.h"
 
 static i2c_master_bus_handle_t I2C_Handle = NULL;
-static const char* TAG = "Lepton-Example";
+static const char *TAG = "Lepton-Example";
 
 extern "C" void app_main(void)
 {
@@ -49,8 +49,7 @@ extern "C" void app_main(void)
 
     Lepton_t Device;
     Lepton_Error_t Error = Lepton_Init(&Device, &Config);
-    if (Error != LEPTON_ERR_OK)
-    {
+    if (Error != LEPTON_ERR_OK) {
         ESP_LOGE(TAG, "Failed to initialize Lepton: %d", Error);
         ESP_LOGE(TAG, "Check wiring and power supply!");
         return;

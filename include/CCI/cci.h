@@ -373,6 +373,22 @@ Lepton_Error_t CCI_SetSceneROI(CCI_t *p_Interface, const Lepton_ROI_t *p_ROI, Le
  */
 Lepton_Error_t CCI_GetSceneROI(CCI_t *p_Interface, Lepton_ROI_t *p_ROI, Lepton_Result_t *p_Status = NULL);
 
+/** @brief              Set the video focus ROI.
+ *  @param p_Interface  Pointer to CCI interface object
+ *  @param p_ROI        Pointer to ROI object
+ *  @param p_Status     (Optional) Pointer to device status
+ *  @return             LEPTON_ERR_OK when successful
+ */
+Lepton_Error_t CCI_SetVideoFocusROI(CCI_t *p_Interface, const Lepton_ROI_t *p_ROI, Lepton_Result_t *p_Status = NULL);
+
+/** @brief              Get the video focus ROI.
+ *  @param p_Interface  Pointer to CCI interface object
+ *  @param p_ROI        Pointer to ROI object
+ *  @param p_Status     (Optional) Pointer to device status
+ *  @return             LEPTON_ERR_OK when successful
+ */
+Lepton_Error_t CCI_GetVideoFocusROI(CCI_t *p_Interface, Lepton_ROI_t *p_ROI, Lepton_Result_t *p_Status = NULL);
+
 /** @brief              Set the spotmeter ROI.
  *  @param p_Interface  Pointer to CCI interface object
  *  @param p_ROI        Pointer to ROI object
@@ -446,7 +462,7 @@ Lepton_Error_t CCI_GetAGCPolicy(CCI_t *p_Interface, Lepton_AGC_Mode_t *p_Policy,
  *  @param p_Status     (Optional) Pointer to device status
  *  @return             LEPTON_ERR_OK when successful
  */
-Lepton_Error_t CCI_SetVideoFreeze(CCI_t *p_Interface, bool Freeze, Lepton_Result_t *p_Status);
+Lepton_Error_t CCI_SetVideoFreeze(CCI_t *p_Interface, bool Freeze, Lepton_Result_t *p_Status = NULL);
 
 /** @brief              Get the status of the video freeze.
  *  @param p_Interface  Pointer to CCI interface object
@@ -454,6 +470,6 @@ Lepton_Error_t CCI_SetVideoFreeze(CCI_t *p_Interface, bool Freeze, Lepton_Result
  *  @param p_Status     (Optional) Pointer to device status
  *  @return             LEPTON_ERR_OK when successful
  */
-Lepton_Error_t CCI_GetVideoFreeze(CCI_t *p_Interface, bool *p_Freeze, Lepton_Result_t *p_Status);
+Lepton_Error_t CCI_GetVideoFreeze(CCI_t *p_Interface, bool *p_Freeze, Lepton_Result_t *p_Status = NULL);
 
 #endif /* CCI_H_ */

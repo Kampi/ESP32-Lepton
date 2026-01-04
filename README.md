@@ -25,8 +25,8 @@ High-performance ESP-IDF driver for [FLIR Lepton 3.5](https://oem.flir.com/de-de
 ## Features
 
 - Full support for **Lepton 3.5** (160x120 resolution)
-- **VoSPI** (Video over SPI) high-speed frame capture
-- **CCI** (Command & Control Interface) via I2C
+- VoSPI (Video over SPI) high-speed frame capture
+- CCI (Command & Control Interface) via I2C
 - AGC (Automatic Gain Control) support
 - FFC (Flat Field Correction) control
 - Radiometry support (temperature measurement)
