@@ -172,6 +172,8 @@ Lepton_Error_t Lepton_StartCapture(Lepton_t *p_Device, QueueHandle_t p_Queue)
     p_Device->Internal.FrameQueue = p_Queue;
     p_Device->Internal.VoSPI.CurrentBuffer = 0;
     p_Device->Internal.VoSPI.isCapturing = true;
+    p_Device->Internal.MinSmooth = 0;
+    p_Device->Internal.MaxSmooth = 16383;
 
     ESP_LOGD(TAG, "Creating capture task...");
 
@@ -237,18 +239,14 @@ Lepton_Error_t Lepton_StopCapture(Lepton_t *p_Device)
     return LEPTON_ERR_OK;
 }
 
-bool Lepton_Raw14ToRGB(uint16_t *p_Input, uint8_t *p_Output, int16_t *p_Min, int16_t *p_Max, uint16_t Width,
+bool Lepton_Raw14ToRGB(Lepton_t *p_Device, uint16_t *p_Input, uint8_t *p_Output, int16_t *p_Min, int16_t *p_Max, uint16_t Width,
                        uint16_t Height)
 {
-    static uint16_t min_smooth = 0;
-    static uint16_t max_smooth = 16383;
-    static const float SMOOTH_FACTOR = 0.95f; // Temporal smoothing
-
-    uint16_t min = 0xFFFF;
+    uint16_t min = INT16_MAX;
     uint16_t max = 0;
     uint32_t range;
 
-    if ((p_Input == NULL) || (p_Output == NULL)) {
+    if ((p_Device == NULL) || (p_Device->Internal.isInitialized == false) || ((p_Input == NULL) || (p_Output == NULL))) {
         return false;
     }
 
@@ -268,18 +266,17 @@ bool Lepton_Raw14ToRGB(uint16_t *p_Input, uint8_t *p_Output, int16_t *p_Min, int
     }
 
     /* Smooth min/max to reduce flicker */
-    if (min_smooth == 0 && max_smooth == 16383) {
+    if ((p_Device->Internal.MinSmooth == 0) && (p_Device->Internal.MaxSmooth == 16383)) {
         /* First frame - initialize */
-        min_smooth = min;
-        max_smooth = max;
+        p_Device->Internal.MinSmooth = min;
+        p_Device->Internal.MaxSmooth = max;
     } else {
         /* Exponential moving average */
-        min_smooth = (uint16_t)(SMOOTH_FACTOR * min_smooth + (1.0f - SMOOTH_FACTOR) * min);
-        max_smooth = (uint16_t)(SMOOTH_FACTOR * max_smooth + (1.0f - SMOOTH_FACTOR) * max);
+        p_Device->Internal.MinSmooth = static_cast<uint16_t>(p_Device->Internal.SmoothFactor * p_Device->Internal.MinSmooth + (1.0f - p_Device->Internal.SmoothFactor) * min);
+        p_Device->Internal.MaxSmooth = static_cast<uint16_t>(p_Device->Internal.SmoothFactor * p_Device->Internal.MaxSmooth + (1.0f - p_Device->Internal.SmoothFactor) * max);
     }
 
-    range = max_smooth - min_smooth;
-
+    range = p_Device->Internal.MaxSmooth - p_Device->Internal.MinSmooth;
     /* Avoid division by zero */
     if (range < 10) {
         range = 10;
@@ -288,7 +285,7 @@ bool Lepton_Raw14ToRGB(uint16_t *p_Input, uint8_t *p_Output, int16_t *p_Min, int
     /* Apply iron palette */
     for (uint32_t i = 0; i < (Width * Height); i++) {
         /* Normalize to 0-255 range using smoothed min/max */
-        uint32_t normalized = ((p_Input[i] - min_smooth) * 255) / range;
+        uint32_t normalized = ((p_Input[i] - p_Device->Internal.MinSmooth) * 255) / range;
         if (normalized > 255) {
             normalized = 255;
         }
