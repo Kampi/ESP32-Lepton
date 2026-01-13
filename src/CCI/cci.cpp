@@ -989,13 +989,13 @@ Lepton_Error_t CCI_SetRadiometryFluxLinearParams(CCI_t *p_Interface, Lepton_Flux
     }
 
     LEPTON_ERROR_CHECK(CCI_WaitBusy(p_Interface, p_Status));
-    LEPTON_ERROR_CHECK(CCI_WriteRegister(p_Interface, CCI_REG_DATA_0, p_Params->sceneEmissivity));
+    LEPTON_ERROR_CHECK(CCI_WriteRegister(p_Interface, CCI_REG_DATA_0, p_Params->SceneEmissivity));
     LEPTON_ERROR_CHECK(CCI_WriteRegister(p_Interface, CCI_REG_DATA_1, p_Params->TBkgK));
-    LEPTON_ERROR_CHECK(CCI_WriteRegister(p_Interface, CCI_REG_DATA_2, p_Params->tauWindow));
+    LEPTON_ERROR_CHECK(CCI_WriteRegister(p_Interface, CCI_REG_DATA_2, p_Params->TauWindow));
     LEPTON_ERROR_CHECK(CCI_WriteRegister(p_Interface, CCI_REG_DATA_3, p_Params->TWindowK));
-    LEPTON_ERROR_CHECK(CCI_WriteRegister(p_Interface, CCI_REG_DATA_4, p_Params->tauAtm));
+    LEPTON_ERROR_CHECK(CCI_WriteRegister(p_Interface, CCI_REG_DATA_4, p_Params->TauAtm));
     LEPTON_ERROR_CHECK(CCI_WriteRegister(p_Interface, CCI_REG_DATA_5, p_Params->TAtmK));
-    LEPTON_ERROR_CHECK(CCI_WriteRegister(p_Interface, CCI_REG_DATA_6, p_Params->reflWindow));
+    LEPTON_ERROR_CHECK(CCI_WriteRegister(p_Interface, CCI_REG_DATA_6, p_Params->ReflWindow));
     LEPTON_ERROR_CHECK(CCI_WriteRegister(p_Interface, CCI_REG_DATA_7, p_Params->TReflK));
     LEPTON_ERROR_CHECK(CCI_WriteRegister(p_Interface, CCI_REG_DATA_LENGTH, 8));
     LEPTON_ERROR_CHECK(CCI_WriteRegister(p_Interface, CCI_REG_COMMAND, CCI_CMD_RAD_SET_FLUX_LINEAR_PARAMS));
@@ -1014,13 +1014,13 @@ Lepton_Error_t CCI_GetRadiometryFluxLinearParams(CCI_t *p_Interface, Lepton_Flux
     LEPTON_ERROR_CHECK(CCI_WriteRegister(p_Interface, CCI_REG_DATA_LENGTH, 8));
     LEPTON_ERROR_CHECK(CCI_WriteRegister(p_Interface, CCI_REG_COMMAND, CCI_CMD_RAD_GET_FLUX_LINEAR_PARAMS));
     LEPTON_ERROR_CHECK(CCI_WaitBusy(p_Interface, p_Status));
-    LEPTON_ERROR_CHECK(CCI_ReadRegister(p_Interface, CCI_REG_DATA_0, &p_Params->sceneEmissivity));
+    LEPTON_ERROR_CHECK(CCI_ReadRegister(p_Interface, CCI_REG_DATA_0, &p_Params->SceneEmissivity));
     LEPTON_ERROR_CHECK(CCI_ReadRegister(p_Interface, CCI_REG_DATA_1, &p_Params->TBkgK));
-    LEPTON_ERROR_CHECK(CCI_ReadRegister(p_Interface, CCI_REG_DATA_2, &p_Params->tauWindow));
+    LEPTON_ERROR_CHECK(CCI_ReadRegister(p_Interface, CCI_REG_DATA_2, &p_Params->TauWindow));
     LEPTON_ERROR_CHECK(CCI_ReadRegister(p_Interface, CCI_REG_DATA_3, &p_Params->TWindowK));
-    LEPTON_ERROR_CHECK(CCI_ReadRegister(p_Interface, CCI_REG_DATA_4, &p_Params->tauAtm));
+    LEPTON_ERROR_CHECK(CCI_ReadRegister(p_Interface, CCI_REG_DATA_4, &p_Params->TauAtm));
     LEPTON_ERROR_CHECK(CCI_ReadRegister(p_Interface, CCI_REG_DATA_5, &p_Params->TAtmK));
-    LEPTON_ERROR_CHECK(CCI_ReadRegister(p_Interface, CCI_REG_DATA_6, &p_Params->reflWindow));
+    LEPTON_ERROR_CHECK(CCI_ReadRegister(p_Interface, CCI_REG_DATA_6, &p_Params->ReflWindow));
     LEPTON_ERROR_CHECK(CCI_ReadRegister(p_Interface, CCI_REG_DATA_7, &p_Params->TReflK));
 
     return CCI_WaitBusy(p_Interface, p_Status);

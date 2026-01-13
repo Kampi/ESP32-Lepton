@@ -183,15 +183,29 @@ Lepton_Error_t Lepton_GetTemperature(Lepton_t *p_Device, uint16_t *p_FPA, uint16
  */
 Lepton_Error_t Lepton_EnableAGC(Lepton_t *p_Device, bool Enable, Lepton_Result_t *p_Status = NULL);
 
-/** @brief              Set the scene emissivity for radiometric measurements.
- *                      Only applicable for radiometric Lepton modules.
+/** @brief              Get the scene parameters for radiometric measurements.
  *  @param p_Device     Pointer to device instance
- *  @param Emissivity   Scene emissivity value in percent (1-100%)
+ *  @param Emissivity   Emissivity value (0-100)
  *  @param p_Status     (Optional) Pointer to device status
  *  @return             LEPTON_ERR_OK when successful
- *                      LEPTON_ERR_INVALID_STATE when called on non-radiometric module
  */
-Lepton_Error_t Lepton_Emissivity(Lepton_t *p_Device, uint16_t Emissivity, Lepton_Result_t *p_Status = NULL);
+Lepton_Error_t Lepton_SetEmissivity(Lepton_t *p_Device, Lepton_Emissivity_t Emissivity, Lepton_Result_t *p_Status = NULL);
+
+/** @brief              Get the scene parameters for radiometric measurements.
+ *  @param p_Device     Pointer to device instance
+ *  @param p_Parameters Pointer to flux linear parameters object
+ *  @param p_Status     (Optional) Pointer to device status
+ *  @return             LEPTON_ERR_OK when successful
+ */
+Lepton_Error_t Lepton_GetFluxLinearParameters(Lepton_t *p_Device, Lepton_FluxLinearParams_t* p_Parameters, Lepton_Result_t *p_Status = NULL);
+
+/** @brief              Set the scene parameters for radiometric measurements.
+ *  @param p_Device     Pointer to device instance
+ *  @param p_Parameters Pointer to flux linear parameters object
+ *  @param p_Status     (Optional) Pointer to device status
+ *  @return             LEPTON_ERR_OK when successful
+ */
+Lepton_Error_t Lepton_SetFluxLinearParameters(Lepton_t *p_Device, Lepton_FluxLinearParams_t* p_Parameters, Lepton_Result_t *p_Status = NULL);
 
 /** @brief          Get the uptime of the device in milliseconds.
  *  @param p_Device Pointer to device instance
@@ -362,6 +376,7 @@ Lepton_Error_t Lepton_GetPixelTemperature(Lepton_t *p_Device, uint16_t PixelValu
 /** @brief          Convert a thermal value to RGB color using iron palette.
  *                  The function applies an iron palette pseudocolor mapping optimized for thermal imaging.
  *                  Color mapping: blue (cold) -> cyan -> green -> yellow -> red (hot)
+ *  @param p_Device Pointer to device instance
  *  @param p_Input  Pointer to input buffer containing thermal values (14-bit per pixel)
  *  @param p_Output Pointer to RGB output buffer
  *  @param p_Min    Pointer to minimum value in the image
@@ -370,7 +385,7 @@ Lepton_Error_t Lepton_GetPixelTemperature(Lepton_t *p_Device, uint16_t PixelValu
  *  @param Height   Image height in pixels
  *  @return         true on success, false on failure
  */
-bool Lepton_Raw14ToRGB(uint16_t *p_Input, uint8_t *p_Output, int16_t *p_Min, int16_t *p_Max, uint16_t Width,
+bool Lepton_Raw14ToRGB(Lepton_t *p_Device, uint16_t *p_Input, uint8_t *p_Output, int16_t *p_Min, int16_t *p_Max, uint16_t Width,
                        uint16_t Height);
 
 #ifdef __cplusplus

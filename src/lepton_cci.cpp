@@ -69,43 +69,49 @@ Lepton_Error_t Lepton_EnableAGC(Lepton_t *p_Device, bool Enable, Lepton_Result_t
     return LEPTON_ERR_OK;
 }
 
-Lepton_Error_t Lepton_Emissivity(Lepton_t *p_Device, uint16_t Emissivity, Lepton_Result_t *p_Status)
+Lepton_Error_t Lepton_SetEmissivity(Lepton_t *p_Device, Lepton_Emissivity_t Emissivity, Lepton_Result_t *p_Status)
 {
-    Lepton_FluxLinearParams_t FluxValues;
+    Lepton_FluxLinearParams_t Parameters;
 
+    if ((p_Device == NULL) || (Emissivity > 100)) {
+        return LEPTON_ERR_INVALID_ARG;
+    } else if (p_Device->Internal.isInitialized == false) {
+        return LEPTON_ERR_NOT_INITIALIZED;
+    } else if (p_Device->Internal.isRadiometric == false) {
+        return LEPTON_ERR_NOT_SUPPORTED;
+    }
+
+    LEPTON_ERROR_CHECK(CCI_GetRadiometryFluxLinearParams(&p_Device->Internal.CCI, &Parameters, p_Status));
+
+    Parameters.SceneEmissivity = Parameters.SceneEmissivity * Emissivity / 100;
+
+    ESP_LOGI(TAG, "Setting emissivity to %u%% (Value: %u)", Emissivity, Parameters.SceneEmissivity);
+
+    return CCI_SetRadiometryFluxLinearParams(&p_Device->Internal.CCI, &Parameters, p_Status);
+}
+
+Lepton_Error_t Lepton_GetFluxLinearParameters(Lepton_t *p_Device, Lepton_FluxLinearParams_t* p_Parameters, Lepton_Result_t *p_Status)
+{
+    if (p_Device == NULL) {
+        return LEPTON_ERR_INVALID_ARG;
+    } else if (p_Device->Internal.isInitialized == false) {
+        return LEPTON_ERR_NOT_INITIALIZED;
+    } else if (p_Device->Internal.isRadiometric == false) {
+        return LEPTON_ERR_NOT_SUPPORTED;
+    }
+
+    return CCI_GetRadiometryFluxLinearParams(&p_Device->Internal.CCI, p_Parameters, p_Status);
+}
+
+Lepton_Error_t Lepton_SetFluxLinearParameters(Lepton_t *p_Device, Lepton_FluxLinearParams_t* p_Parameters, Lepton_Result_t *p_Status)
+{
     if (p_Device == NULL) {
         return LEPTON_ERR_INVALID_ARG;
     } else if (p_Device->Internal.isInitialized == false) {
         return LEPTON_ERR_NOT_INITIALIZED;
     }
 
-    ESP_LOGD(TAG, "Set Emissivity: %u%%", Emissivity);
-
-    if (p_Device->Internal.isRadiometric) {
-        // Scale percentage into Lepton scene emissivity values (1-100% -> 82-8192).
-        if (Emissivity < 1) {
-            Emissivity = 1;
-        }
-
-        if (Emissivity > 100) {
-            Emissivity = 100;
-        }
-
-        FluxValues.sceneEmissivity = Emissivity * 8192 / 100;
-
-        // Set default (no lens) values for the remaining parameters.
-        FluxValues.TBkgK      = 29515;
-        FluxValues.tauWindow  = 8192;
-        FluxValues.TWindowK   = 29515;
-        FluxValues.tauAtm     = 8192;
-        FluxValues.TAtmK      = 29515;
-        FluxValues.reflWindow = 0;
-        FluxValues.TReflK     = 29515;
-
-        return CCI_SetRadiometryFluxLinearParams(&p_Device->Internal.CCI, &FluxValues, p_Status);
-    }
-
-    return LEPTON_ERR_INVALID_STATE;
+    return CCI_SetRadiometryFluxLinearParams(&p_Device->Internal.CCI, p_Parameters, p_Status);
 }
 
 uint32_t Lepton_GetUptime(Lepton_t *p_Device, Lepton_Result_t *p_Status)

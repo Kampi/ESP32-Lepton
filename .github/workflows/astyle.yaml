@@ -54,7 +54,7 @@ jobs:
             git diff --name-only
             echo ""
             echo "To fix formatting, run:"
-            echo "  astyle --options=.astyle.cfg --recursive 'src/*.cpp,src/*.h,include/*.cpp,include/*.h'"
+            echo "  find src include -type f \( -name '*.cpp' -o -name '*.h' \) | xargs astyle --options=.astyle.cfg"
             git checkout .
             exit 1
           else

@@ -37,8 +37,6 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-typedef uint8_t Lepton_BufferIndex_t;
-
 /** @brief          Set a GPIO to the given level.
  *  @param Level    Output state
  */
@@ -76,6 +74,28 @@ typedef int32_t (*I2C_Read_t)(i2c_master_dev_handle_t *p_Dev_Handle, uint8_t *p_
  *                      -1 when not successful
  */
 typedef int32_t (*I2C_Deinit_t)(i2c_master_bus_handle_t Bus_handle);
+
+/** @brief Material emissivity values scaled by 100.
+ */
+typedef enum {
+    LEPTON_EMISSIVITY_ASPHALT              = 95,    /**< Emissivity value for asphalt (0.90-0.98, avg 0.95) */
+    LEPTON_EMISSIVITY_CONCRETE             = 92,    /**< Emissivity value for concrete (0.92) */
+    LEPTON_EMISSIVITY_SOIL_DRY             = 90,    /**< Emissivity value for dry soil (0.90) */
+    LEPTON_EMISSIVITY_SOIL_WET             = 95,    /**< Emissivity value for wet soil (0.95) */
+    LEPTON_EMISSIVITY_WOOD                 = 90,    /**< Emissivity value for wood (0.90) */
+    LEPTON_EMISSIVITY_WATER                = 94,    /**< Emissivity value for water (0.92-0.96, avg 0.94) */
+    LEPTON_EMISSIVITY_ICE                  = 97,    /**< Emissivity value for ice (0.96-0.98, avg 0.97) */
+    LEPTON_EMISSIVITY_SNOW                 = 83,    /**< Emissivity value for snow (0.83) */
+    LEPTON_EMISSIVITY_BRICK                = 95,    /**< Emissivity value for brick (0.93-0.96, avg 0.95) */
+    LEPTON_EMISSIVITY_PAINT                = 90,    /**< Emissivity value for lacquer/paint (0.80-0.95, avg 0.90) */
+    LEPTON_EMISSIVITY_PAINT_BLACK          = 97,    /**< Emissivity value for flat black lacquer (0.97) */
+    LEPTON_EMISSIVITY_TEXTILES             = 90,    /**< Emissivity value for textiles (0.90) */
+    LEPTON_EMISSIVITY_SKIN_HUMAN           = 98,    /**< Emissivity value for human skin (0.98) */
+    LEPTON_EMISSIVITY_ALUMINUM_POLISHED    = 5,     /**< Emissivity value for polished aluminum (0.04-0.06, avg 0.05) */
+    LEPTON_EMISSIVITY_ALUMINUM_ANODIZED    = 55,    /**< Emissivity value for anodized aluminum (0.55) */
+    LEPTON_EMISSIVITY_STEEL_RUSTY          = 69,    /**< Emissivity value for rusty steel (0.69) */
+    LEPTON_EMISSIVITY_STEEL_STAINLESS      = 30,    /**< Emissivity value for stainless steel (0.16-0.45, avg 0.30) */
+} Lepton_Emissivity_t;
 
 /** @brief Lepton error codes from the software driver (Chapter 2.3 - FLIR LEPTON Software IDD).
  */
@@ -200,13 +220,13 @@ typedef enum {
 /** @brief Radiometry Flux Linear parameter (Chapter 4.8.7 - FLIR LEPTON Software IDD).
  */
 typedef struct {
-    uint16_t sceneEmissivity;                   /**< */
-    uint16_t TBkgK;                             /**< */
-    uint16_t tauWindow;                         /**< */
-    uint16_t TWindowK;                          /**< */
-    uint16_t tauAtm;                            /**< */
+    uint16_t SceneEmissivity;                   /**< */
+    uint16_t TBkgK;                             /**< Background temperature (ambient temperature of surrounding objects) in Kelvin (Factor 100). */
+    uint16_t TauWindow;                         /**< Transmission value of the window in front of the Lepton (8192 = 100%). */
+    uint16_t TWindowK;                          /**< Temperature of the window in front of the Lepton in Kelvin (Factor 100). */
+    uint16_t TauAtm;                            /**< */
     uint16_t TAtmK;                             /**< */
-    uint16_t reflWindow;                        /**< */
+    uint16_t ReflWindow;                        /**< */
     uint16_t TReflK;                            /**< */
 } Lepton_FluxLinearParams_t;
 
@@ -381,6 +401,12 @@ typedef struct {
                                                       NOTE: Managed by the device driver. */
         VoSPI_t VoSPI;                          /**< VoSPI device object used by the camera driver.
                                                       NOTE: Managed by the device driver. */
+        uint16_t MinSmooth;                     /**< Minimum smooth value for RGB conversion.
+                                                     NOTE: Managed by the device driver. */
+        uint16_t MaxSmooth;                     /**< Maximum smooth value for RGB conversion.
+                                                     NOTE: Managed by the device driver. */
+        const float SmoothFactor = 0.95f;       /**< Smoothing factor for min/max smoothing.
+                                                     NOTE: Managed by the device driver. */
     } Internal;
 } Lepton_t;
 
