@@ -183,7 +183,7 @@ Lepton_Error_t Lepton_GetTemperature(Lepton_t *p_Device, uint16_t *p_FPA, uint16
  */
 Lepton_Error_t Lepton_EnableAGC(Lepton_t *p_Device, bool Enable, Lepton_Result_t *p_Status = NULL);
 
-/** @brief              Get the scene parameters for radiometric measurements.
+/** @brief              Set the scene parameters for radiometric measurements.
  *  @param p_Device     Pointer to device instance
  *  @param Emissivity   Emissivity value (0-100)
  *  @param p_Status     (Optional) Pointer to device status

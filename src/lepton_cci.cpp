@@ -83,7 +83,7 @@ Lepton_Error_t Lepton_SetEmissivity(Lepton_t *p_Device, Lepton_Emissivity_t Emis
 
     LEPTON_ERROR_CHECK(CCI_GetRadiometryFluxLinearParams(&p_Device->Internal.CCI, &Parameters, p_Status));
 
-    Parameters.SceneEmissivity = Parameters.SceneEmissivity * Emissivity / 100;
+    Parameters.SceneEmissivity = static_cast<uint16_t>((8192 * Emissivity) / 100);
 
     ESP_LOGI(TAG, "Setting emissivity to %u%% (Value: %u)", Emissivity, Parameters.SceneEmissivity);
 
@@ -109,6 +109,8 @@ Lepton_Error_t Lepton_SetFluxLinearParameters(Lepton_t *p_Device, Lepton_FluxLin
         return LEPTON_ERR_INVALID_ARG;
     } else if (p_Device->Internal.isInitialized == false) {
         return LEPTON_ERR_NOT_INITIALIZED;
+    } else if (p_Device->Internal.isRadiometric == false) {
+        return LEPTON_ERR_NOT_SUPPORTED;
     }
 
     return CCI_SetRadiometryFluxLinearParams(&p_Device->Internal.CCI, p_Parameters, p_Status);
@@ -168,7 +170,7 @@ Lepton_Error_t Lepton_GetSpotmeter(Lepton_t *p_Device, Lepton_Spotmeter_t *p_Spo
     LEPTON_ERROR_CHECK(CCI_GetTLinearResolution(&p_Device->Internal.CCI, &Resolution, p_Status));
 
     ESP_LOGD(TAG, "Spotmeter Resolution: %u", Resolution);
-    ESP_LOGD(TAG, "Spotmeter Raw Values - Value: %u, Min: %u, Max: %u, Population: %u",
+    ESP_LOGD(TAG, "Spotmeter Raw Values - Value: %f, Min: %f, Max: %f, Population: %u",
              Spotmeter.Value, Spotmeter.Min, Spotmeter.Max, Spotmeter.Population);
 
     p_Spot->Population = Spotmeter.Population;
