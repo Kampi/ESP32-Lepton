@@ -1,4 +1,4 @@
-name: Component
+name: Release
 
 on:
   workflow_dispatch:

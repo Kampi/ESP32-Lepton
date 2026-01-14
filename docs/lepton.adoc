@@ -1,0 +1,619 @@
+= Lepton Main Driver Module
+Daniel Kampert <DanielKampert@kampis-elektroecke.de>
+v1.0.0, {docdate}
+:doctype: article
+:icons: font
+:toc: left
+:toclevels: 3
+:sectanchors:
+:sectlinks:
+:sectnums:
+:source-highlighter: rouge
+
+== Overview
+
+The `lepton` module is the core driver interface for FLIR Lepton thermal imaging sensors. It provides high-level functions for device initialization, configuration, and control.
+
+=== Key Features
+
+* Device initialization and deinitialization
+* Video format configuration
+* Telemetry control
+* Temperature reading (FPA and AUX)
+* AGC (Automatic Gain Control) configuration
+* ROI (Region of Interest) management for multiple features
+* Radiometric measurements (Lepton 3.5)
+* Frame capture control
+* Color palette conversion
+
+=== Supported Sensors
+
+The driver automatically detects and supports:
+
+* *Lepton 3.0* (500-0726-01) - Non-radiometric
+* *Lepton 3.5* (500-0771-01) - Radiometric with TLinear
+
+== Initialization
+
+=== Basic Initialization
+
+[source,c]
+----
+#include "lepton.h"
+
+Lepton_t device;
+Lepton_Result_t status;
+
+Lepton_Conf_t config = {
+    .CCI = {
+        .I2C_Read = my_i2c_read_function,
+        .I2C_Write = my_i2c_write_function,
+        .Address = LEPTON_I2C_ADDRESS
+    },
+    .VoSPI = {
+        .Host = SPI2_HOST,
+        .Interface = {
+            .clock_speed_hz = 20000000,  // 20 MHz
+            .spics_io_num = GPIO_NUM_10
+        },
+        .Master = {
+            .sclk_io_num = GPIO_NUM_12,
+            .miso_io_num = GPIO_NUM_13
+        },
+        .DMA = SPI_DMA_CH_AUTO
+    },
+    .VSync = GPIO_NUM_5,
+    .Reset = &my_reset_function,
+    .PowerDown = &my_powerdown_function
+};
+
+if (Lepton_Init(&device, &config, &status) != LEPTON_ERR_OK) {
+    ESP_LOGE(TAG, "Failed to initialize Lepton");
+}
+----
+
+=== Configuration Structure
+
+The `Lepton_Conf_t` structure contains:
+
+* *CCI*: I2C communication callbacks and address
+* *VoSPI*: SPI configuration (host, pins, clock, DMA)
+* *VSync*: GPIO pin for vertical sync interrupt (optional)
+* *Reset*: Hardware reset callback (optional)
+* *PowerDown*: Power-down control callback (optional)
+
+== API Functions
+
+=== Device Control
+
+==== Lepton_Init
+[source,c]
+----
+Lepton_Error_t Lepton_Init(
+    Lepton_t *p_Device,
+    const Lepton_Conf_t *const p_Init,
+    Lepton_Result_t *p_Status
+);
+----
+
+Initialize the Lepton sensor.
+
+*Parameters:*
+
+* `p_Device`: Pointer to device instance
+* `p_Init`: Pointer to configuration structure
+* `p_Status`: Optional pointer to receive status information
+
+*Returns:* `LEPTON_ERR_OK` on success
+
+*Initialization Sequence:*
+
+1. Hardware reset (if callback provided)
+2. Power-up (if callback provided)
+3. Wait 950ms for boot
+4. Initialize CCI interface
+5. Detect sensor model and capabilities
+6. Configure default settings
+
+==== Lepton_Deinit
+[source,c]
+----
+void Lepton_Deinit(Lepton_t *p_Device);
+----
+
+Deinitialize the sensor and free resources.
+
+==== Lepton_HardReset
+[source,c]
+----
+void Lepton_HardReset(Lepton_t *p_Device);
+----
+
+Perform hardware reset via external GPIO.
+
+NOTE: This function is weak and must be implemented by the application.
+
+==== Lepton_EnablePowerDown
+[source,c]
+----
+void Lepton_EnablePowerDown(Lepton_t *p_Device, bool Enable);
+----
+
+Control power-down mode via external GPIO.
+
+NOTE: This function is weak and must be implemented by the application.
+
+=== Video Configuration
+
+==== Lepton_SetVideoFormat
+[source,c]
+----
+Lepton_Error_t Lepton_SetVideoFormat(
+    Lepton_t *p_Device,
+    Lepton_VideoFormat_t Format,
+    Lepton_Result_t *p_Status
+);
+----
+
+Set the video output format.
+
+*Formats:*
+
+* `LEPTON_FORMAT_RAW14`: 14-bit raw thermal data
+* `LEPTON_FORMAT_RGB888`: 8-bit RGB (AGC applied)
+
+NOTE: Changing format triggers VoSPI resynchronization.
+
+==== Lepton_GetVideoFormat
+[source,c]
+----
+Lepton_Error_t Lepton_GetVideoFormat(
+    Lepton_t *p_Device,
+    Lepton_VideoFormat_t *p_Format
+);
+----
+
+Get the current video format.
+
+==== Lepton_SetVideoSource
+[source,c]
+----
+Lepton_Error_t Lepton_SetVideoSource(
+    Lepton_t *p_Device,
+    Lepton_VideoSource_t Source,
+    uint16_t Constant,
+    Lepton_Result_t *p_Status
+);
+----
+
+Set the video source for testing and calibration.
+
+*Sources:*
+
+* `LEPTON_SOURCE_RAW`: Normal thermal imaging
+* `LEPTON_SOURCE_COOKED`: Processed thermal data
+* `LEPTON_SOURCE_CONSTANT`: Fixed value for testing
+* `LEPTON_SOURCE_RAMP`: Ramp pattern for testing
+
+==== Lepton_FreezeVideo
+[source,c]
+----
+Lepton_Error_t Lepton_FreezeVideo(
+    Lepton_t *p_Device,
+    bool Freeze,
+    Lepton_Result_t *p_Status
+);
+----
+
+Freeze/unfreeze video output.
+
+=== Telemetry
+
+==== Lepton_EnableTelemetry
+[source,c]
+----
+Lepton_Error_t Lepton_EnableTelemetry(
+    Lepton_t *p_Device,
+    bool Enable,
+    Lepton_Result_t *p_Status
+);
+----
+
+Enable/disable telemetry data in video stream. Telemetry includes temperature, status, and metadata.
+
+=== Temperature Measurement
+
+==== Lepton_GetTemperature
+[source,c]
+----
+Lepton_Error_t Lepton_GetTemperature(
+    Lepton_t *p_Device,
+    uint16_t *p_FPA,
+    uint16_t *p_AUX,
+    Lepton_Result_t *p_Status
+);
+----
+
+Read sensor temperatures.
+
+*Returns:*
+
+* `p_FPA`: Focal Plane Array temperature (centi-Kelvin)
+* `p_AUX`: Auxiliary temperature (centi-Kelvin)
+
+*Conversion:*
+
+[source,c]
+----
+float celsius = Lepton_KelvinToCelsius(fpa_temp);
+----
+
+==== Lepton_GetPixelTemperature
+[source,c]
+----
+Lepton_Error_t Lepton_GetPixelTemperature(
+    Lepton_t *p_Device,
+    uint16_t PixelValue,
+    float *p_Temperature
+);
+----
+
+Convert a raw pixel value to temperature in Celsius.
+
+IMPORTANT: Only available on radiometric Lepton 3.5 with TLinear enabled.
+
+=== AGC Configuration
+
+==== Lepton_EnableAGC
+[source,c]
+----
+Lepton_Error_t Lepton_EnableAGC(
+    Lepton_t *p_Device,
+    bool Enable,
+    Lepton_Result_t *p_Status
+);
+----
+
+Enable/disable Automatic Gain Control.
+
+* *Enabled*: 8-bit contrast-enhanced output
+* *Disabled*: 14-bit raw radiometric data
+
+=== ROI Management
+
+The driver supports multiple Region of Interest (ROI) types:
+
+* *Spotmeter ROI*: Single-point temperature measurement
+* *Scene ROI*: Scene statistics calculation area
+* *AGC ROI*: Area for AGC algorithm
+* *Video Focus ROI*: Focus calculation area
+
+==== Lepton_SetSpotmeterROI / Lepton_GetSpotmeterROI
+[source,c]
+----
+Lepton_Error_t Lepton_SetSpotmeterROI(
+    Lepton_t *p_Device,
+    Lepton_ROI_t *p_ROI,
+    Lepton_Result_t *p_Status
+);
+----
+
+Configure spotmeter region.
+
+*Example:*
+
+[source,c]
+----
+Lepton_ROI_t roi = {
+    .Start = {.X = 70, .Y = 50},   // Center of 160x120 image
+    .End = {.X = 90, .Y = 70}
+};
+Lepton_SetSpotmeterROI(&device, &roi, &status);
+----
+
+==== Lepton_GetSpotmeter
+[source,c]
+----
+Lepton_Error_t Lepton_GetSpotmeter(
+    Lepton_t *p_Device,
+    Lepton_Spotmeter_t *p_Spot,
+    Lepton_Result_t *p_Status
+);
+----
+
+Read spotmeter values (temperature, min, max, population).
+
+==== Scene ROI Functions
+
+* `Lepton_SetSceneROI()` / `Lepton_GetSceneROI()`
+* `Lepton_SetAGCROI()` / `Lepton_GetAGCROI()`
+* `Lepton_SetVideoFocusROI()` / `Lepton_GetVideoFocusROI()`
+
+=== Scene Statistics
+
+==== Lepton_GetSceneStatistics
+[source,c]
+----
+Lepton_Error_t Lepton_GetSceneStatistics(
+    Lepton_t *p_Device,
+    Lepton_SceneStatistics_t *p_Statistics,
+    Lepton_Result_t *p_Status
+);
+----
+
+Get scene statistics (min, max, average temperature).
+
+=== Radiometric Functions (Lepton 3.5 only)
+
+==== Lepton_SetEmissivity
+[source,c]
+----
+Lepton_Error_t Lepton_SetEmissivity(
+    Lepton_t *p_Device,
+    Lepton_Emissivity_t Emissivity,
+    Lepton_Result_t *p_Status
+);
+----
+
+Set material emissivity for accurate temperature measurement.
+
+*Common Emissivity Values:*
+
+* Human skin: 0.98
+* Water: 0.95
+* Concrete: 0.92
+* Steel (polished): 0.30
+
+==== Lepton_SetFluxLinearParameters / Lepton_GetFluxLinearParameters
+[source,c]
+----
+Lepton_Error_t Lepton_SetFluxLinearParameters(
+    Lepton_t *p_Device,
+    Lepton_FluxLinearParams_t *p_Parameters,
+    Lepton_Result_t *p_Status
+);
+----
+
+Configure flux linear calibration parameters.
+
+==== Lepton_SetTLinearResolution / Lepton_GetTLinearResolution
+[source,c]
+----
+Lepton_Error_t Lepton_SetTLinearResolution(
+    Lepton_t *p_Device,
+    Lepton_TLinear_Resolution_t Resolution,
+    Lepton_Result_t *p_Status
+);
+----
+
+Set TLinear temperature resolution mode.
+
+=== Frame Capture
+
+==== Lepton_StartCapture
+[source,c]
+----
+Lepton_Error_t Lepton_StartCapture(
+    Lepton_t *p_Device,
+    QueueHandle_t p_Queue
+);
+----
+
+Start frame capture task.
+
+*Parameters:*
+
+* `p_Queue`: FreeRTOS queue to receive frame buffers
+
+*Queue Item Type:*
+
+[source,c]
+----
+Lepton_FrameBuffer_t frame;
+if (xQueueReceive(queue, &frame, portMAX_DELAY)) {
+    // Process frame.p_Buffer (160x120 pixels)
+    // Release when done
+}
+----
+
+==== Lepton_StopCapture
+[source,c]
+----
+Lepton_Error_t Lepton_StopCapture(Lepton_t *p_Device);
+----
+
+Stop frame capture and free resources.
+
+=== Image Processing
+
+==== Lepton_Raw14ToRGB
+[source,c]
+----
+bool Lepton_Raw14ToRGB(
+    Lepton_t *p_Device,
+    uint16_t *p_Input,
+    uint8_t *p_Output,
+    int16_t *p_Min,
+    int16_t *p_Max,
+    uint16_t Width,
+    uint16_t Height
+);
+----
+
+Convert 14-bit raw thermal data to RGB using iron palette.
+
+*Color Mapping:*
+
+* Blue → Cyan → Green → Yellow → Red
+* Blue = coldest, Red = hottest
+
+*Usage:*
+
+[source,c]
+----
+uint16_t raw[160*120];
+uint8_t rgb[160*120*3];
+int16_t min, max;
+
+Lepton_Raw14ToRGB(&device, raw, rgb, &min, &max, 160, 120);
+ESP_LOGI(TAG, "Temperature range: %d to %d", min, max);
+----
+
+=== Utility Functions
+
+==== Lepton_LibVersion
+[source,c]
+----
+std::string Lepton_LibVersion(void);
+----
+
+Get library version string (e.g., "1.0.0").
+
+==== Lepton_GetUptime
+[source,c]
+----
+uint32_t Lepton_GetUptime(
+    Lepton_t *p_Device,
+    Lepton_Result_t *p_Status
+);
+----
+
+Get sensor uptime in milliseconds.
+
+==== Lepton_isCapturing
+[source,c]
+----
+bool Lepton_isCapturing(Lepton_t *p_Device);
+----
+
+Check if capture is active.
+
+==== Lepton_GetSyncErrors
+[source,c]
+----
+int32_t Lepton_GetSyncErrors(Lepton_t *p_Device);
+----
+
+Get VoSPI synchronization error count.
+
+==== Lepton_GetFrameCounter
+[source,c]
+----
+int32_t Lepton_GetFrameCounter(Lepton_t *p_Device);
+----
+
+Get number of successfully captured frames.
+
+==== Lepton_KelvinToCelsius
+[source,c]
+----
+float Lepton_KelvinToCelsius(uint32_t Kelvin);
+----
+
+Convert centi-Kelvin to Celsius.
+
+*Example:*
+
+[source,c]
+----
+uint16_t fpa_temp;
+Lepton_GetTemperature(&device, &fpa_temp, NULL, NULL);
+float celsius = Lepton_KelvinToCelsius(fpa_temp);
+----
+
+== Error Handling
+
+All functions return `Lepton_Error_t`:
+
+* `LEPTON_ERR_OK`: Success
+* `LEPTON_ERR_INVALID_ARG`: Invalid parameter
+* `LEPTON_ERR_TIMEOUT`: Communication timeout
+* `LEPTON_ERR_NOT_INITIALIZED`: Device not initialized
+* `LEPTON_ERR_NOT_SUPPORTED`: Feature not supported
+* `LEPTON_ERR_NO_MEM`: Memory allocation failed
+
+The optional `Lepton_Result_t` provides detailed CCI status codes.
+
+== Usage Example
+
+=== Complete Initialization and Capture
+
+[source,c]
+----
+#include "lepton.h"
+
+static Lepton_t lepton_device;
+static QueueHandle_t frame_queue;
+
+void app_main(void) {
+    // Create frame queue
+    frame_queue = xQueueCreate(3, sizeof(Lepton_FrameBuffer_t));
+    
+    // Configure Lepton
+    Lepton_Conf_t config = {
+        .CCI = {
+            .I2C_Read = i2c_read_callback,
+            .I2C_Write = i2c_write_callback,
+            .Address = LEPTON_I2C_ADDRESS
+        },
+        .VoSPI = {
+            .Host = SPI2_HOST,
+            .Interface = {
+                .clock_speed_hz = 20000000,
+                .spics_io_num = GPIO_NUM_10
+            },
+            .Master = {
+                .sclk_io_num = GPIO_NUM_12,
+                .miso_io_num = GPIO_NUM_13
+            },
+            .DMA = SPI_DMA_CH_AUTO
+        },
+        .VSync = GPIO_NUM_5
+    };
+    
+    // Initialize
+    Lepton_Result_t status;
+    if (Lepton_Init(&lepton_device, &config, &status) != LEPTON_ERR_OK) {
+        ESP_LOGE(TAG, "Initialization failed");
+        return;
+    }
+    
+    // Configure for radiometric mode
+    Lepton_EnableAGC(&lepton_device, false, &status);
+    Lepton_SetEmissivity(&lepton_device, 95, &status);  // 0.95 for most surfaces
+    
+    // Start capture
+    Lepton_StartCapture(&lepton_device, frame_queue);
+    
+    // Process frames
+    Lepton_FrameBuffer_t frame;
+    while (true) {
+        if (xQueueReceive(frame_queue, &frame, portMAX_DELAY)) {
+            // Convert to RGB
+            uint8_t rgb[160*120*3];
+            int16_t min, max;
+            Lepton_Raw14ToRGB(&lepton_device, frame.p_Buffer, 
+                             rgb, &min, &max, 160, 120);
+            
+            ESP_LOGI(TAG, "Frame captured, temp range: %.1f to %.1f °C",
+                     Lepton_KelvinToCelsius(min),
+                     Lepton_KelvinToCelsius(max));
+        }
+    }
+}
+----
+
+== See Also
+
+* link:lepton_cci.html[CCI Commands] - High-level CCI interface
+* link:lepton_capture.html[Frame Capture] - Capture implementation details
+* link:cci.html[CCI Low-Level] - Low-level I2C communication
+* link:vospi.html[VoSPI] - SPI video interface
+
+== License
+
+Copyright (C) Daniel Kampert, 2026
+
+This program is free software under GNU GPL v3.0.
+
+Website: https://www.kampis-elektroecke.de
