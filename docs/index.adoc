@@ -1,0 +1,172 @@
+= ESP32-Lepton Component Documentation
+Daniel Kampert <DanielKampert@kampis-elektroecke.de>
+v1.0.0, {docdate}
+:doctype: book
+:icons: font
+:toc: left
+:toclevels: 3
+:sectanchors:
+:sectlinks:
+:sectnums:
+:source-highlighter: rouge
+:imagesdir: ./images
+
+[abstract]
+== Abstract
+
+This documentation provides a comprehensive guide to the ESP32-Lepton component, a driver library for FLIR Lepton thermal imaging sensors on ESP32 platforms.
+
+== Overview
+
+The ESP32-Lepton component is a complete driver implementation for FLIR Lepton 3.0 and 3.5 thermal imaging sensors. It provides:
+
+* *CCI (Command and Control Interface)*: I2C-based communication for sensor configuration and control
+* *VoSPI (Video over SPI)*: High-speed SPI interface for thermal image data acquisition
+* *Frame Capture*: Efficient frame synchronization and data handling
+* *Image Processing*: Built-in color palette support and thermal data processing
+
+=== Key Features
+
+* Support for Lepton 3.0 and 3.5 sensors
+* Radiometric and non-radiometric modes
+* Hardware reset and power management
+* Telemetry data extraction
+* Multiple color palettes (Iron, Rainbow, Grayscale, etc.)
+* DMA-based SPI transfers for optimal performance
+* FreeRTOS integration
+
+=== Supported Hardware
+
+[cols="1,2,1"]
+|===
+|Sensor Model |Part Number |Radiometric
+
+|Lepton 3.0
+|500-0726-01
+|No
+
+|Lepton 3.5
+|500-0771-01
+|Yes
+|===
+
+== Architecture
+
+The component is organized into several modules:
+
+=== Core Module
+* <<lepton.adoc#,*lepton*>>: Main driver interface and initialization
+
+=== Communication Interfaces
+* <<lepton_cci.adoc#,*lepton_cci*>>: High-level CCI command implementation
+* <<cci.adoc#,*CCI*>>: Low-level CCI (Command and Control Interface) over I2C
+* <<vospi.adoc#,*VoSPI*>>: Low-level VoSPI (Video over SPI) interface
+
+=== Data Acquisition
+* <<lepton_capture.adoc#,*lepton_capture*>>: Frame capture and synchronization
+
+== Module Documentation
+
+=== link:lepton.html[Main Driver (lepton)]
+Core driver implementation providing initialization, configuration, and control functions.
+
+=== link:lepton_cci.html[CCI Commands (lepton_cci)]
+High-level CCI command interface for sensor configuration and status queries.
+
+=== link:cci.html[CCI Low-Level (cci)]
+Low-level I2C communication layer implementing the Lepton CCI protocol.
+
+=== link:vospi.html[VoSPI Interface (vospi)]
+SPI-based video interface for high-speed thermal data acquisition.
+
+=== link:lepton_capture.html[Frame Capture (lepton_capture)]
+Frame synchronization and data capture implementation.
+
+== Getting Started
+
+=== Prerequisites
+
+* ESP-IDF v5.0 or later
+* FLIR Lepton 3.0 or 3.5 sensor module
+* SPI and I2C connections to ESP32
+
+=== Basic Usage
+
+[source,c]
+----
+#include "lepton.h"
+
+// Initialize Lepton configuration
+Lepton_Conf_t config = {
+    .CCI = {
+        .I2C_Read = my_i2c_read_func,
+        .I2C_Write = my_i2c_write_func,
+        .Address = LEPTON_I2C_ADDRESS
+    },
+    .VoSPI = {
+        .Host = SPI2_HOST,
+        .Interface = {
+            .clock_speed_hz = 20000000,
+            .spics_io_num = GPIO_NUM_10
+        },
+        .Master = {
+            .sclk_io_num = GPIO_NUM_12,
+            .miso_io_num = GPIO_NUM_13
+        },
+        .DMA = SPI_DMA_CH_AUTO
+    },
+    .VSync = GPIO_NUM_5,
+    .Reset = &my_reset_func,
+    .PowerDown = &my_powerdown_func
+};
+
+Lepton_t device;
+Lepton_Result_t status;
+
+// Initialize the device
+if (Lepton_Init(&device, &config, &status) != LEPTON_ERR_OK) {
+    // Handle error
+}
+
+// Start capturing
+if (Lepton_StartCapture(&device, my_frame_callback, &status) != LEPTON_ERR_OK) {
+    // Handle error
+}
+----
+
+== Error Handling
+
+All API functions return a `Lepton_Error_t` error code. The `Lepton_Result_t` structure provides detailed status information from the sensor.
+
+[source,c]
+----
+Lepton_Result_t status;
+Lepton_Error_t error = Lepton_SomeFunction(&device, &status);
+
+if (error != LEPTON_ERR_OK) {
+    ESP_LOGE(TAG, "Operation failed with error: %d", error);
+    ESP_LOGE(TAG, "CCI Status Code: 0x%04X", status.StatusCode);
+}
+----
+
+== API Reference
+
+For detailed API documentation, please refer to the individual module documentation:
+
+* link:lepton.html[Main Driver API]
+* link:lepton_cci.html[CCI Commands API]
+* link:cci.html[CCI Low-Level API]
+* link:vospi.html[VoSPI API]
+* link:lepton_capture.html[Frame Capture API]
+
+== License
+
+Copyright (C) Daniel Kampert, 2026
+
+This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+Website: https://www.kampis-elektroecke.de
+
+== Contact
+
+For errors and commissions, please contact: DanielKampert@kampis-elektroecke.de
