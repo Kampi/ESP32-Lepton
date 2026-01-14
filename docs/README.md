@@ -142,7 +142,7 @@ SPI-based video interface for high-speed thermal data acquisition. Implements pa
 
 This project is licensed under the **GNU General Public License v3.0**.
 
-See [LICENSE](LICENSE) for full text.
+See [LICENSE](../LICENSE) for full text.
 
 ## Maintainer
 

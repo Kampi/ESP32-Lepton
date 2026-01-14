@@ -405,8 +405,8 @@ static Lepton_Error_t CCI_SetROI(CCI_t *p_Interface, uint16_t Command, const Lep
 
     Buffer[0] = p_ROI->Start_Col;
     Buffer[1] = p_ROI->Start_Row;
-    Buffer[2] = p_ROI->End_Row;
-    Buffer[3] = p_ROI->End_Col;
+    Buffer[2] = p_ROI->End_Col;
+    Buffer[3] = p_ROI->End_Row;
 
     return CCI_Set(p_Interface, Command, 4, Buffer, p_Status);
 }
@@ -434,8 +434,8 @@ static Lepton_Error_t CCI_GetROI(CCI_t *p_Interface, uint16_t Command, Lepton_RO
 
     p_ROI->Start_Col = Buffer[0];
     p_ROI->Start_Row = Buffer[1];
-    p_ROI->End_Row = Buffer[2];
-    p_ROI->End_Col = Buffer[3];
+    p_ROI->End_Col = Buffer[2];
+    p_ROI->End_Row = Buffer[3];
 
     return LEPTON_ERR_OK;
 }
@@ -1189,24 +1189,26 @@ Lepton_Error_t CCI_GetSpotmeterROI(CCI_t *p_Interface, Lepton_ROI_t *p_ROI, Lept
 
 Lepton_Error_t CCI_GetSpotmeter(CCI_t *p_Interface, Lepton_Spotmeter_t *p_Spot, Lepton_Result_t *p_Status)
 {
+    uint16_t value;
+    uint16_t max;
+    uint16_t min;
+
     if (p_Spot == NULL) {
         return LEPTON_ERR_INVALID_ARG;
     }
-
-    uint16_t temp_value, temp_max, temp_min;
 
     LEPTON_ERROR_CHECK(CCI_WaitBusy(p_Interface, p_Status));
     LEPTON_ERROR_CHECK(CCI_WriteRegister(p_Interface, CCI_REG_DATA_LENGTH, 8));
     LEPTON_ERROR_CHECK(CCI_WriteRegister(p_Interface, CCI_REG_COMMAND, CCI_CMD_RAD_GET_SPOT));
     LEPTON_ERROR_CHECK(CCI_WaitBusy(p_Interface, p_Status));
-    LEPTON_ERROR_CHECK(CCI_ReadRegister(p_Interface, CCI_REG_DATA_0, &temp_value));
-    LEPTON_ERROR_CHECK(CCI_ReadRegister(p_Interface, CCI_REG_DATA_1, &temp_max));
-    LEPTON_ERROR_CHECK(CCI_ReadRegister(p_Interface, CCI_REG_DATA_2, &temp_min));
+    LEPTON_ERROR_CHECK(CCI_ReadRegister(p_Interface, CCI_REG_DATA_0, &value));
+    LEPTON_ERROR_CHECK(CCI_ReadRegister(p_Interface, CCI_REG_DATA_1, &max));
+    LEPTON_ERROR_CHECK(CCI_ReadRegister(p_Interface, CCI_REG_DATA_2, &min));
     LEPTON_ERROR_CHECK(CCI_ReadRegister(p_Interface, CCI_REG_DATA_3, &p_Spot->Population));
 
-    p_Spot->Value = temp_value;
-    p_Spot->Max = temp_max;
-    p_Spot->Min = temp_min;
+    p_Spot->Value = value;
+    p_Spot->Max = max;
+    p_Spot->Min = min;
 
     return CCI_WaitBusy(p_Interface, p_Status);
 }
