@@ -21,8 +21,8 @@
  * Errors and commissions should be reported to DanielKampert@kampis-elektroecke.de
  */
 
-#ifndef LEPTON_TYPES_H_
-#define LEPTON_TYPES_H_
+#ifndef ESP32_LEPTON_TYPES_H_
+#define ESP32_LEPTON_TYPES_H_
 
 #include <driver/gpio.h>
 #include <driver/i2c_master.h>
@@ -514,4 +514,4 @@ typedef struct {
     uint16_t Reserved11[22];                    /**< Reserved. */
 } __attribute__((packed)) Lepton_Telemetry_t;
 
-#endif /* LEPTON_TYPES_H_ */
+#endif /* ESP32_LEPTON_TYPES_H_ */

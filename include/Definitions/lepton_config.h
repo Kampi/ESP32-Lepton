@@ -21,8 +21,8 @@
  * Errors and commissions should be reported to DanielKampert@kampis-elektroecke.de
  */
 
-#ifndef LEPTON_CONFIG_H_
-#define LEPTON_CONFIG_H_
+#ifndef ESP32_LEPTON_CONFIG_H_
+#define ESP32_LEPTON_CONFIG_H_
 
 #include <driver/i2c.h>
 #include <driver/gpio.h>
@@ -170,4 +170,4 @@
                                                                                             Conf.CCI.I2C_Bus_Handle = Handle;                                           \
                                                                                         } while (0)
 
-#endif /* LEPTON_CONFIG_H_ */
+#endif /* ESP32_LEPTON_CONFIG_H_ */
