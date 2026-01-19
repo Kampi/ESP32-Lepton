@@ -7,11 +7,11 @@ on:
       - master
     paths:
       - 'docs/**'
-      - '.github/workflows/documentation.yml'
+      - '.github/workflows/documentation.yaml'
   pull_request:
     paths:
       - 'docs/**'
-      - '.github/workflows/documentation.yml'
+      - '.github/workflows/documentation.yaml'
   workflow_dispatch:
 
 env:
