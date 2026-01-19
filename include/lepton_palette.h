@@ -21,8 +21,8 @@
  * Errors and commissions should be reported to DanielKampert@kampis-elektroecke.de
  */
 
-#ifndef LEPTON_PALETTE_H_
-#define LEPTON_PALETTE_H_
+#ifndef ESP32_LEPTON_PALETTE_H_
+#define ESP32_LEPTON_PALETTE_H_
 
 #include <stdint.h>
 
@@ -100,4 +100,4 @@ static const uint8_t Lepton_Palette_Rainbow[256][3] = {
     { 255, 255, 255 }, { 255, 255, 255 }, { 255, 255, 255 }, { 255, 255, 255 }, { 255, 255, 255 }, { 255, 255, 255 }, { 255, 255, 255 }, { 255, 255, 255 },
 };
 
-#endif /* LEPTON_PALETTE_H_ */
+#endif /* ESP32_LEPTON_PALETTE_H_ */

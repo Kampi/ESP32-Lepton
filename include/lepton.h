@@ -21,8 +21,8 @@
  * Errors and commissions should be reported to DanielKampert@kampis-elektroecke.de
  */
 
-#ifndef LEPTON_H_
-#define LEPTON_H_
+#ifndef ESP32_LEPTON_H_
+#define ESP32_LEPTON_H_
 
 #include "lepton_defs.h"
 #include "lepton_errors.h"
@@ -392,4 +392,4 @@ bool Lepton_Raw14ToRGB(Lepton_t *p_Device, uint16_t *p_Input, uint8_t *p_Output,
 }
 #endif
 
-#endif /* LEPTON_H_ */
+#endif /* ESP32_LEPTON_H_ */
