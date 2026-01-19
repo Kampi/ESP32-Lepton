@@ -75,7 +75,7 @@ The documentation is automatically built and deployed via GitHub Actions:
 
 ### Workflow File
 
-See `.github/workflows/documentation.yml` for the complete CI/CD pipeline.
+See `.github/workflows/documentation.yaml` for the complete CI/CD pipeline.
 
 ### Accessing Built Documentation
 
