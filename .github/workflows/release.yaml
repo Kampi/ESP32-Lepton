@@ -1,19 +1,21 @@
 name: Release
 
 on:
-  workflow_dispatch:
   push:
-    tags:
-      - '[0-9]+.[0-9]+.[0-9]+'
     branches:
       - main
       - master
-      - dev
     paths-ignore:
       - '*.md'
 
+  pull_request:
+    branches:
+      - main
+      - master
+
+  workflow_dispatch:
+
 env:
-  # Master branch (main or master)
   master_branch: main
 
 permissions:
@@ -21,142 +23,122 @@ permissions:
   id-token: write
 
 jobs:
-  release:
-    if: startsWith(github.ref, 'refs/tags/')
+  extract_version:
+    name: Extract Version and Update Files
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v5
-        with:
-          fetch-depth: 0
-          ref: ${{ github.ref }}
-      
-      - name: Extract version from tag
-        run: |
-          TAG_NAME="${GITHUB_REF_NAME}"
-          echo "VERSION=${TAG_NAME}" >> ${GITHUB_ENV}
-          echo "Using version from tag: ${TAG_NAME}"
-
-      - name: ZIP artifact
-        shell: bash
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y zip
-          zip -r ${GITHUB_REF_NAME}.zip .
-
-      - name: Upload to Component registry
-        uses: espressif/upload-components-ci-action@v2
-        with:
-          components: "ESP32-Lepton:."
-          version: ${{ env.VERSION }}
-          namespace: "Kampi"
-          api_token: ${{ secrets.IDF_COMPONENT_REGISTRY_TOKEN }}
-
-      - name: Release
-        uses: docker://antonyurchenko/git-release:v6
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          CHANGELOG_FILE: CHANGELOG.md
-        with:
-          args: |
-            ${GITHUB_REF_NAME}.zip
-  
-  generate_outputs:
-    if: github.ref_type == 'branch' && github.ref_name != 'main'
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout
+      - name: Checkout Repository
         uses: actions/checkout@v5
 
-      - name: Initialize
-        run: |
-          mkdir -p log
-          echo "DATE=$(date +'%Y-%m-%d %H:%M:%S')" >> "${GITHUB_ENV}"
-
-      - name: Get release version
+      - name: Extract Version from Branch Name
+        id: extract_version
         run: |
           BRANCH_NAME="${GITHUB_REF_NAME}"
-          echo "BRANCH_NAME=${BRANCH_NAME}"
-          
-          # Extract version from branch name (format: x.y.z_Dev or x.y_Dev)
+          echo "Branch Name: $BRANCH_NAME"
+
+          # Extract version from branch name (format: Major.Minor.Revision_Dev)
           BASE_VERSION="${BRANCH_NAME%%_*}"
-          
-          # Split version into components
-          IFS='.' read -r MAJOR MINOR BUILD <<< "${BASE_VERSION}"
-          
-          # Handle optional BUILD number
-          if [ -z "$BUILD" ]; then
-            BUILD=0
-          fi
+          IFS='.' read -r MAJOR MINOR BUILD <<< "$BASE_VERSION"
+          if [ -z "$BUILD" ]; then BUILD=0; fi
 
-          echo "MAJOR=${MAJOR}" >> ${GITHUB_ENV}
-          echo "MINOR=${MINOR}" >> ${GITHUB_ENV}
-          echo "BUILD=${BUILD}" >> ${GITHUB_ENV}
-          echo "VERSION=${BASE_VERSION}" >> ${GITHUB_ENV}
+          echo "MAJOR=$MAJOR" >> $GITHUB_ENV
+          echo "MINOR=$MINOR" >> $GITHUB_ENV
+          echo "BUILD=$BUILD" >> $GITHUB_ENV
+          echo "VERSION=$BASE_VERSION" >> $GITHUB_ENV
 
-      - name: Update version numbers
-        shell: bash
+          echo "Extracted Version: $BASE_VERSION"
+
+      - name: Update CMakeLists.txt
         run: |
-          echo "Using version: ${{ env.VERSION }}"
-          
-          # Update CMakeLists.txt version definitions
-          sed -i -E "s/(ESP32_LEPTON_LIB_MAJOR=)[0-9]+/\1${{ env.MAJOR }}/" CMakeLists.txt
-          sed -i -E "s/(ESP32_LEPTON_LIB_MINOR=)[0-9]+/\1${{ env.MINOR }}/" CMakeLists.txt
-          sed -i -E "s/(ESP32_LEPTON_LIB_BUILD=)[0-9]+/\1${{ env.BUILD }}/" CMakeLists.txt
-          
-          # Update idf_component.yml version field
-          sed -i -E "s/^version: \".*\"/version: \"${{ env.VERSION }}\"/" idf_component.yml
+          sed -i -E "s/set\(ESP32_LEPTON_LIB_MAJOR[[:space:]]+[0-9]+\)/set(ESP32_LEPTON_LIB_MAJOR $MAJOR)/" CMakeLists.txt
+          sed -i -E "s/set\(ESP32_LEPTON_LIB_MINOR[[:space:]]+[0-9]+\)/set(ESP32_LEPTON_LIB_MINOR $MINOR)/" CMakeLists.txt
+          sed -i -E "s/set\(ESP32_LEPTON_LIB_BUILD[[:space:]]+[0-9]+\)/set(ESP32_LEPTON_LIB_BUILD $BUILD)/" CMakeLists.txt
 
-      - name: Push outputs
+      - name: Update idf_component.yml
+        run: |
+          sed -i -E "s/^version: \".*\"/version: \"$VERSION\"/" idf_component.yml
+
+      - name: Stash Changes Before Pull
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git stash
+
+      - name: Pull Remote Changes with Rebase
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git stash
+          git pull --rebase origin ${{ github.ref_name }}
+          git stash pop || echo "No changes to apply from stash"
+
+      - name: Force Push Changes
+        run: |
+          git push origin ${{ github.ref_name }} --force
+
+      - name: Commit Changes
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
+          commit_message: "Update version to $VERSION"
           branch: ${{ github.ref_name }}
-          commit_message: Push outputs from CI/CD (${{ env.DATE }})
-  
-  release_changelog_update:
-    if: github.ref_type == 'branch' && github.ref_name == 'main'
+        env:
+          VERSION: ${{ env.VERSION }}
+
+  update_changelog:
+    name: Update Changelog
+    needs: extract_version
+    if: github.event_name == 'push' && (github.ref_name == 'main' || github.ref_name == 'master')
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      - name: Checkout Repository
         uses: actions/checkout@v5
 
-      - name: Initialize
+      - name: Update CHANGELOG.md
         run: |
-          mkdir -p log
-          echo "DATE=$(date +'%Y-%m-%d %H:%M:%S')" >> "${GITHUB_ENV}"
+          sed -i "s/^## \[Unreleased\]/## [$VERSION] - $(date +'%Y-%m-%d')/" CHANGELOG.md
+          sed -i '/^# CHANGELOG/a \n## [Unreleased]' CHANGELOG.md
 
-      - name: Get release version from CMakeLists.txt
+      - name: Pull Remote Changes Before Commit
         run: |
-          # Extract version from CMakeLists.txt
-          MAJOR=$(grep -oP 'ESP32_LEPTON_LIB_MAJOR=\K[0-9]+' CMakeLists.txt)
-          MINOR=$(grep -oP 'ESP32_LEPTON_LIB_MINOR=\K[0-9]+' CMakeLists.txt)
-          BUILD=$(grep -oP 'ESP32_LEPTON_LIB_BUILD=\K[0-9]+' CMakeLists.txt)
-          
-          VERSION="${MAJOR}.${MINOR}.${BUILD}"
-          
-          echo "MAJOR=${MAJOR}" >> ${GITHUB_ENV}
-          echo "MINOR=${MINOR}" >> ${GITHUB_ENV}
-          echo "BUILD=${BUILD}" >> ${GITHUB_ENV}
-          echo "VERSION=${VERSION}" >> ${GITHUB_ENV}
-          
-          echo "Extracted version: ${VERSION}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git pull origin ${{ github.ref_name }} --rebase
 
-      - name: Update CHANGELOG for release
-        shell: bash
-        run: |
-          echo "Updating CHANGELOG with version: ${{ env.VERSION }}"
-          
-          # Replace ## [Unreleased] with version and date
-          sed -i "s/^## \[Unreleased\]/## [${{ env.VERSION }}] - $(date +'%Y-%m-%d')/" CHANGELOG.md
-          
-          # Add new [Unreleased] section at the top
-          sed -i '/^# CHANGELOG/a \\n## [Unreleased]' CHANGELOG.md
-
-      - name: Push CHANGELOG update
+      - name: Commit Changes
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
+          commit_message: "Update CHANGELOG for release ${{ env.VERSION }}"
           branch: ${{ github.ref_name }}
-          commit_message: Release ${{ env.VERSION }} - Update CHANGELOG (${{ env.DATE }})
+
+      - name: Push Changes
+        run: |
+          git push origin ${{ github.ref_name }}
+
+  create_release:
+    name: Create GitHub Release
+    needs: [extract_version, update_changelog]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v5
+
+      - name: Create GitHub Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ env.VERSION }}
+          release_name: Release ${{ env.VERSION }}
+          draft: false
+          prerelease: false
+
+      - name: Upload Release Assets
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./build/firmware.bin
+          asset_name: firmware-${{ env.VERSION }}.bin
+          asset_content_type: application/octet-stream
