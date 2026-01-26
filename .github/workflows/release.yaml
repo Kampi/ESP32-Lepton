@@ -1,162 +1,145 @@
-name: Release
+---
+name: Component Release
 
 on:
-  workflow_dispatch:
   push:
-    tags:
-      - '[0-9]+.[0-9]+.[0-9]+'
     branches:
       - main
       - master
-      - dev
-    paths-ignore:
-      - '*.md'
-
-env:
-  # Master branch (main or master)
-  master_branch: main
 
 permissions:
   contents: write
-  id-token: write
 
 jobs:
   release:
-    if: startsWith(github.ref, 'refs/tags/')
+    name: Component Release
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v5
         with:
           fetch-depth: 0
-          ref: ${{ github.ref }}
-      
-      - name: Extract version from tag
+
+      - name: Extract version from merged branch
+        id: extract_version
         run: |
-          TAG_NAME="${GITHUB_REF_NAME}"
-          echo "VERSION=${TAG_NAME}" >> ${GITHUB_ENV}
-          echo "Using version from tag: ${TAG_NAME}"
-
-      - name: ZIP artifact
-        shell: bash
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y zip
-          zip -r ${GITHUB_REF_NAME}.zip .
-
-      - name: Upload to Component registry
-        uses: espressif/upload-components-ci-action@v2
-        with:
-          components: "ESP32-Lepton:."
-          version: ${{ env.VERSION }}
-          namespace: "Kampi"
-          api_token: ${{ secrets.IDF_COMPONENT_REGISTRY_TOKEN }}
-
-      - name: Release
-        uses: docker://antonyurchenko/git-release:v6
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          CHANGELOG_FILE: CHANGELOG.md
-        with:
-          args: |
-            ${GITHUB_REF_NAME}.zip
-  
-  generate_outputs:
-    if: github.ref_type == 'branch' && github.ref_name != 'main'
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v5
-
-      - name: Initialize
-        run: |
-          mkdir -p log
-          echo "DATE=$(date +'%Y-%m-%d %H:%M:%S')" >> "${GITHUB_ENV}"
-
-      - name: Get release version
-        run: |
-          BRANCH_NAME="${GITHUB_REF_NAME}"
-          echo "BRANCH_NAME=${BRANCH_NAME}"
+          # Get the merged branch name from the merge commit
+          COMMIT_MSG=$(git log -1 --pretty=%B)
+          echo "Commit message: $COMMIT_MSG"
           
-          # Extract version from branch name (format: x.y.z_Dev or x.y_Dev)
-          BASE_VERSION="${BRANCH_NAME%%_*}"
+          # Extract branch name from merge commit message (e.g., "Merge branch '0.0.2_Dev'")
+          BRANCH_NAME=$(echo "$COMMIT_MSG" | sed -n "s/.*Merge.*branch '\([^']*\)'.*/\1/p")
           
-          # Split version into components
-          IFS='.' read -r MAJOR MINOR BUILD <<< "${BASE_VERSION}"
+          if [ -z "$BRANCH_NAME" ]; then
+            # Try alternative merge message format
+            BRANCH_NAME=$(echo "$COMMIT_MSG" | sed -n "s/.*Merge.*branch \"\([^\"]*\)\".*/\1/p")
+          fi
           
-          # Handle optional BUILD number
-          if [ -z "$BUILD" ]; then
-            BUILD=0
+          if [ -z "$BRANCH_NAME" ]; then
+            # No merge commit found, try to get version from commit message directly
+            echo "::warning::No merge commit detected, trying to extract version from commit message"
+            VERSION=$(echo "$COMMIT_MSG" | grep -oE '[0-9]+\.[0-9]+\.[0-9]+(_[A-Za-z0-9]+)?' | head -n 1)
+          else
+            echo "Merged branch: $BRANCH_NAME"
+            # Extract version from branch name (format: X.Y.Z_Dev or X.Y.Z)
+            VERSION=$(echo "$BRANCH_NAME" | grep -oE '[0-9]+\.[0-9]+\.[0-9]+(_[A-Za-z0-9]+)?' | head -n 1)
+          fi
+          
+          if [ -z "$VERSION" ]; then
+            echo "::error::No version found in commit message or branch name"
+            exit 1
+          fi
+          
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "Extracted version: $VERSION"
+
+      - name: Update CHANGELOG.md
+        run: |
+          # Get repository URL
+          REPO_URL="https://github.com/${{ github.repository }}"
+          
+          # Get the previous release tag (exclude current version if it exists)
+          PREVIOUS_TAG=$(git tag --sort=-v:refname | grep -E '^[0-9]+\.[0-9]+\.[0-9]+' | grep -v "^$VERSION$" | head -n 1 || true)
+          
+          # Replace [Unreleased] with [VERSION] - DATE
+          sed -i "s/^## \[Unreleased\]/## [$VERSION] - $(date +'%Y-%m-%d')/" CHANGELOG.md
+          
+          # Add new Unreleased section at the top
+          sed -i '/^# CHANGELOG/a\\n## [Unreleased]' CHANGELOG.md
+          
+          # Update or add version comparison links at the bottom of the file
+          if grep -q "^\[Unreleased\]:" CHANGELOG.md; then
+            # Update existing Unreleased link
+            sed -i "s|^\[Unreleased\]:.*|[Unreleased]: $REPO_URL/compare/$VERSION...HEAD|" CHANGELOG.md
+          else
+            # Add Unreleased link
+            echo "" >> CHANGELOG.md
+            echo "[Unreleased]: $REPO_URL/compare/$VERSION...HEAD" >> CHANGELOG.md
+          fi
+          
+          # Add link for the new version
+          if [ -n "$PREVIOUS_TAG" ]; then
+            # Add comparison link between versions
+            echo "[$VERSION]: $REPO_URL/compare/$PREVIOUS_TAG...$VERSION" >> CHANGELOG.md
+          else
+            # First release, link to the tag
+            echo "[$VERSION]: $REPO_URL/releases/tag/$VERSION" >> CHANGELOG.md
           fi
 
-          echo "MAJOR=${MAJOR}" >> ${GITHUB_ENV}
-          echo "MINOR=${MINOR}" >> ${GITHUB_ENV}
-          echo "BUILD=${BUILD}" >> ${GITHUB_ENV}
-          echo "VERSION=${BASE_VERSION}" >> ${GITHUB_ENV}
-
-      - name: Update version numbers
-        shell: bash
+      - name: Update CMakeLists.txt
         run: |
-          echo "Using version: ${{ env.VERSION }}"
-          
-          # Update CMakeLists.txt version definitions
-          sed -i -E "s/(ESP32_LEPTON_LIB_MAJOR=)[0-9]+/\1${{ env.MAJOR }}/" CMakeLists.txt
-          sed -i -E "s/(ESP32_LEPTON_LIB_MINOR=)[0-9]+/\1${{ env.MINOR }}/" CMakeLists.txt
-          sed -i -E "s/(ESP32_LEPTON_LIB_BUILD=)[0-9]+/\1${{ env.BUILD }}/" CMakeLists.txt
-          
-          # Update idf_component.yml version field
-          sed -i -E "s/^version: \".*\"/version: \"${{ env.VERSION }}\"/" idf_component.yml
+          # Update version in CMakeLists.txt (searches for any VERSION variable)
+          sed -i -E "s/set\([A-Z_]*VERSION[A-Z_]* [^)]*\)/set(\0 $VERSION)/g" CMakeLists.txt || true
+          sed -i -E "s/set\([A-Z_]*LIB_VERSION[A-Z_]* [^)]*\)/set(\0 $VERSION)/g" CMakeLists.txt || true
 
-      - name: Push outputs
+      - name: Update idf_component.yml
+        run: |
+          # Update version in idf_component.yml
+          sed -i "s/^version: .*/version: \"$VERSION\"/" idf_component.yml
+
+      - name: Commit and push changes
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
+          commit_message: "Release: Update to version ${{ env.VERSION }}"
           branch: ${{ github.ref_name }}
-          commit_message: Push outputs from CI/CD (${{ env.DATE }})
-  
-  release_changelog_update:
-    if: github.ref_type == 'branch' && github.ref_name == 'main'
-    runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v5
-
-      - name: Initialize
+      - name: Generate release notes with diff
         run: |
-          mkdir -p log
-          echo "DATE=$(date +'%Y-%m-%d %H:%M:%S')" >> "${GITHUB_ENV}"
+          # Get the previous release tag (without v prefix)
+          PREVIOUS_TAG=$(git tag --sort=-v:refname | grep -E '^[0-9]+\.[0-9]+\.[0-9]+' | head -n 1 || true)
+          
+          echo "RELEASE_NOTES<<EOF" >> $GITHUB_ENV
+          
+          if [ -n "$PREVIOUS_TAG" ]; then
+            echo "## Changes" >> $GITHUB_ENV
+            echo "" >> $GITHUB_ENV
+            git log $PREVIOUS_TAG..HEAD --pretty=format:"- %s (%h)" >> $GITHUB_ENV || true
+            echo "" >> $GITHUB_ENV
+            echo "" >> $GITHUB_ENV
+            echo "See [CHANGELOG.md](CHANGELOG.md) for full details." >> $GITHUB_ENV
+          else
+            echo "## Release $VERSION" >> $GITHUB_ENV
+            echo "" >> $GITHUB_ENV
+            echo "See [CHANGELOG.md](CHANGELOG.md) for details." >> $GITHUB_ENV
+          fi
+          
+          echo "EOF" >> $GITHUB_ENV
 
-      - name: Get release version from CMakeLists.txt
-        run: |
-          # Extract version from CMakeLists.txt
-          MAJOR=$(grep -oP 'ESP32_LEPTON_LIB_MAJOR=\K[0-9]+' CMakeLists.txt)
-          MINOR=$(grep -oP 'ESP32_LEPTON_LIB_MINOR=\K[0-9]+' CMakeLists.txt)
-          BUILD=$(grep -oP 'ESP32_LEPTON_LIB_BUILD=\K[0-9]+' CMakeLists.txt)
-          
-          VERSION="${MAJOR}.${MINOR}.${BUILD}"
-          
-          echo "MAJOR=${MAJOR}" >> ${GITHUB_ENV}
-          echo "MINOR=${MINOR}" >> ${GITHUB_ENV}
-          echo "BUILD=${BUILD}" >> ${GITHUB_ENV}
-          echo "VERSION=${VERSION}" >> ${GITHUB_ENV}
-          
-          echo "Extracted version: ${VERSION}"
-
-      - name: Update CHANGELOG for release
-        shell: bash
-        run: |
-          echo "Updating CHANGELOG with version: ${{ env.VERSION }}"
-          
-          # Replace ## [Unreleased] with version and date
-          sed -i "s/^## \[Unreleased\]/## [${{ env.VERSION }}] - $(date +'%Y-%m-%d')/" CHANGELOG.md
-          
-          # Add new [Unreleased] section at the top
-          sed -i '/^# CHANGELOG/a \\n## [Unreleased]' CHANGELOG.md
-
-      - name: Push CHANGELOG update
-        uses: stefanzweifel/git-auto-commit-action@v5
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
         with:
-          branch: ${{ github.ref_name }}
-          commit_message: Release ${{ env.VERSION }} - Update CHANGELOG (${{ env.DATE }})
+          tag_name: ${{ env.VERSION }}
+          name: Release ${{ env.VERSION }}
+          body: ${{ env.RELEASE_NOTES }}
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload component to ESP Component Registry
+        uses: espressif/upload-components-ci-action@v1
+        with:
+          name: ${{ github.event.repository.name }}
+          version: ${{ env.VERSION }}
+          namespace: ${{ github.repository_owner }}
+          api_token: ${{ secrets.IDF_COMPONENT_REGISTRY_TOKEN }}
+
