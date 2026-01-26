@@ -1,7 +1,3 @@
-set(ESP32_LEPTON_LIB_MAJOR=0)
-set(ESP32_LEPTON_LIB_MINOR=0)
-set(ESP32_LEPTON_LIB_BUILD=2)
-
 set(COMPONENT_SRCS
     "src/lepton.cpp"
     "src/lepton_cci.cpp"
