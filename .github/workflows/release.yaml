@@ -102,9 +102,9 @@ jobs:
           echo "Using version: ${{ env.VERSION }}"
           
           # Update CMakeLists.txt version definitions
-          sed -i -E "s/(ESP32_LEPTON_LIB_MAJOR=)[0-9]+/\1${{ env.MAJOR }}/" CMakeLists.txt
-          sed -i -E "s/(ESP32_LEPTON_LIB_MINOR=)[0-9]+/\1${{ env.MINOR }}/" CMakeLists.txt
-          sed -i -E "s/(ESP32_LEPTON_LIB_BUILD=)[0-9]+/\1${{ env.BUILD }}/" CMakeLists.txt
+          sed -i -E "s/(ESP32_LEPTON_LIB_MAJOR\s+)[0-9]+/\1${{ env.MAJOR }}/" CMakeLists.txt
+          sed -i -E "s/(ESP32_LEPTON_LIB_MINOR\s+)[0-9]+/\1${{ env.MINOR }}/" CMakeLists.txt
+          sed -i -E "s/(ESP32_LEPTON_LIB_BUILD\s+)[0-9]+/\1${{ env.BUILD }}/" CMakeLists.txt
           
           # Update idf_component.yml version field
           sed -i -E "s/^version: \".*\"/version: \"${{ env.VERSION }}\"/" idf_component.yml
@@ -116,7 +116,7 @@ jobs:
           commit_message: Push outputs from CI/CD (${{ env.DATE }})
   
   release_changelog_update:
-    if: github.ref_type == 'branch' && github.ref_name == 'main'
+    if: github.ref_type == 'branch' && (github.ref_name == 'main' || github.ref_name == 'master')
     runs-on: ubuntu-latest
 
     steps:
@@ -128,30 +128,35 @@ jobs:
           mkdir -p log
           echo "DATE=$(date +'%Y-%m-%d %H:%M:%S')" >> "${GITHUB_ENV}"
 
-      - name: Get release version from CMakeLists.txt
+      - name: Get release version
         run: |
-          # Extract version from CMakeLists.txt
-          MAJOR=$(grep -oP 'ESP32_LEPTON_LIB_MAJOR=\K[0-9]+' CMakeLists.txt)
-          MINOR=$(grep -oP 'ESP32_LEPTON_LIB_MINOR=\K[0-9]+' CMakeLists.txt)
-          BUILD=$(grep -oP 'ESP32_LEPTON_LIB_BUILD=\K[0-9]+' CMakeLists.txt)
-          
-          VERSION="${MAJOR}.${MINOR}.${BUILD}"
-          
+          BRANCH_NAME="${GITHUB_REF_NAME}"
+          echo "BRANCH_NAME=${BRANCH_NAME}"
+          BASE_VERSION="${BRANCH_NAME%%_*}"
+
+          IFS='.' read -r MAJOR MINOR BUILD <<< "${BASE_VERSION}"
+
           echo "MAJOR=${MAJOR}" >> ${GITHUB_ENV}
           echo "MINOR=${MINOR}" >> ${GITHUB_ENV}
           echo "BUILD=${BUILD}" >> ${GITHUB_ENV}
-          echo "VERSION=${VERSION}" >> ${GITHUB_ENV}
-          
-          echo "Extracted version: ${VERSION}"
+          echo "VERSION=${BASE_VERSION}" >> ${GITHUB_ENV}
+
+      - name: Update version numbers
+        shell: bash
+        run: |
+          echo "Using version: ${{ env.VERSION }}"
+          sed -i -E "s/(ESP32_LEPTON_LIB_MAJOR=)[0-9]+/\1${{ env.MAJOR }}/" CMakeLists.txt
+          sed -i -E "s/(ESP32_LEPTON_LIB_MINOR=)[0-9]+/\1${{ env.MINOR }}/" CMakeLists.txt
+          sed -i -E "s/(ESP32_LEPTON_LIB_BUILD=)[0-9]+/\1${{ env.BUILD }}/" CMakeLists.txt
 
       - name: Update CHANGELOG for release
         shell: bash
         run: |
           echo "Updating CHANGELOG with version: ${{ env.VERSION }}"
-          
+
           # Replace ## [Unreleased] with version and date
           sed -i "s/^## \[Unreleased\]/## [${{ env.VERSION }}] - $(date +'%Y-%m-%d')/" CHANGELOG.md
-          
+
           # Add new [Unreleased] section at the top
           sed -i '/^# CHANGELOG/a \\n## [Unreleased]' CHANGELOG.md
 
