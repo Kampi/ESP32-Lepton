@@ -116,7 +116,7 @@ jobs:
           commit_message: Push outputs from CI/CD (${{ env.DATE }})
   
   release_changelog_update:
-    if: github.ref_type == 'branch' && github.ref_name == 'main'
+    if: github.ref_type == 'branch' && (github.ref_name == 'main' || github.ref_name == 'master')
     runs-on: ubuntu-latest
 
     steps:
