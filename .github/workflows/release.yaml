@@ -102,9 +102,9 @@ jobs:
           echo "Using version: ${{ env.VERSION }}"
           
           # Update CMakeLists.txt version definitions
-          sed -i -E "s/(ESP32_LEPTON_LIB_MAJOR=)[0-9]+/\1${{ env.MAJOR }}/" CMakeLists.txt
-          sed -i -E "s/(ESP32_LEPTON_LIB_MINOR=)[0-9]+/\1${{ env.MINOR }}/" CMakeLists.txt
-          sed -i -E "s/(ESP32_LEPTON_LIB_BUILD=)[0-9]+/\1${{ env.BUILD }}/" CMakeLists.txt
+          sed -i -E "s/(ESP32_LEPTON_LIB_MAJOR\s+)[0-9]+/\1${{ env.MAJOR }}/" CMakeLists.txt
+          sed -i -E "s/(ESP32_LEPTON_LIB_MINOR\s+)[0-9]+/\1${{ env.MINOR }}/" CMakeLists.txt
+          sed -i -E "s/(ESP32_LEPTON_LIB_BUILD\s+)[0-9]+/\1${{ env.BUILD }}/" CMakeLists.txt
           
           # Update idf_component.yml version field
           sed -i -E "s/^version: \".*\"/version: \"${{ env.VERSION }}\"/" idf_component.yml
@@ -116,7 +116,7 @@ jobs:
           commit_message: Push outputs from CI/CD (${{ env.DATE }})
   
   release_changelog_update:
-    if: github.ref_type == 'branch' && github.ref_name == 'main'
+    if: github.ref_type == 'branch' && (github.ref_name == 'main' || github.ref_name == 'master')
     runs-on: ubuntu-latest
 
     steps:
@@ -130,10 +130,18 @@ jobs:
 
       - name: Get release version from CMakeLists.txt
         run: |
-          # Extract version from CMakeLists.txt
-          MAJOR=$(grep -oP 'ESP32_LEPTON_LIB_MAJOR=\K[0-9]+' CMakeLists.txt)
-          MINOR=$(grep -oP 'ESP32_LEPTON_LIB_MINOR=\K[0-9]+' CMakeLists.txt)
-          BUILD=$(grep -oP 'ESP32_LEPTON_LIB_BUILD=\K[0-9]+' CMakeLists.txt)
+          # Extract version from CMakeLists.txt (robust gegen Whitespaces/Tabs)
+          MAJOR=$(sed -n 's/set(ESP32_LEPTON_LIB_MAJOR[[:space:]]\+\([0-9]\+\)[[:space:]]*)/\1/p' CMakeLists.txt)
+          MINOR=$(sed -n 's/set(ESP32_LEPTON_LIB_MINOR[[:space:]]\+\([0-9]\+\)[[:space:]]*)/\1/p' CMakeLists.txt)
+          BUILD=$(sed -n 's/set(ESP32_LEPTON_LIB_BUILD[[:space:]]\+\([0-9]\+\)[[:space:]]*)/\1/p' CMakeLists.txt)
+          
+          # Validate extracted values
+          if [ -z "$MAJOR" ] || [ -z "$MINOR" ] || [ -z "$BUILD" ]; then
+            echo "Error: Could not extract version numbers from CMakeLists.txt"
+            echo "MAJOR='$MAJOR', MINOR='$MINOR', BUILD='$BUILD'"
+            cat CMakeLists.txt | head -10
+            exit 1
+          fi
           
           VERSION="${MAJOR}.${MINOR}.${BUILD}"
           
