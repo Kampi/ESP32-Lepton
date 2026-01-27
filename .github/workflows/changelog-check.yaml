@@ -2,14 +2,19 @@ name: Changelog Check
 
 on:
   pull_request:
-    branches:
-      - main
-      - master
+    paths:
+      - 'hardware/CHANGELOG.md'
   push:
     branches:
       - main
       - master
       - dev
+    paths:
+      - 'hardware/CHANGELOG.md'
+
+env:
+  # Master branch (main or master)
+  master_branch: main
 
 jobs:
   validate-changelog:
@@ -22,34 +27,34 @@ jobs:
       - name: Validate Changelog Format
         shell: bash
         run: |
-          CHANGELOG_FILE="CHANGELOG.md"
-
+          CHANGELOG_FILE="hardware/CHANGELOG.md"
+          
           if [ ! -f "$CHANGELOG_FILE" ]; then
-            echo "Error: CHANGELOG.md not found in directory"
+            echo "Error: CHANGELOG.md not found in hardware directory"
             exit 1
           fi
-
+          
           echo "Validating CHANGELOG.md format..."
-
+          
           # Check if [Unreleased] section exists
           if ! grep -q "\[Unreleased\]" "$CHANGELOG_FILE"; then
             echo "Error: [Unreleased] section not found in CHANGELOG.md"
             exit 1
           fi
-
+          
           # Extract [Unreleased] section content
           UNRELEASED_CONTENT=$(awk '/\[Unreleased\]/,/^## \[/' "$CHANGELOG_FILE" | sed '1d;$d')
-
+          
           if [ -z "$UNRELEASED_CONTENT" ]; then
             echo "Warning: [Unreleased] section is empty"
             exit 0
           fi
-
+          
           echo "Checking [Unreleased] section content..."
-
+          
           # Valid section headers
           VALID_SECTIONS=("### Added" "### Changed" "### Fixed" "### Removed")
-
+          
           # Check for valid section headers
           FOUND_SECTIONS=false
           for section in "${VALID_SECTIONS[@]}"; do
@@ -58,20 +63,20 @@ jobs:
               echo "✓ Found section: $section"
             fi
           done
-
+          
           if [ "$FOUND_SECTIONS" = false ]; then
             echo "Error: No valid sections found in [Unreleased]"
             echo "Expected sections: Added, Changed, Fixed, Removed"
             exit 1
           fi
-
+          
           # Validate entry format: must start with "- " (dash + space/tab) and contain issue reference "(#number)"
           ERROR_COUNT=0
           LINE_NUMBER=0
-
+          
           echo ""
           echo "Validating entry format..."
-
+          
           while IFS= read -r line; do
             LINE_NUMBER=$((LINE_NUMBER + 1))
             
@@ -79,7 +84,7 @@ jobs:
             if [[ -z "$line" ]] || [[ "$line" =~ ^### ]]; then
               continue
             fi
-
+            
             # Check if line is an entry (starts with -)
             if [[ "$line" =~ ^[[:space:]]*- ]]; then
               # Check for issue reference in format (#number)
@@ -97,7 +102,7 @@ jobs:
               ERROR_COUNT=$((ERROR_COUNT + 1))
             fi
           done <<< "$UNRELEASED_CONTENT"
-
+          
           echo ""
           if [ $ERROR_COUNT -gt 0 ]; then
             echo "=========================================="
@@ -131,29 +136,29 @@ jobs:
       - name: Check for duplicate issue numbers
         shell: bash
         run: |
-          CHANGELOG_FILE="CHANGELOG.md"
-
+          CHANGELOG_FILE="hardware/CHANGELOG.md"
+          
           echo "Checking for duplicate issue numbers in [Unreleased] section..."
-
+          
           # Extract issue numbers from [Unreleased] section
           UNRELEASED_CONTENT=$(awk '/\[Unreleased\]/,/^## \[/' "$CHANGELOG_FILE" | sed '1d;$d')
-
+          
           if [ -z "$UNRELEASED_CONTENT" ]; then
             echo "No content to check"
             exit 0
           fi
-
+          
           # Extract all issue numbers
           ISSUE_NUMBERS=$(echo "$UNRELEASED_CONTENT" | grep -oP '\(#\K[0-9]+(?=\))' || true)
-
+          
           if [ -z "$ISSUE_NUMBERS" ]; then
             echo "No issue numbers found"
             exit 0
           fi
-
+          
           # Check for duplicates
           DUPLICATES=$(echo "$ISSUE_NUMBERS" | sort | uniq -d)
-
+          
           if [ -n "$DUPLICATES" ]; then
             echo "Warning: Duplicate issue numbers found in [Unreleased] section:"
             echo "$DUPLICATES" | while read -r issue; do

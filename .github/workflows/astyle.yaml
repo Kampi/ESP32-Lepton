@@ -10,6 +10,10 @@ on:
       - dev
   workflow_dispatch:
 
+env:
+  # Master branch (main or master)
+  master_branch: master
+
 permissions:
   contents: read
   pull-requests: write
