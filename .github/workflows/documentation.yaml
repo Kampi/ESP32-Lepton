@@ -5,14 +5,18 @@ on:
     branches:
       - main
       - master
+    paths:
+      - 'docs/**'
+      - '.github/workflows/documentation.yaml'
   pull_request:
-    branches:
-      - main
-      - master
     paths:
       - 'docs/**'
       - '.github/workflows/documentation.yaml'
   workflow_dispatch:
+
+env:
+  # Master branch (main or master)
+  master_branch: main
 
 permissions:
   contents: write
@@ -248,11 +252,11 @@ jobs:
         path: docs/public
 
   deploy:
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+    if: github.event_name != 'pull_request' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' || contains(github.ref, 'refs/tags/'))
     needs:
       - asciidoctor
     runs-on: ubuntu-latest
-    name: Deploy to GitHub Pages
+    name: Deploy to Releases
 
     steps:
     - name: Repository Checkout
@@ -261,9 +265,37 @@ jobs:
     - name: Download Artifacts
       uses: actions/download-artifact@v4
 
-    - name: Organize documentation
+    - name: Organize and create tarball
       run: |
         mv ESP32-Lepton-Documentation public
+
+        # Create renamed copies for GitHub Releases (with -nightly suffix)
+        mkdir -p release_pdfs
+        cd public/pdf
+        for pdf_file in *.pdf; do
+          if [ -f "$pdf_file" ]; then
+            base_name="${pdf_file%.pdf}"
+            cp "$pdf_file" "../../release_pdfs/${base_name}-nightly.pdf"
+          fi
+        done
+        cd ../..
+        
+        # Create tarball
+        tar zvcf ESP32-Lepton-Docs-nightly.tar.gz -C public .
+
+    - name: Deploy to GitHub Releases
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        gh release view nightly 2>/dev/null || \
+          gh release create nightly \
+            --title "Nightly Documentation Build" \
+            --notes "Automatically generated documentation for ESP32-Lepton component" \
+            --prerelease
+
+        gh release upload nightly \
+          ESP32-Lepton-Docs-nightly.tar.gz \
+          release_pdfs/*.pdf --clobber
 
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v4

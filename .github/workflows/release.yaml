@@ -1,3 +1,4 @@
+---
 name: Component Release
 
 on:
@@ -25,42 +26,30 @@ jobs:
           # Get the merged branch name from the merge commit
           COMMIT_MSG=$(git log -1 --pretty=%B)
           echo "Commit message: $COMMIT_MSG"
-
-          # Try to extract branch name from merge commit message
-          # Supports various formats:
-          # - "Merge branch '0.0.2_Dev'"
-          # - "Merge branch '0.0.2_Dev' into main"
-          # - "Merge pull request #123 from user/0.0.2_Dev"
-          BRANCH_NAME=$(echo "$COMMIT_MSG" | sed -n "s/.*[Mm]erge.*branch '\([^']*\)'.*/\1/p" | head -n 1)
-
+          
+          # Extract branch name from merge commit message (e.g., "Merge branch '0.0.2_Dev'")
+          BRANCH_NAME=$(echo "$COMMIT_MSG" | sed -n "s/.*Merge.*branch '\([^']*\)'.*/\1/p")
+          
           if [ -z "$BRANCH_NAME" ]; then
-            # Try alternative format with double quotes
-            BRANCH_NAME=$(echo "$COMMIT_MSG" | sed -n "s/.*[Mm]erge.*branch \"\([^\"]*\)\".*/\1/p" | head -n 1)
+            # Try alternative merge message format
+            BRANCH_NAME=$(echo "$COMMIT_MSG" | sed -n "s/.*Merge.*branch \"\([^\"]*\)\".*/\1/p")
           fi
-
+          
           if [ -z "$BRANCH_NAME" ]; then
-            # Try GitHub pull request merge format: "Merge pull request #123 from user/branch"
-            BRANCH_NAME=$(echo "$COMMIT_MSG" | sed -n "s/.*[Mm]erge pull request.*from [^/]*\/\([^ ]*\).*/\1/p" | head -n 1)
-          fi
-
-          if [ -z "$BRANCH_NAME" ]; then
-            # No merge commit found, try to extract version directly from commit message
+            # No merge commit found, try to get version from commit message directly
             echo "::warning::No merge commit detected, trying to extract version from commit message"
             VERSION=$(echo "$COMMIT_MSG" | grep -oE '[0-9]+\.[0-9]+\.[0-9]+(_[A-Za-z0-9]+)?' | head -n 1)
           else
             echo "Merged branch: $BRANCH_NAME"
             # Extract version from branch name (format: X.Y.Z_Dev or X.Y.Z)
-            # Supports branch names like: "0.0.2_Dev", "feature/1.2.3", "release-1.0.0_RC1"
             VERSION=$(echo "$BRANCH_NAME" | grep -oE '[0-9]+\.[0-9]+\.[0-9]+(_[A-Za-z0-9]+)?' | head -n 1)
           fi
-
+          
           if [ -z "$VERSION" ]; then
             echo "::error::No version found in commit message or branch name"
-            echo "::error::Commit message: $COMMIT_MSG"
-            echo "::error::Branch name: $BRANCH_NAME"
             exit 1
           fi
-
+          
           echo "VERSION=$VERSION" >> $GITHUB_ENV
           echo "Extracted version: $VERSION"
 
@@ -68,17 +57,16 @@ jobs:
         run: |
           # Get repository URL
           REPO_URL="https://github.com/${{ github.repository }}"
-          VERSION="${{ env.VERSION }}"
-
+          
           # Get the previous release tag (exclude current version if it exists)
           PREVIOUS_TAG=$(git tag --sort=-v:refname | grep -E '^[0-9]+\.[0-9]+\.[0-9]+' | grep -v "^$VERSION$" | head -n 1 || true)
-
+          
           # Replace [Unreleased] with [VERSION] - DATE
           sed -i "s/^## \[Unreleased\]/## [$VERSION] - $(date +'%Y-%m-%d')/" CHANGELOG.md
-
+          
           # Add new Unreleased section at the top
           sed -i '/^# CHANGELOG/a\\n## [Unreleased]' CHANGELOG.md
-
+          
           # Update or add version comparison links at the bottom of the file
           if grep -q "^\[Unreleased\]:" CHANGELOG.md; then
             # Update existing Unreleased link
@@ -88,7 +76,7 @@ jobs:
             echo "" >> CHANGELOG.md
             echo "[Unreleased]: $REPO_URL/compare/$VERSION...HEAD" >> CHANGELOG.md
           fi
-
+          
           # Add link for the new version
           if [ -n "$PREVIOUS_TAG" ]; then
             # Add comparison link between versions
@@ -100,14 +88,12 @@ jobs:
 
       - name: Update CMakeLists.txt
         run: |
-          VERSION="${{ env.VERSION }}"
           # Update version in CMakeLists.txt (searches for any VERSION variable)
           sed -i -E "s/set\([A-Z_]*VERSION[A-Z_]* [^)]*\)/set(\0 $VERSION)/g" CMakeLists.txt || true
           sed -i -E "s/set\([A-Z_]*LIB_VERSION[A-Z_]* [^)]*\)/set(\0 $VERSION)/g" CMakeLists.txt || true
 
       - name: Update idf_component.yml
         run: |
-          VERSION="${{ env.VERSION }}"
           # Update version in idf_component.yml
           sed -i "s/^version: .*/version: \"$VERSION\"/" idf_component.yml
 
@@ -119,12 +105,11 @@ jobs:
 
       - name: Generate release notes with diff
         run: |
-          VERSION="${{ env.VERSION }}"
           # Get the previous release tag (without v prefix)
           PREVIOUS_TAG=$(git tag --sort=-v:refname | grep -E '^[0-9]+\.[0-9]+\.[0-9]+' | head -n 1 || true)
-
+          
           echo "RELEASE_NOTES<<EOF" >> $GITHUB_ENV
-
+          
           if [ -n "$PREVIOUS_TAG" ]; then
             echo "## Changes" >> $GITHUB_ENV
             echo "" >> $GITHUB_ENV
@@ -137,15 +122,8 @@ jobs:
             echo "" >> $GITHUB_ENV
             echo "See [CHANGELOG.md](CHANGELOG.md) for details." >> $GITHUB_ENV
           fi
-
+          
           echo "EOF" >> $GITHUB_ENV
-
-      - name: Create and push tag
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git tag -a "${{ env.VERSION }}" -m "Release ${{ env.VERSION }}"
-          git push origin "${{ env.VERSION }}"
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
@@ -164,3 +142,4 @@ jobs:
           version: ${{ env.VERSION }}
           namespace: ${{ github.repository_owner }}
           api_token: ${{ secrets.IDF_COMPONENT_REGISTRY_TOKEN }}
+
