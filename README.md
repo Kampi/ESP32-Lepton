@@ -5,6 +5,7 @@ High-performance ESP-IDF driver for [FLIR Lepton 3.5](https://oem.flir.com/de-de
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg?logo=opensourceinitiative)](https://www.gnu.org/licenses/gpl-3.0)
 [![ESP-IDF](https://img.shields.io/badge/ESP--IDF-v5.1+-blue.svg)](https://github.com/espressif/esp-idf)
 [![Documentation](https://img.shields.io/badge/User%20Guide-PDF-007ec6?longCache=true&style=flat&logo=asciidoctor&colorA=555555)](https://kampi.github.io/ESP32-Lepton/)
+[![ESP Registry](https://components.espressif.com/components/kampi/esp32-lepton/badge.svg)](https://components.espressif.com/components/kampi/esp32-lepton/badge.svg)
 
 ## Table of Contents
 
