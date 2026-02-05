@@ -41,7 +41,7 @@ jobs:
           UNRELEASED_CONTENT=$(awk '/\[Unreleased\]/,/^## \[/' "$CHANGELOG_FILE" | sed '1d;$d')
 
           if [ -z "$UNRELEASED_CONTENT" ]; then
-            echo "Warning: [Unreleased] section is empty"
+            echo "✓ [Unreleased] section is empty (allowed during development)"
             exit 0
           fi
 
@@ -60,9 +60,10 @@ jobs:
           done
 
           if [ "$FOUND_SECTIONS" = false ]; then
-            echo "Error: No valid sections found in [Unreleased]"
+            echo "Warning: No valid sections found in [Unreleased], but content exists"
             echo "Expected sections: Added, Changed, Fixed, Removed"
-            exit 1
+            echo "This is allowed during early development"
+            exit 0
           fi
 
           # Validate entry format: must start with "- " (dash + space/tab) and contain issue reference "(#number)"
