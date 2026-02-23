@@ -90,7 +90,7 @@ Lepton_Error_t VoSPI_Init(VoSPI_t *p_Interface)
     if (spi_bus_initialize(p_Interface->Host, &p_Interface->Master, p_Interface->DMA) != ESP_OK) {
         ESP_LOGE(TAG, "SPI Master initialization failed!");
         Error = LEPTON_ERR_FAIL;
-        goto VoSPI_Init_Error_1;
+        return Error;
     }
 
     if (spi_bus_add_device(p_Interface->Host, &p_Interface->Interface, &p_Interface->Handle) != ESP_OK) {

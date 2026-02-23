@@ -204,6 +204,9 @@ Lepton_Error_t Lepton_Init(Lepton_t *p_Device, const Lepton_Conf_t *const p_Init
 #endif
 
     Error = Lepton_SetVideoFormat(p_Device, p_Init->VideoFormat, p_Status);
+    if (Error != LEPTON_ERR_OK) {
+        goto Lepton_Init_Error_1;
+    }
 
     return Error;
 
@@ -227,6 +230,8 @@ void Lepton_Deinit(Lepton_t *p_Device)
 
     CCI_Deinit(&p_Device->Internal.CCI);
     VoSPI_Deinit(&p_Device->Internal.VoSPI);
+
+    p_Device->Internal.isInitialized = false;
 }
 
 void Lepton_HardReset(Lepton_t *p_Device)

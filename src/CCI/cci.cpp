@@ -468,6 +468,9 @@ Lepton_Error_t CCI_Init(CCI_t *p_Interface)
     }
 
     if (i2c_master_bus_add_device(p_Interface->I2C_Bus_Handle, &_CCI_I2C_Config, &p_Interface->I2C_Dev_Handle) != ESP_OK) {
+        if (p_Interface->I2C_Deinit != NULL) {
+            p_Interface->I2C_Deinit(p_Interface->I2C_Bus_Handle);
+        }
         return LEPTON_ERR_FAIL;
     }
 
@@ -482,6 +485,11 @@ Lepton_Error_t CCI_Deinit(CCI_t *p_Interface)
         return LEPTON_ERR_INVALID_ARG;
     } else if (p_Interface->isInitialized == false) {
         return LEPTON_ERR_OK;
+    }
+
+    if (p_Interface->I2C_Dev_Handle != NULL) {
+        i2c_master_bus_rm_device(p_Interface->I2C_Dev_Handle);
+        p_Interface->I2C_Dev_Handle = NULL;
     }
 
     if (p_Interface->I2C_Deinit != NULL) {
