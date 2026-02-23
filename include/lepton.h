@@ -189,7 +189,8 @@ Lepton_Error_t Lepton_EnableAGC(Lepton_t *p_Device, bool Enable, Lepton_Result_t
  *  @param p_Status     (Optional) Pointer to device status
  *  @return             LEPTON_ERR_OK when successful
  */
-Lepton_Error_t Lepton_SetEmissivity(Lepton_t *p_Device, Lepton_Emissivity_t Emissivity, Lepton_Result_t *p_Status = NULL);
+Lepton_Error_t Lepton_SetEmissivity(Lepton_t *p_Device, Lepton_Emissivity_t Emissivity,
+                                    Lepton_Result_t *p_Status = NULL);
 
 /** @brief              Get the scene parameters for radiometric measurements.
  *  @param p_Device     Pointer to device instance
@@ -197,7 +198,8 @@ Lepton_Error_t Lepton_SetEmissivity(Lepton_t *p_Device, Lepton_Emissivity_t Emis
  *  @param p_Status     (Optional) Pointer to device status
  *  @return             LEPTON_ERR_OK when successful
  */
-Lepton_Error_t Lepton_GetFluxLinearParameters(Lepton_t *p_Device, Lepton_FluxLinearParams_t* p_Parameters, Lepton_Result_t *p_Status = NULL);
+Lepton_Error_t Lepton_GetFluxLinearParameters(Lepton_t *p_Device, Lepton_FluxLinearParams_t *p_Parameters,
+                                              Lepton_Result_t *p_Status = NULL);
 
 /** @brief              Set the scene parameters for radiometric measurements.
  *  @param p_Device     Pointer to device instance
@@ -205,7 +207,8 @@ Lepton_Error_t Lepton_GetFluxLinearParameters(Lepton_t *p_Device, Lepton_FluxLin
  *  @param p_Status     (Optional) Pointer to device status
  *  @return             LEPTON_ERR_OK when successful
  */
-Lepton_Error_t Lepton_SetFluxLinearParameters(Lepton_t *p_Device, Lepton_FluxLinearParams_t* p_Parameters, Lepton_Result_t *p_Status = NULL);
+Lepton_Error_t Lepton_SetFluxLinearParameters(Lepton_t *p_Device, Lepton_FluxLinearParams_t *p_Parameters,
+                                              Lepton_Result_t *p_Status = NULL);
 
 /** @brief          Get the uptime of the device in milliseconds.
  *  @param p_Device Pointer to device instance
@@ -385,7 +388,8 @@ Lepton_Error_t Lepton_GetPixelTemperature(Lepton_t *p_Device, uint16_t PixelValu
  *  @param Height   Image height in pixels
  *  @return         true on success, false on failure
  */
-bool Lepton_Raw14ToRGB(Lepton_t *p_Device, uint16_t *p_Input, uint8_t *p_Output, int16_t *p_Min, int16_t *p_Max, uint16_t Width,
+bool Lepton_Raw14ToRGB(Lepton_t *p_Device, uint16_t *p_Input, uint8_t *p_Output, int16_t *p_Min, int16_t *p_Max,
+                       uint16_t Width,
                        uint16_t Height);
 
 #ifdef __cplusplus

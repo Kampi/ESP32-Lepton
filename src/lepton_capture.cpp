@@ -239,7 +239,8 @@ Lepton_Error_t Lepton_StopCapture(Lepton_t *p_Device)
     return LEPTON_ERR_OK;
 }
 
-bool Lepton_Raw14ToRGB(Lepton_t *p_Device, uint16_t *p_Input, uint8_t *p_Output, int16_t *p_Min, int16_t *p_Max, uint16_t Width,
+bool Lepton_Raw14ToRGB(Lepton_t *p_Device, uint16_t *p_Input, uint8_t *p_Output, int16_t *p_Min, int16_t *p_Max,
+                       uint16_t Width,
                        uint16_t Height)
 {
     uint16_t min = INT16_MAX;
@@ -272,8 +273,10 @@ bool Lepton_Raw14ToRGB(Lepton_t *p_Device, uint16_t *p_Input, uint8_t *p_Output,
         p_Device->Internal.MaxSmooth = max;
     } else {
         /* Exponential moving average */
-        p_Device->Internal.MinSmooth = static_cast<uint16_t>(p_Device->Internal.SmoothFactor * p_Device->Internal.MinSmooth + (1.0f - p_Device->Internal.SmoothFactor) * min);
-        p_Device->Internal.MaxSmooth = static_cast<uint16_t>(p_Device->Internal.SmoothFactor * p_Device->Internal.MaxSmooth + (1.0f - p_Device->Internal.SmoothFactor) * max);
+        p_Device->Internal.MinSmooth = static_cast<uint16_t>(p_Device->Internal.SmoothFactor * p_Device->Internal.MinSmooth +
+                                                             (1.0f - p_Device->Internal.SmoothFactor) * min);
+        p_Device->Internal.MaxSmooth = static_cast<uint16_t>(p_Device->Internal.SmoothFactor * p_Device->Internal.MaxSmooth +
+                                                             (1.0f - p_Device->Internal.SmoothFactor) * max);
     }
 
     range = p_Device->Internal.MaxSmooth - p_Device->Internal.MinSmooth;

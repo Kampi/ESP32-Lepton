@@ -90,7 +90,8 @@ Lepton_Error_t Lepton_SetEmissivity(Lepton_t *p_Device, Lepton_Emissivity_t Emis
     return CCI_SetRadiometryFluxLinearParams(&p_Device->Internal.CCI, &Parameters, p_Status);
 }
 
-Lepton_Error_t Lepton_GetFluxLinearParameters(Lepton_t *p_Device, Lepton_FluxLinearParams_t* p_Parameters, Lepton_Result_t *p_Status)
+Lepton_Error_t Lepton_GetFluxLinearParameters(Lepton_t *p_Device, Lepton_FluxLinearParams_t *p_Parameters,
+                                              Lepton_Result_t *p_Status)
 {
     if (p_Device == NULL) {
         return LEPTON_ERR_INVALID_ARG;
@@ -103,7 +104,8 @@ Lepton_Error_t Lepton_GetFluxLinearParameters(Lepton_t *p_Device, Lepton_FluxLin
     return CCI_GetRadiometryFluxLinearParams(&p_Device->Internal.CCI, p_Parameters, p_Status);
 }
 
-Lepton_Error_t Lepton_SetFluxLinearParameters(Lepton_t *p_Device, Lepton_FluxLinearParams_t* p_Parameters, Lepton_Result_t *p_Status)
+Lepton_Error_t Lepton_SetFluxLinearParameters(Lepton_t *p_Device, Lepton_FluxLinearParams_t *p_Parameters,
+                                              Lepton_Result_t *p_Status)
 {
     if (p_Device == NULL) {
         return LEPTON_ERR_INVALID_ARG;
