@@ -33,7 +33,8 @@
 
 #define CCI_ADDRESS                                 0x2A
 
-// CCI register locations
+/** @brief CCI register locations.
+ */
 #define CCI_REG_STATUS                              0x0002
 #define CCI_REG_COMMAND                             0x0004
 #define CCI_REG_DATA_LENGTH                         0x0006
@@ -125,7 +126,8 @@
 #define CCI_CMD_VID_GET_VIDEO_PSEUDO_COLOR_SELECT   (CCI_CMD_SDK_MODULE_VID + 0x34)
 #define CCI_CMD_VID_SET_VIDEO_PSEUDO_COLOR_SELECT   (CCI_CMD_SDK_MODULE_VID + 0x35)
 
-// Protected commands
+/** @brief Protected commands.
+ */
 #define CCI_CMD_SDK_MODULE_OEM                      0x0800
 #define CCI_CMD_OEM_GET_PART_NUM                    (0x4000 + CCI_CMD_SDK_MODULE_OEM + 0x1C)
 #define CCI_CMD_OEM_GET_SOFTWARE_REVISION           (0x4000 + CCI_CMD_SDK_MODULE_OEM + 0x20)
@@ -152,7 +154,8 @@
 #define CCI_CMD_RAD_SET_SPOT_ROI                    (0x4000 + CCI_CMD_SDK_MODULE_RAD + 0xCD)
 #define CCI_CMD_RAD_GET_SPOT                        (0x4000 + CCI_CMD_SDK_MODULE_RAD + 0xD0)
 
-// Bit positions
+/** @brief Bit positions.
+ */
 #define CCI_BIT_BOOT_STATUS_BIT                     0x02
 #define CCI_BIT_BOOT_MODE_BIT                       0x01
 #define CCI_BIT_BUSY                                0x00
@@ -286,11 +289,11 @@ static Lepton_Error_t CCI_WriteBurst(CCI_t *p_Interface, uint16_t Start, uint16_
 
     ESP_LOGD(TAG, "Perform write burst. Start at %u, write %u from %p", Start, Length, p_Buf);
 
-    // Copy the start address in the buffer.
+    /* Copy the start address in the buffer */
     _CCI_Buffer[0] = static_cast<uint8_t>(Start >> 8);
     _CCI_Buffer[1] = static_cast<uint8_t>(Start & 0xFF);
 
-    // Copy the data in the buffer.
+    /* Copy the data in the buffer */
     for (uint32_t i = 1; i <= Length; i++) {
         _CCI_Buffer[i << 1] = static_cast<uint8_t>(*p_Buf >> 8);
         _CCI_Buffer[(i << 1) + 1] = static_cast<uint8_t>(*p_Buf++ & 0xFF);
@@ -363,7 +366,7 @@ static Lepton_Error_t CCI_ReadBurst(CCI_t *p_Interface, uint16_t Start, uint16_t
 
     ESP_LOGD(TAG, "Perform read burst. Start at %u, read %u to %p", Start, Length, p_Buf);
 
-    // Copy the start address in the buffer.
+    /* Copy the start address in the buffer */
     _CCI_Buffer[0] = static_cast<uint8_t>(Start >> 8);
     _CCI_Buffer[1] = static_cast<uint8_t>(Start & 0xFF);
 
@@ -376,7 +379,7 @@ static Lepton_Error_t CCI_ReadBurst(CCI_t *p_Interface, uint16_t Start, uint16_t
         goto CCI_ReadBurst_Exit;
     }
 
-    // Copy the data in the buffer.
+    /* Copy the data in the buffer */
     for (uint32_t i = 0; i < Length; i++) {
         *p_Buf++ = (_CCI_Buffer[i << 1] << 8) | _CCI_Buffer[(i << 1) + 1];
     }
@@ -522,10 +525,10 @@ Lepton_Error_t CCI_Set(CCI_t *p_Interface, uint16_t Command, uint16_t Length, co
         Start = CCI_BLOCK_BUF_0;
     }
 
-    // First: Write the data.
+    /* First: Write the data */
     LEPTON_ERROR_CHECK(CCI_WriteBurst(p_Interface, Start, Length, p_Buffer));
 
-    // Second: Execute the command when the data transmission was successful.
+    /* Second: Execute the command when the data transmission was successful */
     LEPTON_ERROR_CHECK(CCI_WriteRegister(p_Interface, CCI_REG_DATA_LENGTH, Length));
     LEPTON_ERROR_CHECK(CCI_WriteRegister(p_Interface, CCI_REG_COMMAND, Command));
 
@@ -543,14 +546,14 @@ Lepton_Error_t CCI_Get(CCI_t *p_Interface, uint16_t Command, uint16_t Length, ui
 
     LEPTON_ERROR_CHECK(CCI_WaitBusy(p_Interface, p_Status));
 
-    // First: Execute the command when the device is not busy anymore.
+    /* First: Execute the command when the device is not busy anymore */
     LEPTON_ERROR_CHECK(CCI_WriteRegister(p_Interface, CCI_REG_DATA_LENGTH, Length));
     LEPTON_ERROR_CHECK(CCI_WriteRegister(p_Interface, CCI_REG_COMMAND, Command));
 
-    // Wait for command to complete
+    /* Wait for command to complete */
     LEPTON_ERROR_CHECK(CCI_WaitBusy(p_Interface, p_Status));
 
-    // Second: Read the data.
+    /* Second: Read the data */
     Start = CCI_REG_DATA_0;
     if ((Length > 16) && (Length <= 512)) {
         Start = CCI_BLOCK_BUF_0;
