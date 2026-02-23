@@ -145,19 +145,59 @@ jobs:
 
       - name: Generate release notes
         run: |
+          # Get the previous release tag
+          PREVIOUS_TAG=$(git tag --sort=-v:refname | grep -E '^[0-9]+\.[0-9]+\.[0-9]+' | grep -v "^$VERSION$" | head -n 1 || true)
+          
+          # Start building release notes
+          echo "# Release $VERSION" > RELEASE_NOTES.md
+          echo "" >> RELEASE_NOTES.md
+          
           # Extract the section for the current version from CHANGELOG.md
           awk -v version="$VERSION" '
             /^## \['"$VERSION"'\]/ { found=1; next }
             /^## \[/ { if(found) exit }
             found { print }
-          ' CHANGELOG.md > RELEASE_NOTES.md
+          ' CHANGELOG.md >> RELEASE_NOTES.md
           
-          # Check if we extracted anything
+          # Add detailed changes section if previous tag exists
+          if [ -n "$PREVIOUS_TAG" ]; then
+            echo "" >> RELEASE_NOTES.md
+            echo "---" >> RELEASE_NOTES.md
+            echo "" >> RELEASE_NOTES.md
+            echo "## Detailed Changes" >> RELEASE_NOTES.md
+            echo "" >> RELEASE_NOTES.md
+            echo "**Full Changelog**: [\`${PREVIOUS_TAG}...${VERSION}\`](https://github.com/${{ github.repository }}/compare/${PREVIOUS_TAG}...${VERSION})" >> RELEASE_NOTES.md
+            echo "" >> RELEASE_NOTES.md
+            
+            # Add commit log
+            echo "### Commits" >> RELEASE_NOTES.md
+            echo "" >> RELEASE_NOTES.md
+            git log --pretty=format:"- %s (%h)" "${PREVIOUS_TAG}..${VERSION}" >> RELEASE_NOTES.md
+            echo "" >> RELEASE_NOTES.md
+            echo "" >> RELEASE_NOTES.md
+            
+            # Add file changes summary
+            echo "### File Changes" >> RELEASE_NOTES.md
+            echo "" >> RELEASE_NOTES.md
+            echo '```diff' >> RELEASE_NOTES.md
+            git diff --stat "${PREVIOUS_TAG}..${VERSION}" >> RELEASE_NOTES.md
+            echo '```' >> RELEASE_NOTES.md
+          else
+            echo "" >> RELEASE_NOTES.md
+            echo "---" >> RELEASE_NOTES.md
+            echo "" >> RELEASE_NOTES.md
+            echo "**Note**: This is the first release" >> RELEASE_NOTES.md
+          fi
+          
+          # Verify content was generated
           if [ ! -s RELEASE_NOTES.md ]; then
             echo "## Release $VERSION" > RELEASE_NOTES.md
             echo "" >> RELEASE_NOTES.md
             echo "See [CHANGELOG.md](CHANGELOG.md) for details." >> RELEASE_NOTES.md
           fi
+          
+          echo "Generated release notes:"
+          cat RELEASE_NOTES.md
 
       - name: Create Release
         env:
@@ -168,4 +208,14 @@ jobs:
           gh release create "$VERSION" \
             --title "Release $VERSION" \
             --notes-file RELEASE_NOTES.md \
-            --target main
+            --target ${{ github.ref_name }}
+
+      - name: Upload component to ESP Component Registry
+        env:
+          VERSION: ${{ env.VERSION }}
+        uses: espressif/upload-components-ci-action@v1
+        with:
+          name: ${{ github.event.repository.name }}
+          version: ${{ env.VERSION }}
+          namespace: ${{ github.repository_owner }}
+          api_token: ${{ secrets.IDF_COMPONENT_REGISTRY_TOKEN }}

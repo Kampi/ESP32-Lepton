@@ -78,7 +78,7 @@ esp_err_t Lepton_Init(Lepton_Handle_t *p_Handle, const Lepton_Config_t *p_Config
 ### Code Organization
 
 #### Directory Structure
-```
+```text
 ESP32-Lepton/
 ├── CMakeLists.txt             # Component build configuration
 ├── idf_component.yml          # Component manifest
@@ -247,7 +247,7 @@ typedef enum {
    - Verify examples in documentation still compile
 
 **Example validation checklist for each change:**
-```
+```text
 ☐ Code compiles without errors
 ☐ No compiler warnings introduced
 ☐ All function declarations have complete Doxygen documentation
@@ -404,7 +404,7 @@ esp_err_t Lepton_GetTemperature(Lepton_Handle_t Handle, float *p_Temp);
 
 #### Documentation Structure
 
-```
+```text
 docs/
 ├── index.adoc              # Component overview
 ├── lepton.adoc             # Main driver API
