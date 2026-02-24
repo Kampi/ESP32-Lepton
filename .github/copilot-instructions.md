@@ -150,6 +150,52 @@ ESP32-Lepton/
 
 **CRITICAL**: Every function declaration in header files MUST include complete Doxygen documentation.
 
+#### Documentation Placement Rule
+
+Function documentation belongs exclusively in the **header file** (`.h`) alongside the declaration — not in the implementation file.
+
+**Exception:** `static` functions that are only defined in a `.cpp`/`.c` file and have no header declaration. For these, the Doxygen comment is placed directly above the function definition in the implementation file.
+
+| Function type | Documentation location |
+|--------------|------------------------|
+| Public API (declared in `.h`) | Header file (`.h`) only |
+| `static` (defined in `.cpp`/`.c` only) | Implementation file (`.cpp`/`.c`) |
+
+```cpp
+// ✅ CORRECT: Public API → documented in header (.h)
+// lepton.h:
+/** @brief          Initialize the Lepton driver.
+ *  @return         LEPTON_ERR_OK on success
+ */
+Lepton_Error_t Lepton_Init(Lepton_Config_t *p_Config);
+
+// lepton.cpp: NO Doxygen comment above the definition
+Lepton_Error_t Lepton_Init(Lepton_Config_t *p_Config)
+{
+    // ...
+}
+
+// ✅ CORRECT: static function → documented in .cpp only
+// lepton.cpp:
+/** @brief          Reset the VoSPI synchronization state.
+ *  @param p_Config Pointer to Lepton configuration
+ */
+static void resync_vospi(Lepton_Config_t *p_Config)
+{
+    // ...
+}
+```
+
+```cpp
+// ❌ INCORRECT: Doxygen comment in .cpp for a public function
+// lepton.cpp:
+/** @brief Initialize the Lepton driver. */  // ← wrong place
+Lepton_Error_t Lepton_Init(Lepton_Config_t *p_Config)
+{
+    // ...
+}
+```
+
 #### Doxygen-Style Documentation for ALL Functions
 
 Use Doxygen comments for **ALL** public API functions and structures:

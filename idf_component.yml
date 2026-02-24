@@ -9,10 +9,9 @@ tags:
   - flir
   - lepton
 targets:
-  - esp32
   - esp32s3
 maintainers:
   - "Daniel Kampert <DanielKampert@kampis-elektroecke.de>"
 dependencies:
   idf:
-    version: ">=5.1"
+    version: ">=5.5.3"

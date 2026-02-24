@@ -245,7 +245,8 @@ typedef struct {
     uint16_t Height;                            /**< Image buffer height in pixel. */
     uint16_t Width;                             /**< Image buffer width in pixel. */
     uint8_t BytesPerPixel;                      /**< Number of bytes per pixel. */
-    uint16_t *Image_Buffer;                     /**< Pointer to memory location for image buffer. */
+    uint16_t *Image_Buffer;                     /**< Pointer to memory location for image buffer.
+                                                     Allocated with MALLOC_CAP_SIMD and MALLOC_CAP_SPIRAM, if PSRAM is enabled. */
     uint16_t *Telemetry_Buffer;                 /**< Pointer to memory location for telemetry buffer. */
 } Lepton_FrameBuffer_t;
 
