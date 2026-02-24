@@ -55,6 +55,7 @@ static esp_err_t VoSPI_ReadPacket(VoSPI_t *p_Interface, uint16_t *p_Header, uint
     Trans.rxlength = PacketSize * 8;  /* Bits */
     Trans.rx_buffer = p_Interface->Packet;
     Trans.tx_buffer = NULL;
+    Trans.flags = SPI_TRANS_DMA_USE_PSRAM;
 
     Error = spi_device_transmit(p_Interface->Handle, &Trans);
     if (Error != ESP_OK) {
@@ -78,6 +79,7 @@ static esp_err_t VoSPI_ReadPacket(VoSPI_t *p_Interface, uint16_t *p_Header, uint
 
 Lepton_Error_t VoSPI_Init(VoSPI_t *p_Interface)
 {
+    uint32_t Caps;
     Lepton_Error_t Error;
     size_t PacketBufferSize;
 
@@ -99,21 +101,33 @@ Lepton_Error_t VoSPI_Init(VoSPI_t *p_Interface)
         goto VoSPI_Init_Error_1;
     }
 
+    #ifdef CONFIG_SPIRAM
+        Caps = MALLOC_CAP_DMA | MALLOC_CAP_SPIRAM;
+    #else
+        Caps = MALLOC_CAP_DMA;
+    #endif
+
     /* Allocate DMA-capable packet buffer (4 bytes header/CRC + payload)
      * RAW14: 4 + 160 = 164 bytes
      * RGB888: 4 + 240 = 244 bytes */
     PacketBufferSize = 4 + (VOSPI_PIXELS_PER_PACKET * p_Interface->BytesPerPixel);
-    p_Interface->Packet = reinterpret_cast<uint16_t *>(heap_caps_malloc(PacketBufferSize, MALLOC_CAP_DMA));
+    p_Interface->Packet = reinterpret_cast<uint16_t *>(heap_caps_malloc(PacketBufferSize, Caps));
     if (p_Interface->Packet == NULL) {
         ESP_LOGE(TAG, "Failed to allocate DMA packet buffer!");
         Error = LEPTON_ERR_NO_MEM;
         goto VoSPI_Init_Error_2;
     }
 
+    #ifdef CONFIG_SPIRAM
+        Caps = MALLOC_CAP_SIMD | MALLOC_CAP_SPIRAM;
+    #else
+        Caps = MALLOC_CAP_SIMD;
+    #endif
+
     /* Allocate frame buffer in PSRAM */
     for (uint8_t i = 0; i < CONFIG_LEPTON_VOSPI_FRAME_BUFFERS; i++) {
         p_Interface->Image_Buffer[i] = reinterpret_cast<uint16_t *>(heap_caps_malloc(p_Interface->ImageWidth *
-                                                                                     p_Interface->ImageHeight * p_Interface->BytesPerPixel, MALLOC_CAP_SPIRAM));
+                                                                                     p_Interface->ImageHeight * p_Interface->BytesPerPixel, Caps));
         if (p_Interface->Image_Buffer[i] == NULL) {
             ESP_LOGE(TAG, "Failed to allocate frame buffer!");
             Error = LEPTON_ERR_NO_MEM;
@@ -122,11 +136,17 @@ Lepton_Error_t VoSPI_Init(VoSPI_t *p_Interface)
     }
 
     if (p_Interface->useTelemetry) {
+        #ifdef CONFIG_SPIRAM
+            Caps = MALLOC_CAP_SPIRAM;
+        #else
+            Caps = 0;
+        #endif
+
         /* Telemetry contains 4 packets (or 3 lines) = 4 * 80 pixels * 2 bytes = 640 bytes */
         size_t telemetryBufferSize = 4 * VOSPI_PIXELS_PER_PACKET * sizeof(uint16_t);
         for (uint8_t i = 0; i < CONFIG_LEPTON_VOSPI_FRAME_BUFFERS; i++) {
             p_Interface->Telemetry_Buffer[i] = reinterpret_cast<uint16_t *>(heap_caps_malloc(telemetryBufferSize,
-                                                                                             MALLOC_CAP_SPIRAM));
+                                                                                             Caps));
             if (p_Interface->Telemetry_Buffer[i] == NULL) {
                 ESP_LOGE(TAG, "Failed to allocate telemetry buffer!");
                 Error = LEPTON_ERR_NO_MEM;
@@ -356,9 +376,25 @@ Lepton_Error_t VoSPI_CaptureImage(VoSPI_t *p_Interface, uint8_t *p_BufferIndex)
                     uint8_t *ImageBufferBytes = reinterpret_cast<uint8_t *>(p_Interface->Image_Buffer[p_Interface->CurrentBuffer]);
                     memcpy(&ImageBufferBytes[ByteOffset], PacketData, VOSPI_PIXELS_PER_PACKET * 3);
                 } else {
-                    /* RAW14 mode: Convert big-endian 16-bit values to little-endian */
-                    for (size_t i = 0; i < VOSPI_PIXELS_PER_PACKET; i++) {
-                        Dest[i] = (static_cast<uint16_t>(PacketData[i * 2]) << 8) | PacketData[i * 2 + 1];
+                    /* RAW14 mode: Convert big-endian 16-bit values to little-endian.
+                     * SIMD optimisation: process 2 pixels (4 bytes) per iteration using
+                     * __builtin_bswap32.  On Xtensa LX7 this maps to SSAI+SRC or equivalent,
+                     * cutting the per-packet load/store count roughly in half compared to
+                     * processing one pixel at a time. */
+                    const uint8_t *__restrict__ Src = PacketData;
+                    size_t OutIdx = 0;
+
+                    for (; (OutIdx + 2) <= VOSPI_PIXELS_PER_PACKET; OutIdx += 2, Src += 4) {
+                        uint32_t Val;
+                        memcpy(&Val, Src, sizeof(uint32_t));   /* safe unaligned 32-bit load */
+                        uint32_t Swapped = __builtin_bswap32(Val);
+                        Dest[OutIdx]     = static_cast<uint16_t>(Swapped >> 16);
+                        Dest[OutIdx + 1] = static_cast<uint16_t>(Swapped & 0xFFFFU);
+                    }
+
+                    /* Remainder: handles odd VOSPI_PIXELS_PER_PACKET (never taken for 80 pixels) */
+                    if (OutIdx < VOSPI_PIXELS_PER_PACKET) {
+                        Dest[OutIdx] = (static_cast<uint16_t>(Src[0]) << 8) | Src[1];
                     }
                 }
             }

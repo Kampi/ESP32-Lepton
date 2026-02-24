@@ -2,7 +2,23 @@
 
 ## [Unreleased]
 
+**Changed:**
+
+- Change min. esp-idf version to 5.5.3 to make use of the direct PSRAM / SPI DMA transaction
+
+**Added:**
+
+- Add `MALLOC_CAP_SIMD` for image buffers
+- Add dynamic memory caps for VoSPI transaction to allow the usage without PSRAM
+- Add SIMD support
+
+**Fixed:**
+
 - Fix memory leaks during driver deinitialization
+
+**Removed:**
+
+- Remove ESP from supported devices list because it is untested
 
 ## [0.0.2] - 2026-01-26
 

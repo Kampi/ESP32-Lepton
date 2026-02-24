@@ -18,7 +18,7 @@ set(COMPONENT_PRIV_INCLUDEDIRS
     "include/VoSPI"
     )
 
-set(COMPONENT_PRIV_REQUIRES freertos driver)
+set(COMPONENT_PRIV_REQUIRES freertos driver espressif__esp-dsp)
 
 if((IDF_TARGET STREQUAL "esp32s3"))
 	list(APPEND COMPONENT_PRIV_REQUIRES esp_timer)

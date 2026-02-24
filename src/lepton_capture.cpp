@@ -31,8 +31,21 @@
 
 #include "lepton.h"
 #include "vospi.h"
+#include "dsps_sub.h"
 
 #include <sdkconfig.h>
+
+/* -----------------------------------------------------------------------
+ * ESP32-S3 Xtensa LX7 + PIE SIMD via GCC vector extension.
+ * vector_size(16) maps to the 128-bit Q-registers of the PIE engine:
+ *   u16x8_t  – 8 lanes of uint16_t  (used for the min/max scan)
+ *   u32x4_t  – 4 lanes of uint32_t  (used for the normalization multiply)
+ * The compiler emits EE.* PIE instructions when -O2/-O3 is active.
+ * The __attribute__((optimize("O3"))) on Lepton_Raw14ToRGB enforces this
+ * even in debug builds (which default to -Og).
+ * ----------------------------------------------------------------------- */
+typedef uint16_t u16x8_t __attribute__((vector_size(16), aligned(16)));
+typedef uint32_t u32x4_t __attribute__((vector_size(16), aligned(16)));
 
 #ifndef CONFIG_LEPTON_CAPTURE_TASK_STACK
 #define CONFIG_LEPTON_CAPTURE_TASK_STACK                4096
@@ -239,6 +252,7 @@ Lepton_Error_t Lepton_StopCapture(Lepton_t *p_Device)
     return LEPTON_ERR_OK;
 }
 
+__attribute__((optimize("O3")))
 bool Lepton_Raw14ToRGB(Lepton_t *p_Device, uint16_t *p_Input, uint8_t *p_Output, int16_t *p_Min, int16_t *p_Max,
                        uint16_t Width,
                        uint16_t Height)
@@ -251,18 +265,55 @@ bool Lepton_Raw14ToRGB(Lepton_t *p_Device, uint16_t *p_Input, uint8_t *p_Output,
         return false;
     }
 
-    /* Find min and max values for normalization */
-    for (uint32_t i = 0; i < (Width * Height); i++) {
-        if (p_Input[i] < min) {
-            min = p_Input[i];
-        }
-        if (p_Input[i] > max) {
-            max = p_Input[i];
-        }
+    /* -----------------------------------------------------------------------
+     * Min/Max pass – 8-wide SIMD using ESP32-S3 PIE Q-registers.
+     *
+     * u16x8_t maps to a single 128-bit Q-register (8 × uint16_t).
+     * The vector ternary  v = (cond) ? a : b  compiles to element-wise
+     * PIE compare-and-move (EE.VCMP / EE.VSEL) instructions.
+     * Each iteration processes 8 pixels in one set of SIMD operations,
+     * reducing loop iterations by 8× compared to the scalar baseline.
+     * ----------------------------------------------------------------------- */
+    uint32_t PixelCount = static_cast<uint32_t>(Width) * Height;
+    uint32_t i = 0;
+
+    /* Initialise 8-lane SIMD accumulators */
+    u16x8_t vmin8 = {UINT16_MAX, UINT16_MAX, UINT16_MAX, UINT16_MAX,
+                     UINT16_MAX, UINT16_MAX, UINT16_MAX, UINT16_MAX};
+    u16x8_t vmax8 = {0, 0, 0, 0, 0, 0, 0, 0};
+
+    for (; (i + 8) <= PixelCount; i += 8) {
+        u16x8_t v;
+
+        __builtin_memcpy(&v, p_Input + i, sizeof(u16x8_t)); /* unaligned Q-reg load */
+        vmin8 = vmin8 < v ? vmin8 : v;  /* EE.VMIN.U16 or equivalent */
+        vmax8 = vmax8 > v ? vmax8 : v;  /* EE.VMAX.U16 or equivalent */
 
         /* Reset watchdog periodically during min/max search */
         if ((i & 0x3FF) == 0) { /* Every 1024 pixels */
             esp_task_wdt_reset();
+        }
+    }
+
+    /* Horizontal reduction: fold 8 SIMD lanes down to a single scalar */
+    for (uint8_t k = 0; k < 8; k++) {
+        if (vmin8[k] < min) {
+            min = vmin8[k];
+        }
+
+        if (vmax8[k] > max) {
+            max = vmax8[k];
+        }
+    }
+
+    /* Scalar tail for the remaining < 8 pixels (160×120 = 19200, remainder 0) */
+    for (; i < PixelCount; i++) {
+        if (p_Input[i] < min) {
+            min = p_Input[i];
+        }
+
+        if (p_Input[i] > max) {
+            max = p_Input[i];
         }
     }
 
@@ -280,27 +331,101 @@ bool Lepton_Raw14ToRGB(Lepton_t *p_Device, uint16_t *p_Input, uint8_t *p_Output,
     }
 
     range = p_Device->Internal.MaxSmooth - p_Device->Internal.MinSmooth;
+
     /* Avoid division by zero */
     if (range < 10) {
         range = 10;
     }
 
-    /* Apply iron palette */
-    for (uint32_t i = 0; i < (Width * Height); i++) {
-        /* Normalize to 0-255 range using smoothed min/max */
-        uint32_t normalized = ((p_Input[i] - p_Device->Internal.MinSmooth) * 255) / range;
-        if (normalized > 255) {
-            normalized = 255;
+    /* -----------------------------------------------------------------------
+     * Normalization pass – two-stage SIMD pipeline:
+     *
+     * Stage 1 – Subtraction  (dsps_sub_s16, resolved to dsps_sub_s16_aes3 on
+     *             ESP32-S3 when CONFIG_DSP_OPTIMIZED=y):
+     *   Uses ee.vsubs.s16.ld.incp to subtract MinSmooth from 8 pixels per
+     *   PIE-instruction cycle.  Input is reinterpreted as int16_t (safe:
+     *   all RAW14 values fit in [0, 16383] < INT16_MAX).
+     *   Processing is row-by-row so the per-row delta fits in a 320-byte
+     *   stack buffer (LEPTON_IMAGE_WIDTH × 2 bytes).
+     *   The 16-byte alignment attribute on both stack buffers activates the
+     *   fast aes3 path (no fallback to scalar).
+     *
+     * Stage 2 – Multiply + clamp  (GCC u32x4_t, 4-wide PIE Q-registers):
+     *   Fixed-point multiply (delta * InvRange) >> 16 with cap [0, 255].
+     *   Negative delta (pixel < MinSmooth) clamped to 0 during uint32 widen.
+     *
+     * Palette LUT gather remains scalar (no SIMD gather for 3-byte entries).
+     * ----------------------------------------------------------------------- */
+    uint32_t InvRange = (255U << 16) / range;
+    uint16_t MinSmooth = p_Device->Internal.MinSmooth;
+
+    /* 16-byte aligned stack buffers for aes3 SIMD alignment requirement */
+    int16_t MinSmoothRow[LEPTON_IMAGE_WIDTH] __attribute__((aligned(16)));
+    int16_t DeltaRow[LEPTON_IMAGE_WIDTH]     __attribute__((aligned(16)));
+
+    /* Fill constant-subtrahend row once */
+    for (uint8_t k = 0; k < LEPTON_IMAGE_WIDTH; k++) {
+        MinSmoothRow[k] = static_cast<int16_t>(MinSmooth);
+    }
+
+    const u32x4_t InvRange4 = {InvRange, InvRange, InvRange, InvRange};
+    const u32x4_t Cap255 = {255U, 255U, 255U, 255U};
+
+    /* Apply iron palette – one row per outer iteration */
+    for (uint32_t row = 0; row < Height; row++) {
+        int k = 0;
+        u32x4_t norm;
+        uint32_t OutBase;
+        const int16_t *RowIn  = reinterpret_cast<const int16_t *>(p_Input + row * Width);
+        uint8_t *RowOut = p_Output + row * Width * 3U;
+
+        /* Stage 1: vectorized subtract using dsps_sub_s16_aes3
+         * DeltaRow[k] = RowIn[k] - MinSmooth  (shift = 0, no scaling) */
+        dsps_sub_s16(RowIn, MinSmoothRow, DeltaRow, static_cast<int>(Width), 1, 1, 1, 0);
+
+        /* Stage 2: 4-wide PIE multiply+shift+clamp, then scalar palette gather */
+        for (; (k + 4) <= static_cast<int>(Width); k += 4) {
+            u32x4_t delta = {
+                DeltaRow[k + 0] > 0 ? static_cast<uint32_t>(DeltaRow[k + 0]) : 0U,
+                DeltaRow[k + 1] > 0 ? static_cast<uint32_t>(DeltaRow[k + 1]) : 0U,
+                DeltaRow[k + 2] > 0 ? static_cast<uint32_t>(DeltaRow[k + 2]) : 0U,
+                DeltaRow[k + 3] > 0 ? static_cast<uint32_t>(DeltaRow[k + 3]) : 0U
+            };
+
+            norm = (delta * InvRange4) >> 16U;
+            norm = norm > Cap255 ? Cap255 : norm;
+
+            OutBase = static_cast<uint32_t>(k) * 3U;
+            RowOut[OutBase +  0] = Lepton_Palette_Iron[norm[0]][0];
+            RowOut[OutBase +  1] = Lepton_Palette_Iron[norm[0]][1];
+            RowOut[OutBase +  2] = Lepton_Palette_Iron[norm[0]][2];
+            RowOut[OutBase +  3] = Lepton_Palette_Iron[norm[1]][0];
+            RowOut[OutBase +  4] = Lepton_Palette_Iron[norm[1]][1];
+            RowOut[OutBase +  5] = Lepton_Palette_Iron[norm[1]][2];
+            RowOut[OutBase +  6] = Lepton_Palette_Iron[norm[2]][0];
+            RowOut[OutBase +  7] = Lepton_Palette_Iron[norm[2]][1];
+            RowOut[OutBase +  8] = Lepton_Palette_Iron[norm[2]][2];
+            RowOut[OutBase +  9] = Lepton_Palette_Iron[norm[3]][0];
+            RowOut[OutBase + 10] = Lepton_Palette_Iron[norm[3]][1];
+            RowOut[OutBase + 11] = Lepton_Palette_Iron[norm[3]][2];
         }
 
-        p_Output[i * 3 + 0] = Lepton_Palette_Iron[normalized][0];
-        p_Output[i * 3 + 1] = Lepton_Palette_Iron[normalized][1];
-        p_Output[i * 3 + 2] = Lepton_Palette_Iron[normalized][2];
+        /* Scalar tail (160 is divisible by 4 – this loop is never entered) */
+        for (; k < static_cast<int>(Width); k++) {
+            uint32_t Delta = DeltaRow[k] > 0 ? static_cast<uint32_t>(DeltaRow[k]) : 0U;
+            uint32_t normalized = (Delta * InvRange) >> 16;
 
-        /* Reset watchdog periodically during conversion */
-        if ((i & 0x3FF) == 0) { /* Every 1024 pixels */
-            esp_task_wdt_reset();
+            if (normalized > 255U) {
+                normalized = 255U;
+            }
+
+            RowOut[k * 3 + 0] = Lepton_Palette_Iron[normalized][0];
+            RowOut[k * 3 + 1] = Lepton_Palette_Iron[normalized][1];
+            RowOut[k * 3 + 2] = Lepton_Palette_Iron[normalized][2];
         }
+
+        /* Reset watchdog once per row instead of once per 1024 pixels */
+        esp_task_wdt_reset();
     }
 
     if (p_Min != NULL) {
