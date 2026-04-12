@@ -68,6 +68,22 @@ typedef int32_t (*I2C_Write_t)(i2c_master_dev_handle_t *p_Dev_Handle, const uint
  */
 typedef int32_t (*I2C_Read_t)(i2c_master_dev_handle_t *p_Dev_Handle, uint8_t *p_Buffer, uint32_t Length);
 
+/** @brief              I2C combined write-then-read function prototype (atomic, uses repeated-START).
+ *                      Preferred over separate I2C_Write + I2C_Read for register reads because it
+ *                      prevents other I2C devices from injecting a START condition between the
+ *                      register-address phase and the data phase.
+ *  @param p_Dev_Handle Pointer to I2C device handle
+ *  @param p_WriteData  Pointer to write data (register address bytes)
+ *  @param WriteLength  Number of bytes to write
+ *  @param p_ReadData   Pointer to read buffer
+ *  @param ReadLength   Number of bytes to read
+ *  @return             0 when successful
+ *                      -1 when not successful
+ */
+typedef int32_t (*I2C_WriteRead_t)(i2c_master_dev_handle_t *p_Dev_Handle,
+                                   const uint8_t *p_WriteData, uint32_t WriteLength,
+                                   uint8_t *p_ReadData, uint32_t ReadLength);
+
 /** @brief              I2C deinitialization function prototype.
  *  @param Bus_handle   I2C bus handle
  *  @return             0 when successful
@@ -78,23 +94,23 @@ typedef int32_t (*I2C_Deinit_t)(i2c_master_bus_handle_t Bus_handle);
 /** @brief Material emissivity values scaled by 100.
  */
 typedef enum {
-    LEPTON_EMISSIVITY_ASPHALT              = 95,    /**< Emissivity value for asphalt (0.90-0.98, avg 0.95) */
-    LEPTON_EMISSIVITY_CONCRETE             = 92,    /**< Emissivity value for concrete (0.92) */
-    LEPTON_EMISSIVITY_SOIL_DRY             = 90,    /**< Emissivity value for dry soil (0.90) */
-    LEPTON_EMISSIVITY_SOIL_WET             = 95,    /**< Emissivity value for wet soil (0.95) */
-    LEPTON_EMISSIVITY_WOOD                 = 90,    /**< Emissivity value for wood (0.90) */
-    LEPTON_EMISSIVITY_WATER                = 94,    /**< Emissivity value for water (0.92-0.96, avg 0.94) */
-    LEPTON_EMISSIVITY_ICE                  = 97,    /**< Emissivity value for ice (0.96-0.98, avg 0.97) */
-    LEPTON_EMISSIVITY_SNOW                 = 83,    /**< Emissivity value for snow (0.83) */
-    LEPTON_EMISSIVITY_BRICK                = 95,    /**< Emissivity value for brick (0.93-0.96, avg 0.95) */
-    LEPTON_EMISSIVITY_PAINT                = 90,    /**< Emissivity value for lacquer/paint (0.80-0.95, avg 0.90) */
-    LEPTON_EMISSIVITY_PAINT_BLACK          = 97,    /**< Emissivity value for flat black lacquer (0.97) */
-    LEPTON_EMISSIVITY_TEXTILES             = 90,    /**< Emissivity value for textiles (0.90) */
-    LEPTON_EMISSIVITY_SKIN_HUMAN           = 98,    /**< Emissivity value for human skin (0.98) */
-    LEPTON_EMISSIVITY_ALUMINUM_POLISHED    = 5,     /**< Emissivity value for polished aluminum (0.04-0.06, avg 0.05) */
-    LEPTON_EMISSIVITY_ALUMINUM_ANODIZED    = 55,    /**< Emissivity value for anodized aluminum (0.55) */
-    LEPTON_EMISSIVITY_STEEL_RUSTY          = 69,    /**< Emissivity value for rusty steel (0.69) */
-    LEPTON_EMISSIVITY_STEEL_STAINLESS      = 30,    /**< Emissivity value for stainless steel (0.16-0.45, avg 0.30) */
+    LEPTON_EMISSIVITY_ASPHALT = 95,                 /**< Emissivity value for asphalt (0.90-0.98, avg 0.95) */
+    LEPTON_EMISSIVITY_CONCRETE = 92,                /**< Emissivity value for concrete (0.92) */
+    LEPTON_EMISSIVITY_SOIL_DRY = 90,                /**< Emissivity value for dry soil (0.90) */
+    LEPTON_EMISSIVITY_SOIL_WET = 95,                /**< Emissivity value for wet soil (0.95) */
+    LEPTON_EMISSIVITY_WOOD = 90,                    /**< Emissivity value for wood (0.90) */
+    LEPTON_EMISSIVITY_WATER = 94,                   /**< Emissivity value for water (0.92-0.96, avg 0.94) */
+    LEPTON_EMISSIVITY_ICE = 97,                     /**< Emissivity value for ice (0.96-0.98, avg 0.97) */
+    LEPTON_EMISSIVITY_SNOW = 83,                    /**< Emissivity value for snow (0.83) */
+    LEPTON_EMISSIVITY_BRICK = 95,                   /**< Emissivity value for brick (0.93-0.96, avg 0.95) */
+    LEPTON_EMISSIVITY_PAINT = 90,                   /**< Emissivity value for lacquer/paint (0.80-0.95, avg 0.90) */
+    LEPTON_EMISSIVITY_PAINT_BLACK = 97,             /**< Emissivity value for flat black lacquer (0.97) */
+    LEPTON_EMISSIVITY_TEXTILES = 90,                /**< Emissivity value for textiles (0.90) */
+    LEPTON_EMISSIVITY_SKIN_HUMAN = 98,              /**< Emissivity value for human skin (0.98) */
+    LEPTON_EMISSIVITY_ALUMINUM_POLISHED = 5,        /**< Emissivity value for polished aluminum (0.04-0.06, avg 0.05) */
+    LEPTON_EMISSIVITY_ALUMINUM_ANODIZED = 55,       /**< Emissivity value for anodized aluminum (0.55) */
+    LEPTON_EMISSIVITY_STEEL_RUSTY = 69,             /**< Emissivity value for rusty steel (0.69) */
+    LEPTON_EMISSIVITY_STEEL_STAINLESS = 30,         /**< Emissivity value for stainless steel (0.16-0.45, avg 0.30) */
 } Lepton_Emissivity_t;
 
 /** @brief Lepton error codes from the software driver (Chapter 2.3 - FLIR LEPTON Software IDD).
@@ -194,14 +210,14 @@ typedef enum {
 /** @brief Video output format definitions (Chapter 4.6.8 - FLIR LEPTON Software IDD).
  */
 typedef enum {
-    LEPTON_FORMAT_RGB888    = 3,                /**< 24-bit color mode. */
-    LEPTON_FORMAT_RAW14     = 7,                /**< 14-bit raw data. */
+    LEPTON_FORMAT_RGB888 = 3,                   /**< 24-bit color mode. */
+    LEPTON_FORMAT_RAW14 = 7,                    /**< 14-bit raw data. */
 } Lepton_VideoFormat_t;
 
 /** @brief Video output source definitions (Chapter 4.7.8 - FLIR LEPTON Software IDD).
  */
 typedef enum {
-    LEPTON_SOURCE_RAW       = 0,                /*< Before video processing. */
+    LEPTON_SOURCE_RAW = 0,                      /*< Before video processing. */
     LEPTON_SOURCE_COOKED,                       /*< Post video processing - Normal mode. */
     LEPTON_SOURCE_RAMP,                         /*< Software Ramp pattern - Increase in X and Y. */
     LEPTON_SOURCE_CONSTANT,                     /*< Software Constant value pattern. */
@@ -213,7 +229,7 @@ typedef enum {
 /** @brief AGC Policy definitions (Chapter 4.4.2 - FLIR LEPTON Software IDD).
  */
 typedef enum {
-    LEPTON_AGC_LINEAR   = 0,                    /**< Linear AGC mode. */
+    LEPTON_AGC_LINEAR = 0,                      /**< Linear AGC mode. */
     LEPTON_AGC_HEQ,                             /**< Histogram Equalization AGC mode. */
 } Lepton_AGC_Mode_t;
 
@@ -311,6 +327,7 @@ typedef struct {
     /**< NOTE: You must set I2C_Bus_Config to use this function! */
     I2C_Write_t I2C_Write;                      /**< I2C write function pointer. */
     I2C_Read_t I2C_Read;                        /**< I2C read function pointer. */
+    I2C_WriteRead_t I2C_WriteRead;              /**< I2C atomic write-then-read function pointer (optional, preferred for register reads). */
     I2C_Deinit_t I2C_Deinit;                    /**< I2C deinitialization function pointer. */
     i2c_master_bus_config_t *I2C_Bus_Config;    /**< Pointer to I2C bus configuration. */
     /**< NOTE: Only needed when I2C_Init is used! */
@@ -393,15 +410,15 @@ typedef struct {
         bool isVideoFreezeEnabled;              /**< true when Video Freeze is enabled.
                                                      NOTE: Managed by the device driver. */
         Lepton_Gain_t Gain;                     /**< Gain setting for the Lepton sensor.
-                                                      NOTE: Managed by the device driver. */
+                                                     NOTE: Managed by the device driver. */
         Lepton_VideoFormat_t VideoFormat;       /**< Video format setting for the Lepton sensor.
-                                                      NOTE: Managed by the device driver. */
+                                                     NOTE: Managed by the device driver. */
         Lepton_AGC_Mode_t AGCPolicy;            /**< AGC policy setting for the Lepton sensor.
-                                                      NOTE: Managed by the device driver. */
+                                                     NOTE: Managed by the device driver. */
         CCI_t CCI;                              /**< CCI device object used by the camera driver.
-                                                      NOTE: Managed by the device driver. */
+                                                     NOTE: Managed by the device driver. */
         VoSPI_t VoSPI;                          /**< VoSPI device object used by the camera driver.
-                                                      NOTE: Managed by the device driver. */
+                                                     NOTE: Managed by the device driver. */
         uint16_t MinSmooth;                     /**< Minimum smooth value for RGB conversion.
                                                      NOTE: Managed by the device driver. */
         uint16_t MaxSmooth;                     /**< Maximum smooth value for RGB conversion.
@@ -434,13 +451,11 @@ typedef struct {
 typedef struct {
     uint16_t Reserved: 3;                       /**< Reserved. */
     uint16_t FFC_Desired: 1;                    /**< 0 = FFC not desired, 1 = FFC desired. */
-    uint16_t FFC_State:
-    2;                      /**< 00 = FFC never commanded, 01 = FFC imminent, 10 = FFC in progress, 11 = FFC complete. */
+    uint16_t FFC_State:2;                       /**< 00 = FFC never commanded, 01 = FFC imminent, 10 = FFC in progress, 11 = FFC complete. */
     uint16_t Reserved1: 6;                      /**< Reserved. */
     uint16_t AGC_State: 1;                      /**< 0 = AGC disabled, 1 = AGC enabled. */
     uint16_t Reserved2: 2;                      /**< Reserved. */
-    uint16_t Shutter_Lockout:
-    1;                /**< 0 = Shutter not locked out, 1 = Shutter locked out (outside of valid temperature range, -10°C to 80°C)). */
+    uint16_t Shutter_Lockout:1;                 /**< 0 = Shutter not locked out, 1 = Shutter locked out (outside of valid temperature range, -10°C to 80°C)). */
     uint16_t Reserved3: 4;                      /**< Reserved. */
     uint16_t Overtemp_Shutdown: 1;              /**< Goes true 10 seconds before shutdown. */
     uint16_t Reserved4: 11;                     /**< Reserved. */
