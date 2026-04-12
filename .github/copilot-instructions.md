@@ -152,7 +152,7 @@ ESP32-Lepton/
 
 #### Documentation Placement Rule
 
-Function documentation belongs exclusively in the **header file** (`.h`) alongside the declaration — not in the implementation file.
+Function documentation belongs exclusively in the **header file** (`.h`) alongside the declaration - not in the implementation file.
 
 **Exception:** `static` functions that are only defined in a `.cpp`/`.c` file and have no header declaration. For these, the Doxygen comment is placed directly above the function definition in the implementation file.
 

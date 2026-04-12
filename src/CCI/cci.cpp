@@ -204,13 +204,29 @@ static Lepton_Error_t CCI_WaitBusy(CCI_t *p_Interface, Lepton_Result_t *p_Status
         _CCI_Buffer[1] = CCI_REG_STATUS & 0xFF;
 
         xSemaphoreTake(p_Interface->Mutex, portMAX_DELAY);
-        if ((p_Interface->I2C_Write(&p_Interface->I2C_Dev_Handle, _CCI_Buffer, 2) != 0) ||
-            (p_Interface->I2C_Read(&p_Interface->I2C_Dev_Handle, _CCI_Buffer, 2) != 0)) {
-            ESP_LOGE(TAG, "Failed to access Status register!");
 
-            xSemaphoreGive(p_Interface->Mutex);
+        /* Use atomic write-then-read (repeated-START) when available to prevent other I2C
+         * devices from injecting a START between the register address phase and the data
+         * phase, which would reset the Lepton's internal register pointer. */
+        if (p_Interface->I2C_WriteRead != NULL) {
+            uint8_t RegBuf[2] = { _CCI_Buffer[0], _CCI_Buffer[1] };
 
-            return LEPTON_ERR_FAIL;
+            if (p_Interface->I2C_WriteRead(&p_Interface->I2C_Dev_Handle, RegBuf, 2, _CCI_Buffer, 2) != 0) {
+                ESP_LOGE(TAG, "Failed to access Status register!");
+
+                xSemaphoreGive(p_Interface->Mutex);
+
+                return LEPTON_ERR_FAIL;
+            }
+        } else {
+            if ((p_Interface->I2C_Write(&p_Interface->I2C_Dev_Handle, _CCI_Buffer, 2) != 0) ||
+                (p_Interface->I2C_Read(&p_Interface->I2C_Dev_Handle, _CCI_Buffer, 2) != 0)) {
+                ESP_LOGE(TAG, "Failed to access Status register!");
+
+                xSemaphoreGive(p_Interface->Mutex);
+
+                return LEPTON_ERR_FAIL;
+            }
         }
 
         xSemaphoreGive(p_Interface->Mutex);
@@ -329,12 +345,24 @@ static Lepton_Error_t CCI_ReadRegister(CCI_t *p_Interface, uint16_t Register, ui
     _CCI_Buffer[1] = static_cast<uint8_t>(Register & 0xFF);
 
     xSemaphoreTake(p_Interface->Mutex, portMAX_DELAY);
-    if ((p_Interface->I2C_Write(&p_Interface->I2C_Dev_Handle, _CCI_Buffer, 2) != 0) ||
-        (p_Interface->I2C_Read(&p_Interface->I2C_Dev_Handle, _CCI_Buffer, 2) != 0)) {
-        ESP_LOGE(TAG, "Failed to access CCI register %02x!", Register);
 
-        xSemaphoreGive(p_Interface->Mutex);
-        return LEPTON_ERR_FAIL;
+    if (p_Interface->I2C_WriteRead != NULL) {
+        uint8_t RegBuf[2] = { _CCI_Buffer[0], _CCI_Buffer[1] };
+
+        if (p_Interface->I2C_WriteRead(&p_Interface->I2C_Dev_Handle, RegBuf, 2, _CCI_Buffer, 2) != 0) {
+            ESP_LOGE(TAG, "Failed to access CCI register %02x!", Register);
+
+            xSemaphoreGive(p_Interface->Mutex);
+            return LEPTON_ERR_FAIL;
+        }
+    } else {
+        if ((p_Interface->I2C_Write(&p_Interface->I2C_Dev_Handle, _CCI_Buffer, 2) != 0) ||
+            (p_Interface->I2C_Read(&p_Interface->I2C_Dev_Handle, _CCI_Buffer, 2) != 0)) {
+            ESP_LOGE(TAG, "Failed to access CCI register %02x!", Register);
+
+            xSemaphoreGive(p_Interface->Mutex);
+            return LEPTON_ERR_FAIL;
+        }
     }
 
     *p_Value = (_CCI_Buffer[0] << 8) | _CCI_Buffer[1];
@@ -371,12 +399,24 @@ static Lepton_Error_t CCI_ReadBurst(CCI_t *p_Interface, uint16_t Start, uint16_t
     _CCI_Buffer[1] = static_cast<uint8_t>(Start & 0xFF);
 
     xSemaphoreTake(p_Interface->Mutex, portMAX_DELAY);
-    if ((p_Interface->I2C_Write(&p_Interface->I2C_Dev_Handle, _CCI_Buffer, 2) != 0) ||
-        (p_Interface->I2C_Read(&p_Interface->I2C_Dev_Handle, _CCI_Buffer, Length << 1) != 0)) {
-        ESP_LOGE(TAG, "Failed to initiate CCI read burst at register %02x!", Start);
 
-        Error = LEPTON_ERR_FAIL;
-        goto CCI_ReadBurst_Exit;
+    if (p_Interface->I2C_WriteRead != NULL) {
+        uint8_t RegBuf[2] = { _CCI_Buffer[0], _CCI_Buffer[1] };
+
+        if (p_Interface->I2C_WriteRead(&p_Interface->I2C_Dev_Handle, RegBuf, 2, _CCI_Buffer, Length << 1) != 0) {
+            ESP_LOGE(TAG, "Failed to initiate CCI read burst at register %02x!", Start);
+
+            Error = LEPTON_ERR_FAIL;
+            goto CCI_ReadBurst_Exit;
+        }
+    } else {
+        if ((p_Interface->I2C_Write(&p_Interface->I2C_Dev_Handle, _CCI_Buffer, 2) != 0) ||
+            (p_Interface->I2C_Read(&p_Interface->I2C_Dev_Handle, _CCI_Buffer, Length << 1) != 0)) {
+            ESP_LOGE(TAG, "Failed to initiate CCI read burst at register %02x!", Start);
+
+            Error = LEPTON_ERR_FAIL;
+            goto CCI_ReadBurst_Exit;
+        }
     }
 
     /* Copy the data in the buffer */
@@ -564,7 +604,7 @@ Lepton_Error_t CCI_Get(CCI_t *p_Interface, uint16_t Command, uint16_t Length, ui
 
 Lepton_Error_t CCI_WaitForBoot(CCI_t *p_Interface, Lepton_Result_t *p_Status)
 {
-    ESP_LOGI(TAG, "Waiting for camera boot (timeout: 10s)...");
+    ESP_LOGD(TAG, "Waiting for camera boot (timeout: 10s)...");
     LEPTON_ERROR_CHECK(CCI_WaitBusy(p_Interface, p_Status, 10000));
     LEPTON_ERROR_CHECK(CCI_WriteRegister(p_Interface, CCI_REG_COMMAND, CCI_CMD_SYS_RUN_PING));
 

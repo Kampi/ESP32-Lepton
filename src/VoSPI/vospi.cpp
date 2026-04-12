@@ -248,6 +248,7 @@ bool VoSPI_IsResyncing(VoSPI_t *p_Interface)
     if (Elapsed_us >= (VOSPI_RESYNC_MS * 1000)) {
         p_Interface->isResync = false;
         ESP_LOGD(TAG, "Resync complete");
+
         return false;
     }
 
@@ -386,9 +387,11 @@ Lepton_Error_t VoSPI_CaptureImage(VoSPI_t *p_Interface, uint8_t *p_BufferIndex)
 
                     for (; (OutIdx + 2) <= VOSPI_PIXELS_PER_PACKET; OutIdx += 2, Src += 4) {
                         uint32_t Val;
-                        memcpy(&Val, Src, sizeof(uint32_t));   /* safe unaligned 32-bit load */
-                        uint32_t Swapped = __builtin_bswap32(Val);
-                        Dest[OutIdx]     = static_cast<uint16_t>(Swapped >> 16);
+                        uint32_t Swapped;
+
+                        memcpy(&Val, Src, sizeof(uint32_t));
+                        Swapped = __builtin_bswap32(Val);
+                        Dest[OutIdx] = static_cast<uint16_t>(Swapped >> 16);
                         Dest[OutIdx + 1] = static_cast<uint16_t>(Swapped & 0xFFFFU);
                     }
 

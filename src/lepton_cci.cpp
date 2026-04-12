@@ -85,7 +85,7 @@ Lepton_Error_t Lepton_SetEmissivity(Lepton_t *p_Device, Lepton_Emissivity_t Emis
 
     Parameters.SceneEmissivity = static_cast<uint16_t>((8192 * Emissivity) / 100);
 
-    ESP_LOGI(TAG, "Setting emissivity to %u%% (Value: %u)", Emissivity, Parameters.SceneEmissivity);
+    ESP_LOGD(TAG, "Setting emissivity to %u%% (Value: %u)", Emissivity, Parameters.SceneEmissivity);
 
     return CCI_SetRadiometryFluxLinearParams(&p_Device->Internal.CCI, &Parameters, p_Status);
 }

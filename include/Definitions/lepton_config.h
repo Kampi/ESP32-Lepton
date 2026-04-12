@@ -60,6 +60,7 @@
                                                                                                 .I2C_Init = NULL,                                                       \
                                                                                                 .I2C_Write = NULL,                                                      \
                                                                                                 .I2C_Read = NULL,                                                       \
+                                                                                                .I2C_WriteRead = NULL,                                                  \
                                                                                                 .I2C_Deinit = NULL,                                                     \
                                                                                                 .I2C_Bus_Config = NULL,                                                 \
                                                                                                 .I2C_Bus_Handle = NULL,                                                 \
