@@ -1,4 +1,4 @@
-/*
+﻿/*
  * cci.cpp
  *
  *  Copyright (C) Daniel Kampert, 2026
@@ -193,7 +193,7 @@ static Lepton_Error_t CCI_WaitBusy(CCI_t *p_Interface, Lepton_Result_t *p_Status
     if ((p_Interface == NULL) || (p_Interface->I2C_Write == NULL) || (p_Interface->I2C_Read == NULL) ||
         (p_Interface->Mutex == NULL)) {
         return LEPTON_ERR_INVALID_ARG;
-    } else if (p_Interface->isInitialized == false) {
+    } else if (p_Interface->IsInitialized == false) {
         return LEPTON_ERR_INVALID_STATE;
     }
 
@@ -231,7 +231,7 @@ static Lepton_Error_t CCI_WaitBusy(CCI_t *p_Interface, Lepton_Result_t *p_Status
 
         xSemaphoreGive(p_Interface->Mutex);
 
-        vTaskDelay(10 / portTICK_PERIOD_MS);
+        vTaskDelay(pdMS_TO_TICKS(10));
         TimeoutCounter += 10;
 
         if (TimeoutCounter >= Timeout) {
@@ -260,7 +260,7 @@ static Lepton_Error_t CCI_WriteRegister(CCI_t *p_Interface, uint16_t Register, u
 
     if ((p_Interface == NULL) || (p_Interface->I2C_Write == NULL) || (p_Interface->Mutex == NULL)) {
         return LEPTON_ERR_INVALID_ARG;
-    } else if (p_Interface->isInitialized == false) {
+    } else if (p_Interface->IsInitialized == false) {
         return LEPTON_ERR_INVALID_STATE;
     }
 
@@ -297,7 +297,7 @@ static Lepton_Error_t CCI_WriteBurst(CCI_t *p_Interface, uint16_t Start, uint16_
     if ((p_Interface == NULL) || (Length == 0) || (p_Buf == NULL) || (p_Interface->I2C_Write == NULL) ||
         (p_Interface->Mutex == NULL)) {
         return LEPTON_ERR_INVALID_ARG;
-    } else if (p_Interface->isInitialized == false) {
+    } else if (p_Interface->IsInitialized == false) {
         return LEPTON_ERR_INVALID_STATE;
     }
 
@@ -337,7 +337,7 @@ static Lepton_Error_t CCI_ReadRegister(CCI_t *p_Interface, uint16_t Register, ui
     if ((p_Interface == NULL) || (p_Value == NULL) || (p_Interface->I2C_Write == NULL) || (p_Interface->I2C_Read == NULL) ||
         (p_Interface->Mutex == NULL)) {
         return LEPTON_ERR_INVALID_ARG;
-    } else if (p_Interface->isInitialized == false) {
+    } else if (p_Interface->IsInitialized == false) {
         return LEPTON_ERR_INVALID_STATE;
     }
 
@@ -386,7 +386,7 @@ static Lepton_Error_t CCI_ReadBurst(CCI_t *p_Interface, uint16_t Start, uint16_t
     if ((p_Interface == NULL) || (Length == 0) || (p_Buf == NULL) || (p_Interface->I2C_Read == NULL) ||
         (p_Interface->Mutex == NULL)) {
         return LEPTON_ERR_INVALID_ARG;
-    } else if (p_Interface->isInitialized == false) {
+    } else if (p_Interface->IsInitialized == false) {
         return LEPTON_ERR_INVALID_STATE;
     }
 
@@ -487,7 +487,7 @@ Lepton_Error_t CCI_Init(CCI_t *p_Interface)
 {
     if (p_Interface == NULL) {
         return LEPTON_ERR_INVALID_ARG;
-    } else if (p_Interface->isInitialized == true) {
+    } else if (p_Interface->IsInitialized == true) {
         return LEPTON_ERR_OK;
     }
 
@@ -517,7 +517,7 @@ Lepton_Error_t CCI_Init(CCI_t *p_Interface)
         return LEPTON_ERR_FAIL;
     }
 
-    p_Interface->isInitialized = true;
+    p_Interface->IsInitialized = true;
 
     return LEPTON_ERR_OK;
 }
@@ -526,7 +526,7 @@ Lepton_Error_t CCI_Deinit(CCI_t *p_Interface)
 {
     if (p_Interface == NULL) {
         return LEPTON_ERR_INVALID_ARG;
-    } else if (p_Interface->isInitialized == false) {
+    } else if (p_Interface->IsInitialized == false) {
         return LEPTON_ERR_OK;
     }
 
@@ -544,7 +544,7 @@ Lepton_Error_t CCI_Deinit(CCI_t *p_Interface)
         p_Interface->Mutex = NULL;
     }
 
-    p_Interface->isInitialized = false;
+    p_Interface->IsInitialized = false;
 
     return LEPTON_ERR_OK;
 }
@@ -727,7 +727,7 @@ Lepton_Error_t CCI_RebootCamera(CCI_t *p_Interface, Lepton_Result_t *p_Status)
     LEPTON_ERROR_CHECK(CCI_WriteRegister(p_Interface, CCI_REG_COMMAND, CCI_CMD_OEM_RUN_REBOOT));
 
     /* Wait for the reboot */
-    vTaskDelay(6000 / portTICK_PERIOD_MS);
+    vTaskDelay(pdMS_TO_TICKS(6000));
 
     return CCI_WaitBusy(p_Interface, p_Status);
 }

@@ -55,9 +55,10 @@ esp_err_t Lepton_Init(Lepton_Handle_t *p_Handle, const Lepton_Config_t *p_Config
   - Examples: `init_spi_device()`, `process_segment()`, `calculate_crc()`
 
 #### Variables
-- **Local variables**: `PascalCase` for important variables, `lowercase` for simple counters
-  - Examples: `RetryCount`, `FrameBuffer`, `Error`, `i`, `x`
-- **Pointers**: Prefix with `p` (e.g., `p_Handle`, `p_Config`, `p_Data`)
+- **Local variables**: `PascalCase` — **all** local variables, including booleans and loop-adjacent variables
+  - Examples: `RetryCount`, `FrameBuffer`, `Error`, `IsInitialized`, `IsCapturing`
+  - Simple single-letter loop counters (`i`, `x`, `y`) are the only exception
+- **Pointers**: Prefix with `p_` (e.g., `p_Handle`, `p_Config`, `p_Data`)
 - **Global/Static module state**: Prefix with underscore: `_Lepton_State`, `_VoSPI_Context`
 
 #### Constants and Macros
@@ -396,7 +397,7 @@ typedef struct {
     i2c_port_t I2C_Port;
     gpio_num_t VSync_Pin;
     SemaphoreHandle_t Mutex;
-    bool isInitialized;
+    bool IsInitialized;
 } Lepton_Context_t;
 ```
 

@@ -1,4 +1,4 @@
-/*
+﻿/*
  * lepton_capture.cpp
  *
  *  Copyright (C) Daniel Kampert, 2026
@@ -35,15 +35,14 @@
 
 #include <sdkconfig.h>
 
-/* -----------------------------------------------------------------------
- * ESP32-S3 Xtensa LX7 + PIE SIMD via GCC vector extension.
- * vector_size(16) maps to the 128-bit Q-registers of the PIE engine:
- *   u16x8_t  – 8 lanes of uint16_t  (used for the min/max scan)
- *   u32x4_t  – 4 lanes of uint32_t  (used for the normalization multiply)
- * The compiler emits EE.* PIE instructions when -O2/-O3 is active.
- * The __attribute__((optimize("O3"))) on Lepton_Raw14ToRGB enforces this
- * even in debug builds (which default to -Og).
- * ----------------------------------------------------------------------- */
+/** @brief  ESP32-S3 Xtensa LX7 + PIE SIMD via GCC vector extension.
+ *          vector_size(16) maps to the 128-bit Q-registers of the PIE engine:
+ *              u16x8_t  – 8 lanes of uint16_t  (used for the min/max scan)
+ *              u32x4_t  – 4 lanes of uint32_t  (used for the normalization multiply)
+ *          The compiler emits EE.* PIE instructions when -O2/-O3 is active.
+ *          The __attribute__((optimize("O3"))) on Lepton_Raw14ToRGB enforces this
+ *          even in debug builds (which default to -Og).
+ */
 typedef uint16_t u16x8_t __attribute__((vector_size(16), aligned(16)));
 typedef uint32_t u32x4_t __attribute__((vector_size(16), aligned(16)));
 
@@ -96,7 +95,7 @@ static void Lepton_CaptureTask(void *p_Args)
 
     ESP_LOGD(TAG, "Capture task started");
 
-    while (Device->Internal.VoSPI.isCapturing) {
+    while (Device->Internal.VoSPI.IsCapturing) {
         int Error;
         uint8_t BufferIndex = 0;
 
@@ -134,7 +133,7 @@ static void Lepton_CaptureTask(void *p_Args)
                 /* Use the buffer index returned by VoSPI_CaptureImage */
                 FrameBuffer.Image_Buffer = Device->Internal.VoSPI.Image_Buffer[BufferIndex];
 
-                if (Device->Internal.VoSPI.useTelemetry) {
+                if (Device->Internal.VoSPI.UseTelemetry) {
                     FrameBuffer.Telemetry_Buffer = Device->Internal.VoSPI.Telemetry_Buffer[BufferIndex];
                 } else {
                     FrameBuffer.Telemetry_Buffer = NULL;
@@ -156,14 +155,14 @@ static void Lepton_CaptureTask(void *p_Args)
             }
 
             /* Longer delay on errors to reduce CPU load during problematic conditions */
-            vTaskDelay(10 / portTICK_PERIOD_MS);
+            vTaskDelay(pdMS_TO_TICKS(10));
         } else if (Error == LEPTON_ERR_NOT_FINISHED) {
             ESP_LOGD(TAG, "Resyncing...");
             /* Short delay during resyncing */
-            vTaskDelay(1 / portTICK_PERIOD_MS);
+            vTaskDelay(pdMS_TO_TICKS(1));
         } else {
             ESP_LOGW(TAG, "Unexpected result: %d", Error);
-            vTaskDelay(5 / portTICK_PERIOD_MS);
+            vTaskDelay(pdMS_TO_TICKS(5));
         }
     }
 }
@@ -174,7 +173,7 @@ Lepton_Error_t Lepton_StartCapture(Lepton_t *p_Device, QueueHandle_t p_Queue)
 
     if ((p_Device == NULL) || (p_Queue == NULL)) {
         return LEPTON_ERR_INVALID_ARG;
-    } else if (p_Device->Internal.isInitialized == false) {
+    } else if (p_Device->Internal.IsInitialized == false) {
         return LEPTON_ERR_NOT_INITIALIZED;
     } else if (p_Device->Internal.CapHandle != NULL) {
         return LEPTON_ERR_BUSY;
@@ -184,7 +183,7 @@ Lepton_Error_t Lepton_StartCapture(Lepton_t *p_Device, QueueHandle_t p_Queue)
 
     p_Device->Internal.FrameQueue = p_Queue;
     p_Device->Internal.VoSPI.CurrentBuffer = 0;
-    p_Device->Internal.VoSPI.isCapturing = true;
+    p_Device->Internal.VoSPI.IsCapturing = true;
     p_Device->Internal.MinSmooth = 0;
     p_Device->Internal.MaxSmooth = 16383;
 
@@ -200,7 +199,7 @@ Lepton_Error_t Lepton_StartCapture(Lepton_t *p_Device, QueueHandle_t p_Queue)
 
     if (p_Device->Internal.CapHandle == NULL) {
         ESP_LOGE(TAG, "Failed to create capture task!");
-        p_Device->Internal.VoSPI.isCapturing = false;
+        p_Device->Internal.VoSPI.IsCapturing = false;
         p_Device->Internal.FrameQueue = NULL;
         Error = LEPTON_ERR_NO_MEM;
         goto Lepton_StartCapture_Error_1;
@@ -238,13 +237,13 @@ Lepton_Error_t Lepton_StopCapture(Lepton_t *p_Device)
 {
     if (p_Device == NULL) {
         return LEPTON_ERR_INVALID_ARG;
-    } else if (p_Device->Internal.isInitialized == false) {
+    } else if (p_Device->Internal.IsInitialized == false) {
         return LEPTON_ERR_NOT_INITIALIZED;
     } else if (p_Device->Internal.CapHandle == NULL) {
         return LEPTON_ERR_OK;
     }
 
-    p_Device->Internal.VoSPI.isCapturing = false;
+    p_Device->Internal.VoSPI.IsCapturing = false;
 
     vTaskDelete(p_Device->Internal.CapHandle);
     esp_task_wdt_delete(p_Device->Internal.CapHandle);
@@ -261,7 +260,7 @@ bool Lepton_Raw14ToRGB(Lepton_t *p_Device, uint16_t *p_Input, uint8_t *p_Output,
     uint16_t max = 0;
     uint32_t range;
 
-    if ((p_Device == NULL) || (p_Device->Internal.isInitialized == false) || ((p_Input == NULL) || (p_Output == NULL))) {
+    if ((p_Device == NULL) || (p_Device->Internal.IsInitialized == false) || ((p_Input == NULL) || (p_Output == NULL))) {
         return false;
     }
 

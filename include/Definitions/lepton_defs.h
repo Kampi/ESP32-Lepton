@@ -1,4 +1,4 @@
-/*
+﻿/*
  * lepton_defs.h
  *
  *  Copyright (C) Daniel Kampert, 2026
@@ -21,8 +21,8 @@
  * Errors and commissions should be reported to DanielKampert@kampis-elektroecke.de
  */
 
-#ifndef ESP32_LEPTON_TYPES_H_
-#define ESP32_LEPTON_TYPES_H_
+#ifndef ESP32_LEPTON_DEFS_H_
+#define ESP32_LEPTON_DEFS_H_
 
 #include <driver/gpio.h>
 #include <driver/i2c_master.h>
@@ -94,23 +94,23 @@ typedef int32_t (*I2C_Deinit_t)(i2c_master_bus_handle_t Bus_handle);
 /** @brief Material emissivity values scaled by 100.
  */
 typedef enum {
-    LEPTON_EMISSIVITY_ASPHALT = 95,                 /**< Emissivity value for asphalt (0.90-0.98, avg 0.95) */
-    LEPTON_EMISSIVITY_CONCRETE = 92,                /**< Emissivity value for concrete (0.92) */
-    LEPTON_EMISSIVITY_SOIL_DRY = 90,                /**< Emissivity value for dry soil (0.90) */
-    LEPTON_EMISSIVITY_SOIL_WET = 95,                /**< Emissivity value for wet soil (0.95) */
-    LEPTON_EMISSIVITY_WOOD = 90,                    /**< Emissivity value for wood (0.90) */
-    LEPTON_EMISSIVITY_WATER = 94,                   /**< Emissivity value for water (0.92-0.96, avg 0.94) */
-    LEPTON_EMISSIVITY_ICE = 97,                     /**< Emissivity value for ice (0.96-0.98, avg 0.97) */
-    LEPTON_EMISSIVITY_SNOW = 83,                    /**< Emissivity value for snow (0.83) */
-    LEPTON_EMISSIVITY_BRICK = 95,                   /**< Emissivity value for brick (0.93-0.96, avg 0.95) */
-    LEPTON_EMISSIVITY_PAINT = 90,                   /**< Emissivity value for lacquer/paint (0.80-0.95, avg 0.90) */
-    LEPTON_EMISSIVITY_PAINT_BLACK = 97,             /**< Emissivity value for flat black lacquer (0.97) */
-    LEPTON_EMISSIVITY_TEXTILES = 90,                /**< Emissivity value for textiles (0.90) */
-    LEPTON_EMISSIVITY_SKIN_HUMAN = 98,              /**< Emissivity value for human skin (0.98) */
-    LEPTON_EMISSIVITY_ALUMINUM_POLISHED = 5,        /**< Emissivity value for polished aluminum (0.04-0.06, avg 0.05) */
-    LEPTON_EMISSIVITY_ALUMINUM_ANODIZED = 55,       /**< Emissivity value for anodized aluminum (0.55) */
-    LEPTON_EMISSIVITY_STEEL_RUSTY = 69,             /**< Emissivity value for rusty steel (0.69) */
-    LEPTON_EMISSIVITY_STEEL_STAINLESS = 30,         /**< Emissivity value for stainless steel (0.16-0.45, avg 0.30) */
+    LEPTON_EMISSIVITY_ASPHALT = 95,             /**< Emissivity value for asphalt (0.90-0.98, avg 0.95) */
+    LEPTON_EMISSIVITY_CONCRETE = 92,            /**< Emissivity value for concrete (0.92) */
+    LEPTON_EMISSIVITY_SOIL_DRY = 90,            /**< Emissivity value for dry soil (0.90) */
+    LEPTON_EMISSIVITY_SOIL_WET = 95,            /**< Emissivity value for wet soil (0.95) */
+    LEPTON_EMISSIVITY_WOOD = 90,                /**< Emissivity value for wood (0.90) */
+    LEPTON_EMISSIVITY_WATER = 94,               /**< Emissivity value for water (0.92-0.96, avg 0.94) */
+    LEPTON_EMISSIVITY_ICE = 97,                 /**< Emissivity value for ice (0.96-0.98, avg 0.97) */
+    LEPTON_EMISSIVITY_SNOW = 83,                /**< Emissivity value for snow (0.83) */
+    LEPTON_EMISSIVITY_BRICK = 95,               /**< Emissivity value for brick (0.93-0.96, avg 0.95) */
+    LEPTON_EMISSIVITY_PAINT = 90,               /**< Emissivity value for lacquer/paint (0.80-0.95, avg 0.90) */
+    LEPTON_EMISSIVITY_PAINT_BLACK = 97,         /**< Emissivity value for flat black lacquer (0.97) */
+    LEPTON_EMISSIVITY_TEXTILES = 90,            /**< Emissivity value for textiles (0.90) */
+    LEPTON_EMISSIVITY_SKIN_HUMAN = 98,          /**< Emissivity value for human skin (0.98) */
+    LEPTON_EMISSIVITY_ALUMINUM_POLISHED = 5,    /**< Emissivity value for polished aluminum (0.04-0.06, avg 0.05) */
+    LEPTON_EMISSIVITY_ALUMINUM_ANODIZED = 55,   /**< Emissivity value for anodized aluminum (0.55) */
+    LEPTON_EMISSIVITY_STEEL_RUSTY = 69,         /**< Emissivity value for rusty steel (0.69) */
+    LEPTON_EMISSIVITY_STEEL_STAINLESS = 30,     /**< Emissivity value for stainless steel (0.16-0.45, avg 0.30) */
 } Lepton_Emissivity_t;
 
 /** @brief Lepton error codes from the software driver (Chapter 2.3 - FLIR LEPTON Software IDD).
@@ -166,8 +166,8 @@ typedef enum {
 /** @brief TLinear resolution definitions (Chapter 4.8.10 - FLIR LEPTON Software IDD).
  */
 typedef enum {
-    LEPTON_TLINEAR_0_1_RESOLUTION = 0,      /**< Scale factor 10. */
-    LEPTON_TLINEAR_0_01_RESOLUTION,         /**< Scale factor 100. */
+    LEPTON_TLINEAR_0_1_RESOLUTION = 0,          /**< Scale factor 10. */
+    LEPTON_TLINEAR_0_01_RESOLUTION,             /**< Scale factor 100. */
 } Lepton_TLinear_Resolution_t;
 
 /** @brief Shutter position definitions (Chapter 4.5.15 - FLIR LEPTON Software IDD).
@@ -335,7 +335,7 @@ typedef struct {
     i2c_master_dev_handle_t I2C_Dev_Handle;     /**< Pointer to I2C device handle. */
     SemaphoreHandle_t Mutex;                    /**< Mutex for the I2C communication.
                                                      NOTE: Managed by the device driver. */
-    bool isInitialized;                         /**< true when the device is initialized.
+    bool IsInitialized;                         /**< true when the device is initialized.
                                                      NOTE: Managed by the device driver. */
 } CCI_t;
 
@@ -348,13 +348,13 @@ typedef struct {
     spi_device_handle_t Handle;                 /**< SPI device handle for communication.
                                                      NOTE: Managed by the device driver. */
     int DMA;                                    /**< DMA channel used by the VoSPI driver. */
-    bool isInitialized;                         /**< true when the device is initialized.
+    bool IsInitialized;                         /**< true when the device is initialized.
                                                      NOTE: Managed by the device driver. */
-    bool isResync;                              /**< true when a resynchronization is in progress.
+    bool IsResync;                              /**< true when a resynchronization is in progress.
                                                      NOTE: Managed by the device driver. */
-    bool isCapturing;                           /**< true when a frame capture is in progress.
+    bool IsCapturing;                           /**< true when a frame capture is in progress.
                                                      NOTE: Managed by the device driver. */
-    bool useTelemetry;                          /**< true when telemetry data is to be captured.
+    bool UseTelemetry;                          /**< true when telemetry data is to be captured.
                                                      NOTE: Managed by the device driver. */
     Lepton_TelemetryPos_t TelemetryPosition;    /**< Telemetry position setting.
                                                      NOTE: Managed by the device driver. */
@@ -393,21 +393,21 @@ typedef struct {
                                                      NOTE: Managed by the device driver. */
         QueueHandle_t FrameQueue;               /**< Queue for frame ready events.
                                                      NOTE: Managed by the device driver. */
-        bool isInitialized;                     /**< true when the device is initialized.
+        bool IsInitialized;                     /**< true when the device is initialized.
                                                      NOTE: Managed by the device driver. */
-        bool isRadiometric;                     /**< Read-only flag indicating if the device is a radiometric model.
+        bool IsRadiometric;                     /**< Read-only flag indicating if the device is a radiometric model.
                                                      NOTE: Managed by the device driver. */
-        bool useAGC;                            /**< true when Automatic Gain Control (AGC) is enabled.
+        bool UseAGC;                            /**< true when Automatic Gain Control (AGC) is enabled.
                                                      NOTE: Managed by the device driver. */
-        bool useAGCCalc;                        /**< true when AGC calculation is enabled.
+        bool UseAGCCalc;                        /**< true when AGC calculation is enabled.
                                                      NOTE: Managed by the device driver. */
-        bool useTLinear;                         /**< true when TLinear mode is enabled.
+        bool UseTLinear;                         /**< true when TLinear mode is enabled.
                                                      NOTE: Managed by the device driver. */
-        bool isAutoRes;                         /**< true when AutoRes mode is enabled.
+        bool IsAutoRes;                         /**< true when AutoRes mode is enabled.
                                                      NOTE: Managed by the device driver. */
-        bool isTLinearAutoRes;                  /**< true when TLinear AutoRes mode is enabled.
+        bool IsTLinearAutoRes;                  /**< true when TLinear AutoRes mode is enabled.
                                                      NOTE: Managed by the device driver. */
-        bool isVideoFreezeEnabled;              /**< true when Video Freeze is enabled.
+        bool IsVideoFreezeEnabled;              /**< true when Video Freeze is enabled.
                                                      NOTE: Managed by the device driver. */
         Lepton_Gain_t Gain;                     /**< Gain setting for the Lepton sensor.
                                                      NOTE: Managed by the device driver. */
@@ -431,9 +431,9 @@ typedef struct {
 /** @brief
  */
 typedef struct {
-    bool useAGC;                                /**< Set to true to enable Automatic Gain Control (AGC). */
-    bool useAGCCalculation;                     /**< Set to true to enable AGC calculation. */
-    bool useTLinear;                            /**< Set to true to enable TLinear mode. */
+    bool UseAGC;                                /**< Set to true to enable Automatic Gain Control (AGC). */
+    bool UseAGCCalculation;                     /**< Set to true to enable AGC calculation. */
+    bool UseTLinear;                            /**< Set to true to enable TLinear mode. */
     Lepton_Gain_t Gain;                         /**< Gain setting for the Lepton sensor. */
     Lepton_VideoFormat_t VideoFormat;           /**< Video format setting for the Lepton sensor. */
     Lepton_AGC_Mode_t AGCPolicy;                /**< AGC policy setting for the Lepton sensor. */
@@ -530,4 +530,4 @@ typedef struct {
     uint16_t Reserved11[22];                    /**< Reserved. */
 } __attribute__((packed)) Lepton_Telemetry_t;
 
-#endif /* ESP32_LEPTON_TYPES_H_ */
+#endif /* ESP32_LEPTON_DEFS_H_ */
