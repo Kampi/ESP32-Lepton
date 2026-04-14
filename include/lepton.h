@@ -1,4 +1,4 @@
-/*
+﻿/*
  * lepton.h
  *
  *  Copyright (C) Daniel Kampert, 2026
@@ -86,7 +86,7 @@ inline __attribute__((always_inline)) bool Lepton_isCapturing(Lepton_t *p_Device
         return false;
     }
 
-    return p_Device->Internal.VoSPI.isCapturing;
+    return p_Device->Internal.VoSPI.IsCapturing;
 }
 
 /** @brief          Return the number of sync errors since initialization.

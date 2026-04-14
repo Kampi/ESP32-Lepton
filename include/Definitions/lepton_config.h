@@ -1,4 +1,4 @@
-/*
+﻿/*
  * lepton_config.h
  *
  *  Copyright (C) Daniel Kampert, 2026
@@ -47,9 +47,9 @@
 /** @brief Default configuration object for the FLIR Lepton Thermal Imager.
  */
 #define LEPTON_DEFAULT_CONF                                                             {                                                                               \
-                                                                                            .useAGC = true,                                                             \
-                                                                                            .useAGCCalculation = true,                                                  \
-                                                                                            .useTLinear = true,                                                         \
+                                                                                            .UseAGC = true,                                                             \
+                                                                                            .UseAGCCalculation = true,                                                  \
+                                                                                            .UseTLinear = true,                                                         \
                                                                                             .Gain = static_cast<Lepton_Gain_t>(LEPTON_SYS_GAIN_MODE_AUTO),              \
                                                                                             .VideoFormat = static_cast<Lepton_VideoFormat_t>(LEPTON_FORMAT_RAW14),      \
                                                                                             .AGCPolicy = static_cast<Lepton_AGC_Mode_t>(LEPTON_AGC_HEQ),                \
@@ -66,7 +66,7 @@
                                                                                                 .I2C_Bus_Handle = NULL,                                                 \
                                                                                                 .I2C_Dev_Handle = NULL,                                                 \
                                                                                                 .Mutex = NULL,                                                          \
-                                                                                                .isInitialized = false,                                                 \
+                                                                                                .IsInitialized = false,                                                 \
                                                                                             },                                                                          \
                                                                                             .VoSPI = {                                                                  \
                                                                                                 .Interface = {                                                          \
@@ -106,10 +106,10 @@
                                                                                                 .Host = LEPTON_VOSPI_SPI_HOST,                                          \
                                                                                                 .Handle = NULL,                                                         \
                                                                                                 .DMA = SPI_DMA_CH_AUTO,                                                 \
-                                                                                                .isInitialized = false,                                                 \
-                                                                                                .isResync = false,                                                      \
-                                                                                                .isCapturing = false,                                                   \
-                                                                                                .useTelemetry = true,                                                   \
+                                                                                                .IsInitialized = false,                                                 \
+                                                                                                .IsResync = false,                                                      \
+                                                                                                .IsCapturing = false,                                                   \
+                                                                                                .UseTelemetry = true,                                                   \
                                                                                                 .TelemetryPosition = LEPTON_TELEMETRY_LOCATION_HEADER,                  \
                                                                                                 .Packet = NULL,                                                         \
                                                                                                 .ImageHeight = 0,                                                       \
@@ -125,21 +125,23 @@
                                                                                             },                                                                          \
                                                                                         }
 
-/** @brief          Assign the I2C functions to a Lepton configuration object.
- *  @param Conf     Lepton configuration object
- *  @param Init     I2C initialization function
- *                  NOTE: Can be set to NULL to skip the initialization.
- *  @param Deinit   I2C deinitialization function
- *                  NOTE: Can be set to NULL to skip the initialization.
- *  @param Write    I2C write function
- *  @param Read     I2C read function
+/** @brief                  Assign the I2C functions to a Lepton configuration object.
+ *  @param Conf             Lepton configuration object
+ *  @param InitFunc         I2C initialization function
+ *                          NOTE: Can be set to NULL to skip the initialization.
+ *  @param DeinitFunc       I2C deinitialization function
+ *                          NOTE: Can be set to NULL to skip the deinitialization.
+ *  @param WriteFunc        I2C write function
+ *  @param ReadFunc         I2C read function
+ *  @param WriteReadFunc    I2C combined write-read function
  */
-#define LEPTON_ASSIGN_FUNC(Conf, Init, Deinit, Write, Read)                             do {                                                                            \
-                                                                                            Conf.CCI.I2C_Init   = Init;                                                 \
-                                                                                            Conf.CCI.I2C_Deinit = Deinit;                                               \
-                                                                                            Conf.CCI.I2C_Write  = Write;                                                \
-                                                                                            Conf.CCI.I2C_Read   = Read;                                                 \
-                                                                                        } while (0)
+#define LEPTON_ASSIGN_I2C_FUNC(Conf, InitFunc, DeinitFunc, WriteFunc, ReadFunc, WriteReadFunc)  do {                                                                    \
+                                                                                                    Conf.CCI.I2C_Init = InitFunc;                                       \
+                                                                                                    Conf.CCI.I2C_Deinit = DeinitFunc;                                   \
+                                                                                                    Conf.CCI.I2C_Write = WriteFunc;                                     \
+                                                                                                    Conf.CCI.I2C_Read = ReadFunc;                                       \
+                                                                                                    Conf.CCI.I2C_WriteRead = WriteReadFunc;                             \
+                                                                                                } while (0)
 
 /** @brief              Add a default I2C configuration to the Lepton configuration object.
  *  @param Conf         Lepton configuration object
@@ -161,6 +163,16 @@
                                                                                                 .enable_internal_pullup = EnablePullup,                                 \
                                                                                                 .allow_pd = AutoPD,                                                     \
                                                                                             };                                                                          \
+                                                                                        } while (0)
+
+/** @brief                  Add a default I2C configuration to the Lepton configuration object.
+ *  @param Conf             Lepton configuration object
+ *  @param ResetFunc        GPIO function to control the Lepton RESET pin (active-low)
+ *  @param PowerDownFunc    GPIO function to control the Lepton POWERDOWN pin (active-high)
+ */
+#define LEPTON_ASSIGN_GPIO_FUNC(Conf, ResetFunc, PowerDownFunc)                         do {                                                                            \
+                                                                                            Conf.Reset = ResetFunc;                                                     \
+                                                                                            Conf.PowerDown = PowerDownFunc;                                             \
                                                                                         } while (0)
 
 /** @brief          Assign an I2C bus handle to the Lepton configuration object.

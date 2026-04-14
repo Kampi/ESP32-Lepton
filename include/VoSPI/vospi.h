@@ -36,6 +36,13 @@
  */
 #define VOSPI_RESYNC_MS                         200
 
+/** @brief Maximum number of consecutive discard packets (ID = 0x0F) before a resync
+ *         is triggered. Prevents an infinite spin when the Lepton is unresponsive.
+ *         At 20 MHz SPI a 164-byte packet takes ~65 µs; 2000 discards ≤ 130 ms,
+ *         which comfortably covers the worst-case inter-frame gap (~115 ms at 8.7 fps).
+ */
+#define VOSPI_MAX_DISCARD_PACKETS               2000
+
 /** @brief Pixels per packet for Lepton 3.5 (half a line).
  */
 #define VOSPI_PIXELS_PER_PACKET                 80

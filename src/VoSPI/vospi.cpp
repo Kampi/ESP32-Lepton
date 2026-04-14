@@ -1,4 +1,4 @@
-/*
+﻿/*
  * vospi.cpp
  *
  *  Copyright (C) Daniel Kampert, 2026
@@ -55,7 +55,7 @@ static esp_err_t VoSPI_ReadPacket(VoSPI_t *p_Interface, uint16_t *p_Header, uint
     Trans.rxlength = PacketSize * 8;  /* Bits */
     Trans.rx_buffer = p_Interface->Packet;
     Trans.tx_buffer = NULL;
-    Trans.flags = SPI_TRANS_DMA_USE_PSRAM;
+    Trans.flags = 0;
 
     Error = spi_device_transmit(p_Interface->Handle, &Trans);
     if (Error != ESP_OK) {
@@ -85,7 +85,7 @@ Lepton_Error_t VoSPI_Init(VoSPI_t *p_Interface)
 
     if (p_Interface == NULL) {
         return LEPTON_ERR_INVALID_ARG;
-    } else if (p_Interface->isInitialized) {
+    } else if (p_Interface->IsInitialized) {
         return LEPTON_ERR_OK;
     }
 
@@ -101,11 +101,10 @@ Lepton_Error_t VoSPI_Init(VoSPI_t *p_Interface)
         goto VoSPI_Init_Error_1;
     }
 
-    #ifdef CONFIG_SPIRAM
-        Caps = MALLOC_CAP_DMA | MALLOC_CAP_SPIRAM;
-    #else
-        Caps = MALLOC_CAP_DMA;
-    #endif
+    /* Packet buffer must always be in internal DMA-capable SRAM (never PSRAM).
+     * Using PSRAM here would force esp_cache_msync() on every SPI transaction
+     * (~244 times per frame), causing severe CPU stalls and WDT timeouts. */
+    Caps = MALLOC_CAP_DMA | MALLOC_CAP_INTERNAL;
 
     /* Allocate DMA-capable packet buffer (4 bytes header/CRC + payload)
      * RAW14: 4 + 160 = 164 bytes
@@ -135,7 +134,7 @@ Lepton_Error_t VoSPI_Init(VoSPI_t *p_Interface)
         }
     }
 
-    if (p_Interface->useTelemetry) {
+    if (p_Interface->UseTelemetry) {
         #ifdef CONFIG_SPIRAM
             Caps = MALLOC_CAP_SPIRAM;
         #else
@@ -156,7 +155,7 @@ Lepton_Error_t VoSPI_Init(VoSPI_t *p_Interface)
     }
 
     p_Interface->FrameCounter = 0;
-    p_Interface->isInitialized = true;
+    p_Interface->IsInitialized = true;
 
     /* Initialize resync state - start with a resync to establish sync */
     VoSPI_RequestResync(p_Interface);
@@ -196,7 +195,7 @@ Lepton_Error_t VoSPI_Deinit(VoSPI_t *p_Interface)
 {
     if (p_Interface == NULL) {
         return LEPTON_ERR_INVALID_ARG;
-    } else if (p_Interface->isInitialized == false) {
+    } else if (p_Interface->IsInitialized == false) {
         return LEPTON_ERR_OK;
     }
 
@@ -220,7 +219,7 @@ Lepton_Error_t VoSPI_Deinit(VoSPI_t *p_Interface)
         p_Interface->Packet = NULL;
     }
 
-    p_Interface->isInitialized = false;
+    p_Interface->IsInitialized = false;
     return LEPTON_ERR_OK;
 }
 
@@ -232,7 +231,7 @@ void VoSPI_RequestResync(VoSPI_t *p_Interface)
 
     ESP_LOGD(TAG, "Resync requested");
 
-    p_Interface->isResync = true;
+    p_Interface->IsResync = true;
     p_Interface->ResyncStartUs = esp_timer_get_time();
 }
 
@@ -240,13 +239,13 @@ bool VoSPI_IsResyncing(VoSPI_t *p_Interface)
 {
     int64_t Elapsed_us;
 
-    if ((p_Interface == NULL) || (p_Interface->isResync == false)) {
+    if ((p_Interface == NULL) || (p_Interface->IsResync == false)) {
         return false;
     }
 
     Elapsed_us = esp_timer_get_time() - p_Interface->ResyncStartUs;
     if (Elapsed_us >= (VOSPI_RESYNC_MS * 1000)) {
-        p_Interface->isResync = false;
+        p_Interface->IsResync = false;
         ESP_LOGD(TAG, "Resync complete");
 
         return false;
@@ -260,7 +259,7 @@ Lepton_Error_t VoSPI_CaptureImage(VoSPI_t *p_Interface, uint8_t *p_BufferIndex)
     uint16_t Header;
     uint8_t *PacketData;
 
-    if ((p_Interface == NULL) || (p_Interface->isInitialized == false) || (p_BufferIndex == NULL)) {
+    if ((p_Interface == NULL) || (p_Interface->IsInitialized == false) || (p_BufferIndex == NULL)) {
         ESP_LOGE(TAG, "Invalid interface or not initialized!");
         return LEPTON_ERR_INVALID_ARG;
     }
@@ -273,6 +272,11 @@ Lepton_Error_t VoSPI_CaptureImage(VoSPI_t *p_Interface, uint8_t *p_BufferIndex)
     /* Capture all 4 segments */
     for (uint8_t Segment = 1; Segment <= LEPTON_VOSPI_SEGMENTS_PER_FRAME; Segment++) {
         bool DiscardSegment = false;
+        uint32_t DiscardCount = 0;
+
+        /* Reset WDT per segment so a stuck PSRAM / discard-packet storm does not
+         * starve lower-priority tasks while this task holds the CPU. */
+        esp_task_wdt_reset();
 
         for (uint8_t packet = 0; packet < p_Interface->PacketsPerFrame; packet++) {
             uint16_t PacketNum;
@@ -291,7 +295,20 @@ Lepton_Error_t VoSPI_CaptureImage(VoSPI_t *p_Interface, uint8_t *p_BufferIndex)
 
             /* Check for discard packet (ID field = 0x0F) */
             if (IdField == 0x0F) {
-                /* Discard packet - retry this packet */
+                /* Discard packet: retry this packet slot, but with a safety ceiling
+                 * to prevent an infinite spin when the Lepton is unresponsive.
+                 * Reset WDT every 100 discards (~6.5 ms at 20 MHz) so other tasks
+                 * keep running while we wait out the inter-frame gap. */
+                DiscardCount++;
+                if (DiscardCount % 100 == 0) {
+                    esp_task_wdt_reset();
+                }
+                if (DiscardCount > VOSPI_MAX_DISCARD_PACKETS) {
+                    ESP_LOGD(TAG, "Too many discard packets (%u), requesting resync",
+                             static_cast<unsigned int>(DiscardCount));
+                    VoSPI_RequestResync(p_Interface);
+                    return LEPTON_ERR_FAIL;
+                }
                 packet--;
                 continue;
             }
@@ -327,7 +344,7 @@ Lepton_Error_t VoSPI_CaptureImage(VoSPI_t *p_Interface, uint8_t *p_BufferIndex)
                 uint16_t *Dest;
 
                 /* We must take care about telemetry packets */
-                if (p_Interface->useTelemetry) {
+                if (p_Interface->UseTelemetry) {
                     /* The first four packets of segment 1 contain telemetry data */
                     if (p_Interface->TelemetryPosition == LEPTON_TELEMETRY_LOCATION_HEADER) {
                         /* Store the telemetry data for the first four packets of segment 1 */

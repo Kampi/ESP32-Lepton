@@ -49,7 +49,7 @@ extern "C" void app_main(void)
     ESP_LOGI(TAG, "============================");
     ESP_LOGI(TAG, "Waiting for Lepton to boot...");
 
-    vTaskDelay(2000 / portTICK_PERIOD_MS);
+    vTaskDelay(pdMS_TO_TICKS(2000));
 
     Config = LEPTON_DEFAULT_CONF;
     LEPTON_ASSIGN_FUNC(Config, I2CM_Init, I2CM_Deinit, I2CM_Write, I2CM_Read);
@@ -135,7 +135,7 @@ extern "C" void app_main(void)
         esp_task_wdt_reset();
 
         /* Wait for a new raw frame with longer timeout to avoid busy waiting */
-        if (xQueueReceive(RawFrameQueue, &RawFrame, 500 / portTICK_PERIOD_MS) == pdTRUE) {
+        if (xQueueReceive(RawFrameQueue, &RawFrame, pdMS_TO_TICKS(500)) == pdTRUE) {
             uint8_t WriteBufferIdx;
             uint8_t *WriteBuffer;
 
@@ -154,7 +154,7 @@ extern "C" void app_main(void)
             ESP_LOGI(TAG, "Processing frame...");
 
             /* Determine which buffer to write to (ping-pong) */
-            if (xSemaphoreTake(BufferMutex, 100 / portTICK_PERIOD_MS) == pdTRUE) {
+            if (xSemaphoreTake(BufferMutex, pdMS_TO_TICKS(100)) == pdTRUE) {
                 /* Find a buffer that's not currently being read */
                 WriteBufferIdx = (CurrentReadBuffer + 1) % 2;
                 WriteBuffer = RGB_Buffer[WriteBufferIdx];
@@ -167,7 +167,7 @@ extern "C" void app_main(void)
             Lepton_Raw14ToRGB(RawFrame.Image_Buffer, WriteBuffer, NULL, NULL, RawFrame.Width, RawFrame.Height);
 
             /* Mark buffer as ready and update read buffer index */
-            if (xSemaphoreTake(BufferMutex, 100 / portTICK_PERIOD_MS) == pdTRUE) {
+            if (xSemaphoreTake(BufferMutex, pdMS_TO_TICKS(100)) == pdTRUE) {
                 CurrentReadBuffer = WriteBufferIdx;
                 xSemaphoreGive(BufferMutex);
             } else {

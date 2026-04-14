@@ -37,7 +37,7 @@ extern "C" void app_main(void)
     ESP_LOGI(TAG, "============================");
     ESP_LOGI(TAG, "Waiting for Lepton to boot...");
 
-    vTaskDelay(2000 / portTICK_PERIOD_MS);
+    vTaskDelay(pdMS_TO_TICKS(2000));
 
     Lepton_Conf_t Config;
     Config = LEPTON_DEFAULT_CONF;
