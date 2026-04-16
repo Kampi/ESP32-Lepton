@@ -252,11 +252,11 @@ Lepton_Error_t Lepton_StopCapture(Lepton_t *p_Device)
 }
 
 __attribute__((optimize("O3")))
-bool Lepton_Raw14ToRGB(Lepton_t *p_Device, uint16_t *p_Input, uint8_t *p_Output, int16_t *p_Min, int16_t *p_Max,
+bool Lepton_Raw14ToRGB(Lepton_t *p_Device, uint16_t *p_Input, uint8_t *p_Output, uint16_t *p_Min, uint16_t *p_Max,
                        uint16_t Width,
                        uint16_t Height)
 {
-    uint16_t min = INT16_MAX;
+    uint16_t min = UINT16_MAX;
     uint16_t max = 0;
     uint32_t range;
 
@@ -428,11 +428,11 @@ bool Lepton_Raw14ToRGB(Lepton_t *p_Device, uint16_t *p_Input, uint8_t *p_Output,
     }
 
     if (p_Min != NULL) {
-        *p_Min = static_cast<int16_t>(min);
+        *p_Min = min;
     }
 
     if (p_Max != NULL) {
-        *p_Max = static_cast<int16_t>(max);
+        *p_Max = max;
     }
 
     return true;

@@ -388,7 +388,7 @@ Lepton_Error_t Lepton_GetPixelTemperature(Lepton_t *p_Device, uint16_t PixelValu
  *  @param Height   Image height in pixels
  *  @return         true on success, false on failure
  */
-bool Lepton_Raw14ToRGB(Lepton_t *p_Device, uint16_t *p_Input, uint8_t *p_Output, int16_t *p_Min, int16_t *p_Max,
+bool Lepton_Raw14ToRGB(Lepton_t *p_Device, uint16_t *p_Input, uint8_t *p_Output, uint16_t *p_Min, uint16_t *p_Max,
                        uint16_t Width,
                        uint16_t Height);
 
