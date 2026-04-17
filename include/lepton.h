@@ -65,7 +65,6 @@ inline __attribute__((always_inline)) Lepton_Error_t Lepton_GetVideoFormat(Lepto
     return LEPTON_ERR_OK;
 }
 
-
 /** @brief          Convert a temperature from Kelvin (in Lepton format) into degree Celsius.
  *                  The Lepton sensor returns temperature values in centi-Kelvin (Kelvin * 100).
  *  @param Kelvin   Temperature in Lepton format (centi-Kelvin, i.e., Kelvin * 100)
@@ -388,7 +387,7 @@ Lepton_Error_t Lepton_GetPixelTemperature(Lepton_t *p_Device, uint16_t PixelValu
  *  @param Height   Image height in pixels
  *  @return         true on success, false on failure
  */
-bool Lepton_Raw14ToRGB(Lepton_t *p_Device, uint16_t *p_Input, uint8_t *p_Output, uint16_t *p_Min, uint16_t *p_Max,
+bool Lepton_Raw14ToRGB(Lepton_t *p_Device, uint16_t *p_Input, uint8_t *p_Output, Lepton_Pixel_t *p_Min, Lepton_Pixel_t *p_Max,
                        uint16_t Width,
                        uint16_t Height);
 
