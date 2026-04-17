@@ -131,12 +131,12 @@ static void Lepton_CaptureTask(void *p_Args)
                 FrameBuffer.BytesPerPixel = Device->Internal.VoSPI.BytesPerPixel;
 
                 /* Use the buffer index returned by VoSPI_CaptureImage */
-                FrameBuffer.Image_Buffer = Device->Internal.VoSPI.Image_Buffer[BufferIndex];
+                FrameBuffer.ImageBuffer = Device->Internal.VoSPI.Image_Buffer[BufferIndex];
 
                 if (Device->Internal.VoSPI.UseTelemetry) {
-                    FrameBuffer.Telemetry_Buffer = Device->Internal.VoSPI.Telemetry_Buffer[BufferIndex];
+                    FrameBuffer.TelemetryBuffer = Device->Internal.VoSPI.Telemetry_Buffer[BufferIndex];
                 } else {
-                    FrameBuffer.Telemetry_Buffer = NULL;
+                    FrameBuffer.TelemetryBuffer = NULL;
                 }
 
                 /* Use overwrite to always update with latest frame */
@@ -252,44 +252,46 @@ Lepton_Error_t Lepton_StopCapture(Lepton_t *p_Device)
 }
 
 __attribute__((optimize("O3")))
-bool Lepton_Raw14ToRGB(Lepton_t *p_Device, uint16_t *p_Input, uint8_t *p_Output, uint16_t *p_Min, uint16_t *p_Max,
+bool Lepton_Raw14ToRGB(Lepton_t *p_Device, uint16_t *p_Input, uint8_t *p_Output, Lepton_Pixel_t *p_Min, Lepton_Pixel_t *p_Max,
                        uint16_t Width,
                        uint16_t Height)
 {
-    uint16_t min = UINT16_MAX;
-    uint16_t max = 0;
-    uint32_t range;
+    int32_t min = INT32_MAX;
+    int32_t max = 0;
+    uint32_t range = 0;
+    uint8_t minX = 0;
+    uint8_t minY = 0;
+    uint8_t maxX = 0;
+    uint8_t maxY = 0;
 
     if ((p_Device == NULL) || (p_Device->Internal.IsInitialized == false) || ((p_Input == NULL) || (p_Output == NULL))) {
         return false;
     }
 
-    /* -----------------------------------------------------------------------
-     * Min/Max pass – 8-wide SIMD using ESP32-S3 PIE Q-registers.
+    /* Min/Max pass – 8-wide SIMD using ESP32-S3 PIE Q-registers.
      *
      * u16x8_t maps to a single 128-bit Q-register (8 × uint16_t).
      * The vector ternary  v = (cond) ? a : b  compiles to element-wise
      * PIE compare-and-move (EE.VCMP / EE.VSEL) instructions.
      * Each iteration processes 8 pixels in one set of SIMD operations,
      * reducing loop iterations by 8× compared to the scalar baseline.
-     * ----------------------------------------------------------------------- */
+     */
     uint32_t PixelCount = static_cast<uint32_t>(Width) * Height;
-    uint32_t i = 0;
 
     /* Initialise 8-lane SIMD accumulators */
     u16x8_t vmin8 = {UINT16_MAX, UINT16_MAX, UINT16_MAX, UINT16_MAX,
                      UINT16_MAX, UINT16_MAX, UINT16_MAX, UINT16_MAX};
     u16x8_t vmax8 = {0, 0, 0, 0, 0, 0, 0, 0};
 
-    for (; (i + 8) <= PixelCount; i += 8) {
+    for (uint32_t i = 0; (i + 8) <= PixelCount; i += 8) {
         u16x8_t v;
 
         __builtin_memcpy(&v, p_Input + i, sizeof(u16x8_t)); /* unaligned Q-reg load */
         vmin8 = vmin8 < v ? vmin8 : v;  /* EE.VMIN.U16 or equivalent */
         vmax8 = vmax8 > v ? vmax8 : v;  /* EE.VMAX.U16 or equivalent */
 
-        /* Reset watchdog periodically during min/max search */
-        if ((i & 0x3FF) == 0) { /* Every 1024 pixels */
+        /* Reset watchdog periodically during min/max search every 1024 pixels */
+        if ((i & 0x3FF) == 0) {
             esp_task_wdt_reset();
         }
     }
@@ -305,14 +307,31 @@ bool Lepton_Raw14ToRGB(Lepton_t *p_Device, uint16_t *p_Input, uint8_t *p_Output,
         }
     }
 
-    /* Scalar tail for the remaining < 8 pixels (160×120 = 19200, remainder 0) */
-    for (; i < PixelCount; i++) {
-        if (p_Input[i] < min) {
-            min = p_Input[i];
-        }
+    /* Scalar tail for the remaining < 8 pixels (160×120 = 19200, remainder 0).
+     * Use two dedicated loops instead of one to avoid modulo and division operations.
+     */
+    uint32_t i = 0;
+    for (uint32_t y = 0; y < Height; y++)
+    {
+        for (uint32_t x = 0; x < Width; x++)
+        {
+            /* Use <= / >= so that pixels equal to the already-determined
+             * global extreme (found by the SIMD pass above) are accepted.
+             * Without this, the strict < / > comparisons would never match
+             * and the coordinates would remain at their initial value of 0. */
+            if (p_Input[i] <= static_cast<uint16_t>(min)) {
+                min = p_Input[i];
+                minX = x;
+                minY = y;
+            }
 
-        if (p_Input[i] > max) {
-            max = p_Input[i];
+            if (p_Input[i] >= static_cast<uint16_t>(max)) {
+                max = p_Input[i];
+                maxX = x;
+                maxY = y;
+            }
+
+            i++;
         }
     }
 
@@ -336,8 +355,7 @@ bool Lepton_Raw14ToRGB(Lepton_t *p_Device, uint16_t *p_Input, uint8_t *p_Output,
         range = 10;
     }
 
-    /* -----------------------------------------------------------------------
-     * Normalization pass – two-stage SIMD pipeline:
+    /* Normalization pass – two-stage SIMD pipeline:
      *
      * Stage 1 – Subtraction  (dsps_sub_s16, resolved to dsps_sub_s16_aes3 on
      *             ESP32-S3 when CONFIG_DSP_OPTIMIZED=y):
@@ -354,7 +372,7 @@ bool Lepton_Raw14ToRGB(Lepton_t *p_Device, uint16_t *p_Input, uint8_t *p_Output,
      *   Negative delta (pixel < MinSmooth) clamped to 0 during uint32 widen.
      *
      * Palette LUT gather remains scalar (no SIMD gather for 3-byte entries).
-     * ----------------------------------------------------------------------- */
+     */
     uint32_t InvRange = (255U << 16) / range;
     uint16_t MinSmooth = p_Device->Internal.MinSmooth;
 
@@ -428,11 +446,15 @@ bool Lepton_Raw14ToRGB(Lepton_t *p_Device, uint16_t *p_Input, uint8_t *p_Output,
     }
 
     if (p_Min != NULL) {
-        *p_Min = min;
+        p_Min->Value = static_cast<int16_t>(min);
+        p_Min->x = static_cast<uint8_t>(minX);
+        p_Min->y = static_cast<uint8_t>(minY);
     }
 
     if (p_Max != NULL) {
-        *p_Max = max;
+        p_Max->Value = static_cast<int16_t>(max);
+        p_Max->x = static_cast<uint8_t>(maxX);
+        p_Max->y = static_cast<uint8_t>(maxY);
     }
 
     return true;

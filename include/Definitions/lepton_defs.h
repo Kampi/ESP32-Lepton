@@ -233,6 +233,14 @@ typedef enum {
     LEPTON_AGC_HEQ,                             /**< Histogram Equalization AGC mode. */
 } Lepton_AGC_Mode_t;
 
+/** @brief Pixel definition for image buffers.
+ */
+typedef struct {
+    int32_t Value;                              /**< Pixel value in raw format (e.g. 14-bit for RAW14 format). */
+    uint8_t x;                                  /**< x coordinate */
+    uint8_t y;                                  /**< y coordinate */
+} Lepton_Pixel_t;
+
 /** @brief Radiometry Flux Linear parameter (Chapter 4.8.7 - FLIR LEPTON Software IDD).
  */
 typedef struct {
@@ -249,9 +257,9 @@ typedef struct {
 /** @brief AGC Histogram statistics (Chapter 4.4.4 - FLIR LEPTON Software IDD).
  */
 typedef struct {
-    uint32_t Intensity_Min;                     /**< Minimum intensity value. */
-    uint32_t Intensity_Max;                     /**< Maximum intensity value. */
-    uint32_t Intensity_Avg;                     /**< Average intensity value. */
+    uint32_t IntensityMin;                      /**< Minimum intensity value. */
+    uint32_t IntensityMax;                      /**< Maximum intensity value. */
+    uint32_t IntensityAvg;                      /**< Average intensity value. */
     uint32_t Pixels;                            /**< Total number of pixels counted in the histogram (19200). */
 } Lepton_AGC_Histogram_Statistics_t;
 
@@ -261,9 +269,9 @@ typedef struct {
     uint16_t Height;                            /**< Image buffer height in pixel. */
     uint16_t Width;                             /**< Image buffer width in pixel. */
     uint8_t BytesPerPixel;                      /**< Number of bytes per pixel. */
-    uint16_t *Image_Buffer;                     /**< Pointer to memory location for image buffer.
+    uint16_t *ImageBuffer;                      /**< Pointer to memory location for image buffer.
                                                      Allocated with MALLOC_CAP_SIMD and MALLOC_CAP_SPIRAM, if PSRAM is enabled. */
-    uint16_t *Telemetry_Buffer;                 /**< Pointer to memory location for telemetry buffer. */
+    uint16_t *TelemetryBuffer;                  /**< Pointer to memory location for telemetry buffer. */
 } Lepton_FrameBuffer_t;
 
 /** @brief Spotmeter object definition (Chapter 4.8.13 - FLIR LEPTON Software IDD).
@@ -287,10 +295,10 @@ typedef struct {
 /** @brief ROI object definition.
  */
 typedef struct {
-    uint16_t Start_Col;                         /**< Start column of the ROI. */
-    uint16_t Start_Row;                         /**< Start row of the ROI. */
-    uint16_t End_Col;                           /**< End column of the ROI. */
-    uint16_t End_Row;                           /**< End row of the ROI. */
+    uint16_t StartCol;                          /**< Start column of the ROI. */
+    uint16_t StartRow;                          /**< Start row of the ROI. */
+    uint16_t EndCol;                            /**< End column of the ROI. */
+    uint16_t EndRow;                            /**< End row of the ROI. */
 } Lepton_ROI_t;
 
 /** @brief Pixel definition for custom look-up table (Chapter 4.6.2 - FLIR LEPTON Software IDD).

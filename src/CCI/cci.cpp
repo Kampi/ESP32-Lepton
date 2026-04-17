@@ -446,10 +446,10 @@ static Lepton_Error_t CCI_SetROI(CCI_t *p_Interface, uint16_t Command, const Lep
         return LEPTON_ERR_INVALID_ARG;
     }
 
-    Buffer[0] = p_ROI->Start_Col;
-    Buffer[1] = p_ROI->Start_Row;
-    Buffer[2] = p_ROI->End_Col;
-    Buffer[3] = p_ROI->End_Row;
+    Buffer[0] = p_ROI->StartCol;
+    Buffer[1] = p_ROI->StartRow;
+    Buffer[2] = p_ROI->EndCol;
+    Buffer[3] = p_ROI->EndRow;
 
     return CCI_Set(p_Interface, Command, 4, Buffer, p_Status);
 }
@@ -475,10 +475,10 @@ static Lepton_Error_t CCI_GetROI(CCI_t *p_Interface, uint16_t Command, Lepton_RO
         return Error;
     }
 
-    p_ROI->Start_Col = Buffer[0];
-    p_ROI->Start_Row = Buffer[1];
-    p_ROI->End_Col = Buffer[2];
-    p_ROI->End_Row = Buffer[3];
+    p_ROI->StartCol = Buffer[0];
+    p_ROI->StartRow = Buffer[1];
+    p_ROI->EndCol = Buffer[2];
+    p_ROI->EndRow = Buffer[3];
 
     return LEPTON_ERR_OK;
 }
