@@ -18,7 +18,7 @@ High-performance ESP-IDF driver for [FLIR Lepton 3.5](https://oem.flir.com/de-de
     - [Using ESP-IDF Component Manager](#using-esp-idf-component-manager)
     - [Manual Installation](#manual-installation)
   - [Kconfig Options](#kconfig-options)
-  - [Color Palettes (TBD)](#color-palettes-tbd)
+  - [Color Palettes](#color-palettes)
   - [Performance](#performance)
   - [Examples](#examples)
   - [License](#license)
@@ -32,7 +32,7 @@ High-performance ESP-IDF driver for [FLIR Lepton 3.5](https://oem.flir.com/de-de
 - AGC (Automatic Gain Control) support
 - FFC (Flat Field Correction) control
 - Radiometry support (temperature measurement)
-- Multiple color palettes (Iron, Rainbow, Grayscale)
+- Multiple color palettes (Iron, Rainbow, Whitehot, Blackhot, Amber, Arctic, Lava)
 
 ## Hardware Support
 
@@ -86,13 +86,19 @@ Configure via `idf.py menuconfig`:
 Component config → ESP32-Lepton
 ```
 
-## Color Palettes (TBD)
+## Color Palettes
 
 Built-in palettes for thermal visualization:
 
 | Palette | Description | Use Case |
 | --------- | ------------- | ---------- |
 | **Iron** | Black → Red → Yellow → White | General thermal imaging |
+| **Rainbow** | Full spectrum blue → cyan → green → yellow → red | High contrast visualization |
+| **Whitehot** | Black → Gray → White (cold to hot) | Standard grayscale imaging |
+| **Blackhot** | White → Gray → Black (cold to hot) | Inverted grayscale imaging |
+| **Amber** | Black → Brown → Orange → Yellow → White | Night vision / security |
+| **Arctic** | Dark blue → Cyan → White | Cold-scene visualization |
+| **Lava** | Black → Purple → Red → Orange → Yellow | Volcanic / high-temp imaging |
 
 ## Performance
 

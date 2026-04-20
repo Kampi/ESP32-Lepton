@@ -335,7 +335,8 @@ typedef struct {
     /**< NOTE: You must set I2C_Bus_Config to use this function! */
     I2C_Write_t I2C_Write;                      /**< I2C write function pointer. */
     I2C_Read_t I2C_Read;                        /**< I2C read function pointer. */
-    I2C_WriteRead_t I2C_WriteRead;              /**< I2C atomic write-then-read function pointer (optional, preferred for register reads). */
+    I2C_WriteRead_t
+    I2C_WriteRead;              /**< I2C atomic write-then-read function pointer (optional, preferred for register reads). */
     I2C_Deinit_t I2C_Deinit;                    /**< I2C deinitialization function pointer. */
     i2c_master_bus_config_t *I2C_Bus_Config;    /**< Pointer to I2C bus configuration. */
     /**< NOTE: Only needed when I2C_Init is used! */
@@ -459,11 +460,13 @@ typedef struct {
 typedef struct {
     uint16_t Reserved: 3;                       /**< Reserved. */
     uint16_t FFC_Desired: 1;                    /**< 0 = FFC not desired, 1 = FFC desired. */
-    uint16_t FFC_State:2;                       /**< 00 = FFC never commanded, 01 = FFC imminent, 10 = FFC in progress, 11 = FFC complete. */
+    uint16_t FFC_State:
+    2;                      /**< 00 = FFC never commanded, 01 = FFC imminent, 10 = FFC in progress, 11 = FFC complete. */
     uint16_t Reserved1: 6;                      /**< Reserved. */
     uint16_t AGC_State: 1;                      /**< 0 = AGC disabled, 1 = AGC enabled. */
     uint16_t Reserved2: 2;                      /**< Reserved. */
-    uint16_t Shutter_Lockout:1;                 /**< 0 = Shutter not locked out, 1 = Shutter locked out (outside of valid temperature range, -10°C to 80°C)). */
+    uint16_t Shutter_Lockout:
+    1;                /**< 0 = Shutter not locked out, 1 = Shutter locked out (outside of valid temperature range, -10°C to 80°C)). */
     uint16_t Reserved3: 4;                      /**< Reserved. */
     uint16_t Overtemp_Shutdown: 1;              /**< Goes true 10 seconds before shutdown. */
     uint16_t Reserved4: 11;                     /**< Reserved. */

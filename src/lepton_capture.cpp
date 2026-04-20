@@ -252,9 +252,11 @@ Lepton_Error_t Lepton_StopCapture(Lepton_t *p_Device)
 }
 
 __attribute__((optimize("O3")))
-bool Lepton_Raw14ToRGB(Lepton_t *p_Device, uint16_t *p_Input, uint8_t *p_Output, Lepton_Pixel_t *p_Min, Lepton_Pixel_t *p_Max,
+bool Lepton_Raw14ToRGB(Lepton_t *p_Device, uint16_t *p_Input, uint8_t *p_Output, Lepton_Pixel_t *p_Min,
+                       Lepton_Pixel_t *p_Max,
                        uint16_t Width,
-                       uint16_t Height)
+                       uint16_t Height,
+                       const uint8_t (*p_Palette)[3])
 {
     int32_t min = INT32_MAX;
     int32_t max = 0;
@@ -280,7 +282,8 @@ bool Lepton_Raw14ToRGB(Lepton_t *p_Device, uint16_t *p_Input, uint8_t *p_Output,
 
     /* Initialise 8-lane SIMD accumulators */
     u16x8_t vmin8 = {UINT16_MAX, UINT16_MAX, UINT16_MAX, UINT16_MAX,
-                     UINT16_MAX, UINT16_MAX, UINT16_MAX, UINT16_MAX};
+                     UINT16_MAX, UINT16_MAX, UINT16_MAX, UINT16_MAX
+                    };
     u16x8_t vmax8 = {0, 0, 0, 0, 0, 0, 0, 0};
 
     for (uint32_t i = 0; (i + 8) <= PixelCount; i += 8) {
@@ -311,10 +314,8 @@ bool Lepton_Raw14ToRGB(Lepton_t *p_Device, uint16_t *p_Input, uint8_t *p_Output,
      * Use two dedicated loops instead of one to avoid modulo and division operations.
      */
     uint32_t i = 0;
-    for (uint32_t y = 0; y < Height; y++)
-    {
-        for (uint32_t x = 0; x < Width; x++)
-        {
+    for (uint32_t y = 0; y < Height; y++) {
+        for (uint32_t x = 0; x < Width; x++) {
             /* Use <= / >= so that pixels equal to the already-determined
              * global extreme (found by the SIMD pass above) are accepted.
              * Without this, the strict < / > comparisons would never match
@@ -378,7 +379,7 @@ bool Lepton_Raw14ToRGB(Lepton_t *p_Device, uint16_t *p_Input, uint8_t *p_Output,
 
     /* 16-byte aligned stack buffers for aes3 SIMD alignment requirement */
     int16_t MinSmoothRow[LEPTON_IMAGE_WIDTH] __attribute__((aligned(16)));
-    int16_t DeltaRow[LEPTON_IMAGE_WIDTH]     __attribute__((aligned(16)));
+    int16_t DeltaRow[LEPTON_IMAGE_WIDTH] __attribute__((aligned(16)));
 
     /* Fill constant-subtrahend row once */
     for (uint8_t k = 0; k < LEPTON_IMAGE_WIDTH; k++) {
@@ -388,7 +389,7 @@ bool Lepton_Raw14ToRGB(Lepton_t *p_Device, uint16_t *p_Input, uint8_t *p_Output,
     const u32x4_t InvRange4 = {InvRange, InvRange, InvRange, InvRange};
     const u32x4_t Cap255 = {255U, 255U, 255U, 255U};
 
-    /* Apply iron palette – one row per outer iteration */
+    /* Apply palette – one row per outer iteration */
     for (uint32_t row = 0; row < Height; row++) {
         int k = 0;
         u32x4_t norm;
@@ -413,18 +414,18 @@ bool Lepton_Raw14ToRGB(Lepton_t *p_Device, uint16_t *p_Input, uint8_t *p_Output,
             norm = norm > Cap255 ? Cap255 : norm;
 
             OutBase = static_cast<uint32_t>(k) * 3U;
-            RowOut[OutBase +  0] = Lepton_Palette_Iron[norm[0]][0];
-            RowOut[OutBase +  1] = Lepton_Palette_Iron[norm[0]][1];
-            RowOut[OutBase +  2] = Lepton_Palette_Iron[norm[0]][2];
-            RowOut[OutBase +  3] = Lepton_Palette_Iron[norm[1]][0];
-            RowOut[OutBase +  4] = Lepton_Palette_Iron[norm[1]][1];
-            RowOut[OutBase +  5] = Lepton_Palette_Iron[norm[1]][2];
-            RowOut[OutBase +  6] = Lepton_Palette_Iron[norm[2]][0];
-            RowOut[OutBase +  7] = Lepton_Palette_Iron[norm[2]][1];
-            RowOut[OutBase +  8] = Lepton_Palette_Iron[norm[2]][2];
-            RowOut[OutBase +  9] = Lepton_Palette_Iron[norm[3]][0];
-            RowOut[OutBase + 10] = Lepton_Palette_Iron[norm[3]][1];
-            RowOut[OutBase + 11] = Lepton_Palette_Iron[norm[3]][2];
+            RowOut[OutBase +  0] = p_Palette[norm[0]][0];
+            RowOut[OutBase +  1] = p_Palette[norm[0]][1];
+            RowOut[OutBase +  2] = p_Palette[norm[0]][2];
+            RowOut[OutBase +  3] = p_Palette[norm[1]][0];
+            RowOut[OutBase +  4] = p_Palette[norm[1]][1];
+            RowOut[OutBase +  5] = p_Palette[norm[1]][2];
+            RowOut[OutBase +  6] = p_Palette[norm[2]][0];
+            RowOut[OutBase +  7] = p_Palette[norm[2]][1];
+            RowOut[OutBase +  8] = p_Palette[norm[2]][2];
+            RowOut[OutBase +  9] = p_Palette[norm[3]][0];
+            RowOut[OutBase + 10] = p_Palette[norm[3]][1];
+            RowOut[OutBase + 11] = p_Palette[norm[3]][2];
         }
 
         /* Scalar tail (160 is divisible by 4 – this loop is never entered) */
@@ -436,9 +437,9 @@ bool Lepton_Raw14ToRGB(Lepton_t *p_Device, uint16_t *p_Input, uint8_t *p_Output,
                 normalized = 255U;
             }
 
-            RowOut[k * 3 + 0] = Lepton_Palette_Iron[normalized][0];
-            RowOut[k * 3 + 1] = Lepton_Palette_Iron[normalized][1];
-            RowOut[k * 3 + 2] = Lepton_Palette_Iron[normalized][2];
+            RowOut[k * 3 + 0] = p_Palette[normalized][0];
+            RowOut[k * 3 + 1] = p_Palette[normalized][1];
+            RowOut[k * 3 + 2] = p_Palette[normalized][2];
         }
 
         /* Reset watchdog once per row instead of once per 1024 pixels */
