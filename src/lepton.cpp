@@ -44,7 +44,8 @@ Lepton_Error_t Lepton_Init(Lepton_t *p_Device, const Lepton_Conf_t *const p_Init
     bool UseTelemetry;
     Lepton_Error_t Error;
 
-    if ((p_Device == NULL) || (p_Init == NULL) || (p_Init->CCI.I2C_Read == NULL) || (p_Init->CCI.I2C_Write == NULL) || (p_Init->CCI.I2C_WriteRead == NULL)) {
+    if ((p_Device == NULL) || (p_Init == NULL) || (p_Init->CCI.I2C_Read == NULL) || (p_Init->CCI.I2C_Write == NULL) ||
+        (p_Init->CCI.I2C_WriteRead == NULL)) {
         return LEPTON_ERR_INVALID_ARG;
     } else if (p_Device->Internal.IsInitialized) {
         return LEPTON_ERR_OK;

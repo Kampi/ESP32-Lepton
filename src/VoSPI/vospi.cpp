@@ -117,11 +117,11 @@ Lepton_Error_t VoSPI_Init(VoSPI_t *p_Interface)
         goto VoSPI_Init_Error_2;
     }
 
-    #ifdef CONFIG_SPIRAM
-        Caps = MALLOC_CAP_SIMD | MALLOC_CAP_SPIRAM;
-    #else
-        Caps = MALLOC_CAP_SIMD;
-    #endif
+#ifdef CONFIG_SPIRAM
+    Caps = MALLOC_CAP_SIMD | MALLOC_CAP_SPIRAM;
+#else
+    Caps = MALLOC_CAP_SIMD;
+#endif
 
     /* Allocate frame buffer in PSRAM */
     for (uint8_t i = 0; i < CONFIG_LEPTON_VOSPI_FRAME_BUFFERS; i++) {
@@ -135,11 +135,11 @@ Lepton_Error_t VoSPI_Init(VoSPI_t *p_Interface)
     }
 
     if (p_Interface->UseTelemetry) {
-        #ifdef CONFIG_SPIRAM
-            Caps = MALLOC_CAP_SPIRAM;
-        #else
-            Caps = 0;
-        #endif
+#ifdef CONFIG_SPIRAM
+        Caps = MALLOC_CAP_SPIRAM;
+#else
+        Caps = 0;
+#endif
 
         /* Telemetry contains 4 packets (or 3 lines) = 4 * 80 pixels * 2 bytes = 640 bytes */
         size_t telemetryBufferSize = 4 * VOSPI_PIXELS_PER_PACKET * sizeof(uint16_t);

@@ -375,9 +375,9 @@ Lepton_Error_t Lepton_StopCapture(Lepton_t *p_Device);
  */
 Lepton_Error_t Lepton_GetPixelTemperature(Lepton_t *p_Device, uint16_t PixelValue, float *p_Temperature);
 
-/** @brief          Convert a thermal value to RGB color using iron palette.
- *                  The function applies an iron palette pseudocolor mapping optimized for thermal imaging.
- *                  Color mapping: blue (cold) -> cyan -> green -> yellow -> red (hot)
+/** @brief          Convert a RAW14 thermal frame to RGB using the specified color palette.
+ *                  The function applies a pseudocolor palette mapping optimized for thermal imaging.
+ *                  Palette selection is controlled by the p_Palette parameter.
  *  @param p_Device Pointer to device instance
  *  @param p_Input  Pointer to input buffer containing thermal values (14-bit per pixel)
  *  @param p_Output Pointer to RGB output buffer
@@ -385,11 +385,14 @@ Lepton_Error_t Lepton_GetPixelTemperature(Lepton_t *p_Device, uint16_t PixelValu
  *  @param p_Max    Pointer to maximum value in the image
  *  @param Width    Image width in pixels
  *  @param Height   Image height in pixels
+ *  @param p_Palette Pointer to the palette LUT (array of 256 RGB triples); use Lepton_Palette_Table[id]
  *  @return         true on success, false on failure
  */
-bool Lepton_Raw14ToRGB(Lepton_t *p_Device, uint16_t *p_Input, uint8_t *p_Output, Lepton_Pixel_t *p_Min, Lepton_Pixel_t *p_Max,
+bool Lepton_Raw14ToRGB(Lepton_t *p_Device, uint16_t *p_Input, uint8_t *p_Output, Lepton_Pixel_t *p_Min,
+                       Lepton_Pixel_t *p_Max,
                        uint16_t Width,
-                       uint16_t Height);
+                       uint16_t Height,
+                       const uint8_t (*p_Palette)[3]);
 
 #ifdef __cplusplus
 }
