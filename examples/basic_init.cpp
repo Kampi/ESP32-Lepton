@@ -1,7 +1,7 @@
 /*
  * basic_init.cpp
  *
- *  Copyright (C) Daniel Kampert, 2025
+ *  Copyright (C) Daniel Kampert, 2026
  *  Website: www.kampis-elektroecke.de
  *  File info: Basic initialization example for ESP32-Lepton component.
  *
@@ -41,7 +41,7 @@ extern "C" void app_main(void)
 
     Lepton_Conf_t Config;
     Config = LEPTON_DEFAULT_CONF;
-    LEPTON_ASSIGN_FUNC(Config, I2CM_Init, I2CM_Deinit, I2CM_Write, I2CM_Read);
+    LEPTON_ASSIGN_I2C_FUNC(Config, I2CM_Init, I2CM_Deinit, I2CM_Write, I2CM_Read, I2CM_WriteRead);
 
     // ...
 
