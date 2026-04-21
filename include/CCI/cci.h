@@ -39,6 +39,13 @@ Lepton_Error_t CCI_Init(CCI_t *p_Interface);
  */
 Lepton_Error_t CCI_Deinit(CCI_t *p_Interface);
 
+/** @brief
+ *  @param p_Interface  Pointer to CCI interface object
+ *  @param p_Status     (Optional) Pointer to device status
+ *  @return             LEPTON_ERR_OK when successful
+ */
+Lepton_Error_t CCI_RunFFC(CCI_t *p_Interface, Lepton_Result_t *p_Status = NULL);
+
 /** @brief              Generic register "SET" access.
  *  @param p_Interface  Pointer to CCI interface object
  *  @param Command      Command instruction
