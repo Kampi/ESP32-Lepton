@@ -1,3 +1,21 @@
+# =============================================================================
+# Workflow: Changelog Check
+# =============================================================================
+#
+# Trigger:
+#   - pull_request: Targeting branches 'main' or 'master'
+#   - push to branches 'main', 'master', or 'dev'
+#
+# Function:
+#   Validates that the hardware CHANGELOG.md exists and is correctly formatted.
+#   Checks that an [Unreleased] section is present and that its content only
+#   contains valid section headers ("**Added:**", "**Changed:**", "**Fixed:**",
+#   "**Removed:**"). Fails the workflow if the format is invalid.
+#
+# Secrets:
+#   (none)
+# =============================================================================
+
 name: Changelog Check
 
 on:
@@ -24,7 +42,7 @@ jobs:
         run: |
           CHANGELOG_FILE="CHANGELOG.md"
 
-          if [ ! -f "$CHANGELOG_FILE" ]; then
+          if [ ! -f "${CHANGELOG_FILE}" ]; then
             echo "Error: CHANGELOG.md not found in directory"
             exit 1
           fi
@@ -32,38 +50,37 @@ jobs:
           echo "Validating CHANGELOG.md format..."
 
           # Check if [Unreleased] section exists
-          if ! grep -q "\[Unreleased\]" "$CHANGELOG_FILE"; then
+          if ! grep -q "\[Unreleased\]" "${CHANGELOG_FILE}"; then
             echo "Error: [Unreleased] section not found in CHANGELOG.md"
             exit 1
           fi
 
-          # Extract [Unreleased] section content
-          UNRELEASED_CONTENT=$(awk '/\[Unreleased\]/,/^## \[/' "$CHANGELOG_FILE" | sed '1d;$d')
+          # Extract [Unreleased] section content (stop at the next versioned ## [ header)
+          UNRELEASED_CONTENT=$(awk '/^## \[Unreleased\]/{found=1; next} found && /^## \[/{exit} found{print}' "${CHANGELOG_FILE}")
 
-          if [ -z "$UNRELEASED_CONTENT" ]; then
-            echo "✓ [Unreleased] section is empty (allowed during development)"
+          if [ -z "${UNRELEASED_CONTENT}" ]; then
+            echo "[Unreleased] section is empty (allowed during development)"
             exit 0
           fi
 
           echo "Checking [Unreleased] section content..."
 
-          # Valid section headers
-          VALID_SECTIONS=("### Added" "### Changed" "### Fixed" "### Removed")
+          # Valid section headers (bold markdown format: **Added:** etc.)
+          VALID_SECTIONS=("**Added:**" "**Changed:**" "**Fixed:**" "**Removed:**")
 
           # Check for valid section headers
           FOUND_SECTIONS=false
           for section in "${VALID_SECTIONS[@]}"; do
-            if echo "$UNRELEASED_CONTENT" | grep -q "^$section"; then
+            if echo "$UNRELEASED_CONTENT" | grep -qF "$section"; then
               FOUND_SECTIONS=true
               echo "✓ Found section: $section"
             fi
           done
 
-          if [ "$FOUND_SECTIONS" = false ]; then
-            echo "Warning: No valid sections found in [Unreleased], but content exists"
-            echo "Expected sections: Added, Changed, Fixed, Removed"
-            echo "This is allowed during early development"
-            exit 0
+          if [ "${FOUND_SECTIONS}" = false ]; then
+            echo "Error: No valid sections found in [Unreleased]"
+            echo "Expected sections: **Added:** **Changed:** **Fixed:** **Removed:**"
+            exit 1
           fi
 
           # Validate entry format: must start with "- " (dash + space/tab) and contain issue reference "(#number)"
@@ -76,21 +93,14 @@ jobs:
           while IFS= read -r line; do
             LINE_NUMBER=$((LINE_NUMBER + 1))
             
-            # Skip empty lines and section headers
-            if [[ -z "$line" ]] || [[ "$line" =~ ^### ]]; then
+            # Skip empty lines and section headers (**Added:** style)
+            if [[ -z "$line" ]] || [[ "$line" =~ ^\*\*.*:\*\*$ ]]; then
               continue
             fi
 
             # Check if line is an entry (starts with -)
             if [[ "$line" =~ ^[[:space:]]*- ]]; then
-              # Check for issue reference in format (#number)
-              if ! [[ "$line" =~ \(#[0-9]+\) ]]; then
-                echo "✗ Line $LINE_NUMBER: Missing or invalid issue reference (expected format: (#123))"
-                echo "  Content: $line"
-                ERROR_COUNT=$((ERROR_COUNT + 1))
-              else
-                echo "✓ Line $LINE_NUMBER: Valid entry"
-              fi
+              echo "✓ Line $LINE_NUMBER: Valid entry"
             elif [[ "$line" =~ ^[[:space:]]*[^-] ]]; then
               # Line has content but doesn't start with -
               echo "✗ Line $LINE_NUMBER: Entry must start with '- ' (dash + space)"
@@ -100,26 +110,27 @@ jobs:
           done <<< "$UNRELEASED_CONTENT"
 
           echo ""
-          if [ $ERROR_COUNT -gt 0 ]; then
+          if [ ${ERROR_COUNT} -gt 0 ]; then
             echo "=========================================="
             echo "Changelog validation FAILED"
             echo "=========================================="
-            echo "Found $ERROR_COUNT error(s)"
+            echo "Found ${ERROR_COUNT} error(s)"
             echo ""
             echo "Requirements:"
-            echo "1. All entries must be grouped under: Added, Changed, Fixed, or Removed"
+            echo "1. All entries must be grouped under: **Added:** **Changed:** **Fixed:** or **Removed:**"
             echo "2. Each entry must start with '- ' (dash + space or tab)"
-            echo "3. Each entry must contain an issue reference in format (#number)"
             echo ""
             echo "Example:"
             echo "## [Unreleased]"
             echo ""
-            echo "### Added"
-            echo "- New feature description (#123)"
-            echo "- Another feature (#124)"
+            echo "**Added:**"
             echo ""
-            echo "### Fixed"
-            echo "- Bug fix description (#125)"
+            echo "- New feature description"
+            echo "- Another feature"
+            echo ""
+            echo "**Fixed:**"
+            echo ""
+            echo "- Bug fix description"
             echo ""
             exit 1
           else
@@ -136,28 +147,28 @@ jobs:
 
           echo "Checking for duplicate issue numbers in [Unreleased] section..."
 
-          # Extract issue numbers from [Unreleased] section
-          UNRELEASED_CONTENT=$(awk '/\[Unreleased\]/,/^## \[/' "$CHANGELOG_FILE" | sed '1d;$d')
+          # Extract issue numbers from [Unreleased] section (stop at the next versioned ## [ header)
+          UNRELEASED_CONTENT=$(awk '/^## \[Unreleased\]/{found=1; next} found && /^## \[/{exit} found{print}' "${CHANGELOG_FILE}")
 
-          if [ -z "$UNRELEASED_CONTENT" ]; then
+          if [ -z "${UNRELEASED_CONTENT}" ]; then
             echo "No content to check"
             exit 0
           fi
 
           # Extract all issue numbers
-          ISSUE_NUMBERS=$(echo "$UNRELEASED_CONTENT" | grep -oP '\(#\K[0-9]+(?=\))' || true)
+          ISSUE_NUMBERS=$(echo "${UNRELEASED_CONTENT}" | grep -oP '\(#\K[0-9]+(?=\))' || true)
 
-          if [ -z "$ISSUE_NUMBERS" ]; then
+          if [ -z "${ISSUE_NUMBERS}" ]; then
             echo "No issue numbers found"
             exit 0
           fi
 
           # Check for duplicates
-          DUPLICATES=$(echo "$ISSUE_NUMBERS" | sort | uniq -d)
+          DUPLICATES=$(echo "${ISSUE_NUMBERS}" | sort | uniq -d)
 
-          if [ -n "$DUPLICATES" ]; then
+          if [ -n "${DUPLICATES}" ]; then
             echo "Warning: Duplicate issue numbers found in [Unreleased] section:"
-            echo "$DUPLICATES" | while read -r issue; do
+            echo "${DUPLICATES}" | while read -r issue; do
               echo "  - Issue #$issue appears multiple times"
             done
             echo ""

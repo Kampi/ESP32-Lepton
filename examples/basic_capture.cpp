@@ -1,7 +1,7 @@
 /*
  * basic_capture.cpp
  *
- *  Copyright (C) Daniel Kampert, 2025
+ *  Copyright (C) Daniel Kampert, 2026
  *  Website: www.kampis-elektroecke.de
  *  File info: Basic capture example for ESP32-Lepton component.
  *
@@ -52,7 +52,7 @@ extern "C" void app_main(void)
     vTaskDelay(pdMS_TO_TICKS(2000));
 
     Config = LEPTON_DEFAULT_CONF;
-    LEPTON_ASSIGN_FUNC(Config, I2CM_Init, I2CM_Deinit, I2CM_Write, I2CM_Read);
+    LEPTON_ASSIGN_I2C_FUNC(Config, I2CM_Init, I2CM_Deinit, I2CM_Write, I2CM_Read, I2CM_WriteRead);
 
     // ...
 
@@ -74,10 +74,11 @@ extern "C" void app_main(void)
     }
 
     /* Allocate 2 RGB buffers for ping-pong buffering */
-    RGB_Buffer[0] = reinterpret_cast<uint8_t *>(heap_caps_malloc(LEPTON_IMAGE_WIDTH * LEPTON_IMAGE_HEIGHT
-                                                                 * 3, MALLOC_CAP_SPIRAM));
-    RGB_Buffer[1] = reinterpret_cast<uint8_t *>(heap_caps_malloc(LEPTON_IMAGE_WIDTH * LEPTON_IMAGE_HEIGHT
-                                                                 * 3, MALLOC_CAP_SPIRAM));
+    /* RGB888 frame buffers: 160 × 120 × 3 = 57,600 bytes each (PSRAM) */
+    RGB_Buffer[0] = static_cast<uint8_t *>(heap_caps_malloc(LEPTON_IMAGE_WIDTH * LEPTON_IMAGE_HEIGHT * 3,
+                                                            MALLOC_CAP_SIMD | MALLOC_CAP_SPIRAM));
+    RGB_Buffer[1] = static_cast<uint8_t *>(heap_caps_malloc(LEPTON_IMAGE_WIDTH * LEPTON_IMAGE_HEIGHT * 3,
+                                                            MALLOC_CAP_SIMD | MALLOC_CAP_SPIRAM));
     if ((RGB_Buffer[0] == NULL) || (RGB_Buffer[1] == NULL)) {
         ESP_LOGE(TAG, "Can not allocate RGB buffers!");
 
@@ -123,8 +124,14 @@ extern "C" void app_main(void)
 
     ESP_LOGI(TAG, "Lepton initialized successfully!");
 
-    ESP_LOGI(TAG, "	Part number: %s", Device.PartNumber);
-    ESP_LOGI(TAG, "	Serial number: %s", Device.SerialNumber);
+    char SerialStr[24];
+    snprintf(SerialStr, sizeof(SerialStr), "%02X%02X-%02X%02X-%02X%02X-%02X%02X",
+             Device.SerialNumber[0], Device.SerialNumber[1],
+             Device.SerialNumber[2], Device.SerialNumber[3],
+             Device.SerialNumber[4], Device.SerialNumber[5],
+             Device.SerialNumber[6], Device.SerialNumber[7]);
+    ESP_LOGI(TAG, "\tPart number: %s", Device.PartNumber);
+    ESP_LOGI(TAG, "\tSerial number: %s", SerialStr);
 
     ESP_LOGI(TAG, "Start image capturing...");
     if (Lepton_StartCapture(&Device, RawFrameQueue) != LEPTON_ERR_OK) {
@@ -142,8 +149,8 @@ extern "C" void app_main(void)
             /* When telemetry is available */
             /*
             Lepton_Telemetry_t Telemetry;
-            if (RawFrame.Telemetry_Buffer != NULL) {
-                memcpy(&Telemetry, RawFrame.Telemetry_Buffer, sizeof(Lepton_Telemetry_t));
+            if (RawFrame.TelemetryBuffer != NULL) {
+                memcpy(&Telemetry, RawFrame.TelemetryBuffer, sizeof(Lepton_Telemetry_t));
                 ESP_LOGD(TAG, "Telemetry - FrameCounter: %u, FPA_Temp: %uK, Housing_Temp: %uK",
                          Telemetry.FrameCounter,
                          Telemetry.FPA_Temp,
@@ -164,7 +171,8 @@ extern "C" void app_main(void)
                 continue;
             }
 
-            Lepton_Raw14ToRGB(RawFrame.Image_Buffer, WriteBuffer, NULL, NULL, RawFrame.Width, RawFrame.Height);
+            Lepton_Raw14ToRGB(&Device, RawFrame.ImageBuffer, WriteBuffer, NULL, NULL, RawFrame.Width, RawFrame.Height,
+                             Lepton_Palette_Table[LEPTON_PALETTE_IRON]);
 
             /* Mark buffer as ready and update read buffer index */
             if (xSemaphoreTake(BufferMutex, pdMS_TO_TICKS(100)) == pdTRUE) {

@@ -1,3 +1,24 @@
+# =============================================================================
+# Workflow: Code Style Check (AStyle)
+# =============================================================================
+#
+# Trigger:
+#   - workflow_dispatch: Manual trigger via GitHub UI
+#   - pull_request: On open, synchronize, or reopen targeting any branch
+#   - push to branches 'main', 'master', or 'dev'
+#
+# Function:
+#   Checks the code style of the repository using AStyle. AStyle is built from
+#   source and the repository's 'scripts/format.sh' script is executed in
+#   dry-run mode to report style violations without modifying any files.
+#
+# Variables:
+#   (none)
+#
+# Secrets:
+#   (none)
+# =============================================================================
+
 name: Code Style Check
 
 on:

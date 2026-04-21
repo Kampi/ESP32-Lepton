@@ -11,6 +11,8 @@
 - Add `MALLOC_CAP_SIMD` for image buffers
 - Add dynamic memory caps for VoSPI transaction to allow the usage without PSRAM
 - Add SIMD support
+- Add additional color paletts
+- Add API to trigger camera FFC
 
 **Fixed:**
 
@@ -18,7 +20,7 @@
 
 **Removed:**
 
-- Remove ESP from supported devices list because it is untested
+- Remove ESP32 from supported devices list because it is untested
 
 ## [0.0.2] - 2026-01-26
 
