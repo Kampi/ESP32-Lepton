@@ -549,6 +549,11 @@ Lepton_Error_t CCI_Deinit(CCI_t *p_Interface)
     return LEPTON_ERR_OK;
 }
 
+Lepton_Error_t CCI_RunFFC(CCI_t *p_Interface, Lepton_Result_t *p_Status)
+{
+    return CCI_Set(p_Interface, CCI_CMD_SYS_RUN_FFC, 0, NULL, p_Status);
+}
+
 Lepton_Error_t CCI_Set(CCI_t *p_Interface, uint16_t Command, uint16_t Length, const uint16_t *p_Buffer,
                        Lepton_Result_t *p_Status)
 {

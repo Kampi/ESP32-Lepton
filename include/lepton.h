@@ -375,6 +375,15 @@ Lepton_Error_t Lepton_StopCapture(Lepton_t *p_Device);
  */
 Lepton_Error_t Lepton_GetPixelTemperature(Lepton_t *p_Device, uint16_t PixelValue, float *p_Temperature);
 
+/** @brief          Run the Flat-Field Correction (FFC) process.
+ *  @param p_Device Pointer to device instance
+ *  @param p_Status (Optional) Pointer to device status
+ *  @return         LEPTON_ERR_OK when successful
+ *                  LEPTON_ERR_NOT_INITIALIZED when device is not initialized
+ *                  LEPTON_ERR_NOT_SUPPORTED when FFC is not supported by the device
+ */
+Lepton_Error_t Lepton_RunCCI(Lepton_t *p_Device, Lepton_Result_t *p_Status = NULL);
+
 /** @brief          Convert a RAW14 thermal frame to RGB using the specified color palette.
  *                  The function applies a pseudocolor palette mapping optimized for thermal imaging.
  *                  Palette selection is controlled by the p_Palette parameter.

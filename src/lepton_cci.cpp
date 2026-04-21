@@ -345,3 +345,14 @@ Lepton_Error_t Lepton_FreezeVideo(Lepton_t *p_Device, bool Freeze, Lepton_Result
 
     return LEPTON_ERR_OK;
 }
+
+Lepton_Error_t Lepton_RunCCI(Lepton_t *p_Device, Lepton_Result_t *p_Status)
+{
+    if (p_Device == NULL) {
+        return LEPTON_ERR_INVALID_ARG;
+    } else if (p_Device->Internal.IsInitialized == false) {
+        return LEPTON_ERR_NOT_INITIALIZED;
+    }
+
+    return CCI_RunFFC(&p_Device->Internal.CCI, p_Status);
+}

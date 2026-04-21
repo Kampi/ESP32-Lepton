@@ -17,6 +17,24 @@ High-performance ESP-IDF driver for [FLIR Lepton 3.5](https://oem.flir.com/de-de
   - [Installation](#installation)
     - [Using ESP-IDF Component Manager](#using-esp-idf-component-manager)
     - [Manual Installation](#manual-installation)
+  - [Supported commands](#supported-commands)
+  - [Documentation](#documentation)
+    - [Requirements](#requirements-1)
+    - [Structure](#structure)
+    - [Format](#format)
+    - [Style Guide](#style-guide)
+    - [Building Locally](#building-locally)
+      - [Build HTML Documentation](#build-html-documentation)
+      - [Build PDF Documentation](#build-pdf-documentation)
+      - [Build All Documentation](#build-all-documentation)
+    - [Automated CI/CD](#automated-cicd)
+    - [Accessing Built Documentation](#accessing-built-documentation)
+    - [Module Overview](#module-overview)
+      - [lepton.adoc](#leptonadoc)
+      - [lepton\_capture.adoc](#lepton_captureadoc)
+      - [lepton\_cci.adoc](#lepton_cciadoc)
+      - [cci.adoc](#cciadoc)
+      - [vospi.adoc](#vospiadoc)
   - [Kconfig Options](#kconfig-options)
   - [Color Palettes](#color-palettes)
   - [Performance](#performance)
@@ -77,6 +95,128 @@ dependencies:
 cd your_project/components
 git clone https://github.com/Kampi/ESP32-Lepton.git
 ```
+
+## Supported commands
+
+See [CCI API Status](CCI_API_Status.md).
+
+## Documentation
+
+### Requirements
+
+```bash
+# Ubuntu/Debian
+sudo apt-get install asciidoctor ruby-asciidoctor-pdf
+
+# macOS
+brew install asciidoctor
+
+# Or via Ruby gems
+gem install asciidoctor asciidoctor-pdf
+```
+
+### Structure
+
+The documentation is organized into separate modules:
+
+- **index.adoc** - Main overview and getting started guide
+- **lepton.adoc** - Main driver API documentation
+- **lepton_capture.adoc** - Frame capture task implementation
+- **lepton_cci.adoc** - High-level CCI commands
+- **cci.adoc** - Low-level CCI protocol implementation
+- **vospi.adoc** - VoSPI (Video over SPI) interface
+
+### Format
+
+The documentation uses **AsciiDoc** format, which provides:
+
+- Rich formatting capabilities
+- Code syntax highlighting
+- Cross-references between documents
+- Professional PDF output
+- Easy-to-read source format
+
+### Style Guide
+
+- Use clear, concise language
+- Include code examples for all API functions
+- Add usage examples for complex features
+- Document error conditions and return values
+- Cross-reference related modules using `link:module.html[Module Name]`
+
+### Building Locally
+
+#### Build HTML Documentation
+
+```bash
+cd docs
+asciidoctor index.adoc -o index.html
+asciidoctor lepton.adoc -o lepton.html
+asciidoctor lepton_capture.adoc -o lepton_capture.html
+asciidoctor lepton_cci.adoc -o lepton_cci.html
+asciidoctor cci.adoc -o cci.html
+asciidoctor vospi.adoc -o vospi.html
+```
+
+#### Build PDF Documentation
+
+```bash
+cd docs
+asciidoctor-pdf index.adoc -o index.pdf
+asciidoctor-pdf lepton.adoc -o lepton.pdf
+asciidoctor-pdf lepton_capture.adoc -o lepton_capture.pdf
+asciidoctor-pdf lepton_cci.adoc -o lepton_cci.pdf
+asciidoctor-pdf cci.adoc -o cci.pdf
+asciidoctor-pdf vospi.adoc -o vospi.pdf
+```
+
+#### Build All Documentation
+
+```bash
+cd docs
+for adoc in *.adoc; do
+  asciidoctor "$adoc" -o "${adoc%.adoc}.html"
+  asciidoctor-pdf "$adoc" -o "${adoc%.adoc}.pdf"
+done
+```
+
+### Automated CI/CD
+
+The documentation is automatically built and deployed via GitHub Actions:
+
+- **Trigger**: Push to `main`/`master` branch or changes in `docs/` directory
+- **Output**: HTML and PDF versions
+- **Artifacts**: Uploaded as GitHub Actions artifacts
+- **Releases**: Nightly documentation releases with tarball and individual PDFs
+
+### Accessing Built Documentation
+
+- **Artifacts**: Download from GitHub Actions run
+- **Releases**: Check the "nightly" pre-release for latest documentation
+- **Tarball**: `ESP32-Lepton-Docs-nightly.tar.gz` contains all HTML files
+- **Individual PDFs**: Available in releases (e.g., `lepton-nightly.pdf`)
+
+### Module Overview
+
+#### lepton.adoc
+
+Core driver interface with initialization, configuration, and high-level control functions. This is the main entry point for users of the component.
+
+#### lepton_capture.adoc
+
+Describes the FreeRTOS task that continuously captures thermal frames from the sensor. Includes VSync interrupt handling and frame buffer management.
+
+#### lepton_cci.adoc
+
+High-level CCI commands for sensor configuration (AGC, emissivity, ROI, telemetry, etc.). Wraps low-level CCI functions with device state management.
+
+#### cci.adoc
+
+Low-level I2C protocol implementation for the Lepton CCI interface. Handles command execution, register access, and status polling.
+
+#### vospi.adoc
+
+SPI-based video interface for high-speed thermal data acquisition. Implements packet synchronization, frame assembly, and DMA transfers.
 
 ## Kconfig Options
 
