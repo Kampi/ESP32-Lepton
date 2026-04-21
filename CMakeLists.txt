@@ -24,6 +24,11 @@ if((IDF_TARGET STREQUAL "esp32s3"))
 	list(APPEND COMPONENT_PRIV_REQUIRES esp_timer)
 endif()
 
+# Library version
+set(ESP32_LEPTON_LIB_MAJOR 0)
+set(ESP32_LEPTON_LIB_MINOR 0)
+set(ESP32_LEPTON_LIB_BUILD 3)
+
 register_component()
 
 # Add version definitions to the component

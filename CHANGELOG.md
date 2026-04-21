@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.0.3] - 2026-04-21
+
 **Changed:**
 
 - Change min. esp-idf version to 5.5.3 to make use of the direct PSRAM / SPI DMA transaction
@@ -35,5 +37,6 @@
 
 Initial release
 
-[Unreleased]: https://github.com/Kampi/ESP32-Lepton/compare/0.0.2...HEAD
+[Unreleased]: https://github.com/Kampi/ESP32-Lepton/compare/0.0.3...HEAD
 [0.0.2]: https://github.com/Kampi/ESP32-Lepton/compare/0.0.1...0.0.2
+[0.0.3]: https://github.com/Kampi/ESP32-Lepton/compare/0.0.2...0.0.3
