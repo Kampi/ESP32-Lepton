@@ -1,0 +1,1617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 2.0.20">
+<meta name="author" content="Daniel Kampert">
+<title>Lepton Frame Capture Module</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<style>
+/*! Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
+/* Uncomment the following line when using as a custom stylesheet */
+/* @import "https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700"; */
+html{font-family:sans-serif;-webkit-text-size-adjust:100%}
+a{background:none}
+a:focus{outline:thin dotted}
+a:active,a:hover{outline:0}
+h1{font-size:2em;margin:.67em 0}
+b,strong{font-weight:bold}
+abbr{font-size:.9em}
+abbr[title]{cursor:help;border-bottom:1px dotted #dddddf;text-decoration:none}
+dfn{font-style:italic}
+hr{height:0}
+mark{background:#ff0;color:#000}
+code,kbd,pre,samp{font-family:monospace;font-size:1em}
+pre{white-space:pre-wrap}
+q{quotes:"\201C" "\201D" "\2018" "\2019"}
+small{font-size:80%}
+sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}
+sup{top:-.5em}
+sub{bottom:-.25em}
+img{border:0}
+svg:not(:root){overflow:hidden}
+figure{margin:0}
+audio,video{display:inline-block}
+audio:not([controls]){display:none;height:0}
+fieldset{border:1px solid silver;margin:0 2px;padding:.35em .625em .75em}
+legend{border:0;padding:0}
+button,input,select,textarea{font-family:inherit;font-size:100%;margin:0}
+button,input{line-height:normal}
+button,select{text-transform:none}
+button,html input[type=button],input[type=reset],input[type=submit]{-webkit-appearance:button;cursor:pointer}
+button[disabled],html input[disabled]{cursor:default}
+input[type=checkbox],input[type=radio]{padding:0}
+button::-moz-focus-inner,input::-moz-focus-inner{border:0;padding:0}
+textarea{overflow:auto;vertical-align:top}
+table{border-collapse:collapse;border-spacing:0}
+*,::before,::after{box-sizing:border-box}
+html,body{font-size:100%}
+body{background:#fff;color:rgba(0,0,0,.8);padding:0;margin:0;font-family:"Noto Serif","DejaVu Serif",serif;line-height:1;position:relative;cursor:auto;-moz-tab-size:4;-o-tab-size:4;tab-size:4;word-wrap:anywhere;-moz-osx-font-smoothing:grayscale;-webkit-font-smoothing:antialiased}
+a:hover{cursor:pointer}
+img,object,embed{max-width:100%;height:auto}
+object,embed{height:100%}
+img{-ms-interpolation-mode:bicubic}
+.left{float:left!important}
+.right{float:right!important}
+.text-left{text-align:left!important}
+.text-right{text-align:right!important}
+.text-center{text-align:center!important}
+.text-justify{text-align:justify!important}
+.hide{display:none}
+img,object,svg{display:inline-block;vertical-align:middle}
+textarea{height:auto;min-height:50px}
+select{width:100%}
+.subheader,.admonitionblock td.content>.title,.audioblock>.title,.exampleblock>.title,.imageblock>.title,.listingblock>.title,.literalblock>.title,.stemblock>.title,.openblock>.title,.paragraph>.title,.quoteblock>.title,table.tableblock>.title,.verseblock>.title,.videoblock>.title,.dlist>.title,.olist>.title,.ulist>.title,.qlist>.title,.hdlist>.title{line-height:1.45;color:#7a2518;font-weight:400;margin-top:0;margin-bottom:.25em}
+div,dl,dt,dd,ul,ol,li,h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6,pre,form,p,blockquote,th,td{margin:0;padding:0}
+a{color:#2156a5;text-decoration:underline;line-height:inherit}
+a:hover,a:focus{color:#1d4b8f}
+a img{border:0}
+p{line-height:1.6;margin-bottom:1.25em;text-rendering:optimizeLegibility}
+p aside{font-size:.875em;line-height:1.35;font-style:italic}
+h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6{font-family:"Open Sans","DejaVu Sans",sans-serif;font-weight:300;font-style:normal;color:#ba3925;text-rendering:optimizeLegibility;margin-top:1em;margin-bottom:.5em;line-height:1.0125em}
+h1 small,h2 small,h3 small,#toctitle small,.sidebarblock>.content>.title small,h4 small,h5 small,h6 small{font-size:60%;color:#e99b8f;line-height:0}
+h1{font-size:2.125em}
+h2{font-size:1.6875em}
+h3,#toctitle,.sidebarblock>.content>.title{font-size:1.375em}
+h4,h5{font-size:1.125em}
+h6{font-size:1em}
+hr{border:solid #dddddf;border-width:1px 0 0;clear:both;margin:1.25em 0 1.1875em}
+em,i{font-style:italic;line-height:inherit}
+strong,b{font-weight:bold;line-height:inherit}
+small{font-size:60%;line-height:inherit}
+code{font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;font-weight:400;color:rgba(0,0,0,.9)}
+ul,ol,dl{line-height:1.6;margin-bottom:1.25em;list-style-position:outside;font-family:inherit}
+ul,ol{margin-left:1.5em}
+ul li ul,ul li ol{margin-left:1.25em;margin-bottom:0}
+ul.circle{list-style-type:circle}
+ul.disc{list-style-type:disc}
+ul.square{list-style-type:square}
+ul.circle ul:not([class]),ul.disc ul:not([class]),ul.square ul:not([class]){list-style:inherit}
+ol li ul,ol li ol{margin-left:1.25em;margin-bottom:0}
+dl dt{margin-bottom:.3125em;font-weight:bold}
+dl dd{margin-bottom:1.25em}
+blockquote{margin:0 0 1.25em;padding:.5625em 1.25em 0 1.1875em;border-left:1px solid #ddd}
+blockquote,blockquote p{line-height:1.6;color:rgba(0,0,0,.85)}
+@media screen and (min-width:768px){h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6{line-height:1.2}
+h1{font-size:2.75em}
+h2{font-size:2.3125em}
+h3,#toctitle,.sidebarblock>.content>.title{font-size:1.6875em}
+h4{font-size:1.4375em}}
+table{background:#fff;margin-bottom:1.25em;border:1px solid #dedede;word-wrap:normal}
+table thead,table tfoot{background:#f7f8f7}
+table thead tr th,table thead tr td,table tfoot tr th,table tfoot tr td{padding:.5em .625em .625em;font-size:inherit;color:rgba(0,0,0,.8);text-align:left}
+table tr th,table tr td{padding:.5625em .625em;font-size:inherit;color:rgba(0,0,0,.8)}
+table tr.even,table tr.alt{background:#f8f8f7}
+table thead tr th,table tfoot tr th,table tbody tr td,table tr td,table tfoot tr td{line-height:1.6}
+h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6{line-height:1.2;word-spacing:-.05em}
+h1 strong,h2 strong,h3 strong,#toctitle strong,.sidebarblock>.content>.title strong,h4 strong,h5 strong,h6 strong{font-weight:400}
+.center{margin-left:auto;margin-right:auto}
+.stretch{width:100%}
+.clearfix::before,.clearfix::after,.float-group::before,.float-group::after{content:" ";display:table}
+.clearfix::after,.float-group::after{clear:both}
+:not(pre).nobreak{word-wrap:normal}
+:not(pre).nowrap{white-space:nowrap}
+:not(pre).pre-wrap{white-space:pre-wrap}
+:not(pre):not([class^=L])>code{font-size:.9375em;font-style:normal!important;letter-spacing:0;padding:.1em .5ex;word-spacing:-.15em;background:#f7f7f8;border-radius:4px;line-height:1.45;text-rendering:optimizeSpeed}
+pre{color:rgba(0,0,0,.9);font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;line-height:1.45;text-rendering:optimizeSpeed}
+pre code,pre pre{color:inherit;font-size:inherit;line-height:inherit}
+pre>code{display:block}
+pre.nowrap,pre.nowrap pre{white-space:pre;word-wrap:normal}
+em em{font-style:normal}
+strong strong{font-weight:400}
+.keyseq{color:rgba(51,51,51,.8)}
+kbd{font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;display:inline-block;color:rgba(0,0,0,.8);font-size:.65em;line-height:1.45;background:#f7f7f7;border:1px solid #ccc;border-radius:3px;box-shadow:0 1px 0 rgba(0,0,0,.2),inset 0 0 0 .1em #fff;margin:0 .15em;padding:.2em .5em;vertical-align:middle;position:relative;top:-.1em;white-space:nowrap}
+.keyseq kbd:first-child{margin-left:0}
+.keyseq kbd:last-child{margin-right:0}
+.menuseq,.menuref{color:#000}
+.menuseq b:not(.caret),.menuref{font-weight:inherit}
+.menuseq{word-spacing:-.02em}
+.menuseq b.caret{font-size:1.25em;line-height:.8}
+.menuseq i.caret{font-weight:bold;text-align:center;width:.45em}
+b.button::before,b.button::after{position:relative;top:-1px;font-weight:400}
+b.button::before{content:"[";padding:0 3px 0 2px}
+b.button::after{content:"]";padding:0 2px 0 3px}
+p a>code:hover{color:rgba(0,0,0,.9)}
+#header,#content,#footnotes,#footer{width:100%;margin:0 auto;max-width:62.5em;*zoom:1;position:relative;padding-left:.9375em;padding-right:.9375em}
+#header::before,#header::after,#content::before,#content::after,#footnotes::before,#footnotes::after,#footer::before,#footer::after{content:" ";display:table}
+#header::after,#content::after,#footnotes::after,#footer::after{clear:both}
+#content{margin-top:1.25em}
+#content::before{content:none}
+#header>h1:first-child{color:rgba(0,0,0,.85);margin-top:2.25rem;margin-bottom:0}
+#header>h1:first-child+#toc{margin-top:8px;border-top:1px solid #dddddf}
+#header>h1:only-child,body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
+#header .details{border-bottom:1px solid #dddddf;line-height:1.45;padding-top:.25em;padding-bottom:.25em;padding-left:.25em;color:rgba(0,0,0,.6);display:flex;flex-flow:row wrap}
+#header .details span:first-child{margin-left:-.125em}
+#header .details span.email a{color:rgba(0,0,0,.85)}
+#header .details br{display:none}
+#header .details br+span::before{content:"\00a0\2013\00a0"}
+#header .details br+span.author::before{content:"\00a0\22c5\00a0";color:rgba(0,0,0,.85)}
+#header .details br+span#revremark::before{content:"\00a0|\00a0"}
+#header #revnumber{text-transform:capitalize}
+#header #revnumber::after{content:"\00a0"}
+#content>h1:first-child:not([class]){color:rgba(0,0,0,.85);border-bottom:1px solid #dddddf;padding-bottom:8px;margin-top:0;padding-top:1rem;margin-bottom:1.25rem}
+#toc{border-bottom:1px solid #e7e7e9;padding-bottom:.5em}
+#toc>ul{margin-left:.125em}
+#toc ul.sectlevel0>li>a{font-style:italic}
+#toc ul.sectlevel0 ul.sectlevel1{margin:.5em 0}
+#toc ul{font-family:"Open Sans","DejaVu Sans",sans-serif;list-style-type:none}
+#toc li{line-height:1.3334;margin-top:.3334em}
+#toc a{text-decoration:none}
+#toc a:active{text-decoration:underline}
+#toctitle{color:#7a2518;font-size:1.2em}
+@media screen and (min-width:768px){#toctitle{font-size:1.375em}
+body.toc2{padding-left:15em;padding-right:0}
+#toc.toc2{margin-top:0!important;background:#f8f8f7;position:fixed;width:15em;left:0;top:0;border-right:1px solid #e7e7e9;border-top-width:0!important;border-bottom-width:0!important;z-index:1000;padding:1.25em 1em;height:100%;overflow:auto}
+#toc.toc2 #toctitle{margin-top:0;margin-bottom:.8rem;font-size:1.2em}
+#toc.toc2>ul{font-size:.9em;margin-bottom:0}
+#toc.toc2 ul ul{margin-left:0;padding-left:1em}
+#toc.toc2 ul.sectlevel0 ul.sectlevel1{padding-left:0;margin-top:.5em;margin-bottom:.5em}
+body.toc2.toc-right{padding-left:0;padding-right:15em}
+body.toc2.toc-right #toc.toc2{border-right-width:0;border-left:1px solid #e7e7e9;left:auto;right:0}}
+@media screen and (min-width:1280px){body.toc2{padding-left:20em;padding-right:0}
+#toc.toc2{width:20em}
+#toc.toc2 #toctitle{font-size:1.375em}
+#toc.toc2>ul{font-size:.95em}
+#toc.toc2 ul ul{padding-left:1.25em}
+body.toc2.toc-right{padding-left:0;padding-right:20em}}
+#content #toc{border:1px solid #e0e0dc;margin-bottom:1.25em;padding:1.25em;background:#f8f8f7;border-radius:4px}
+#content #toc>:first-child{margin-top:0}
+#content #toc>:last-child{margin-bottom:0}
+#footer{max-width:none;background:rgba(0,0,0,.8);padding:1.25em}
+#footer-text{color:hsla(0,0%,100%,.8);line-height:1.44}
+#content{margin-bottom:.625em}
+.sect1{padding-bottom:.625em}
+@media screen and (min-width:768px){#content{margin-bottom:1.25em}
+.sect1{padding-bottom:1.25em}}
+.sect1:last-child{padding-bottom:0}
+.sect1+.sect1{border-top:1px solid #e7e7e9}
+#content h1>a.anchor,h2>a.anchor,h3>a.anchor,#toctitle>a.anchor,.sidebarblock>.content>.title>a.anchor,h4>a.anchor,h5>a.anchor,h6>a.anchor{position:absolute;z-index:1001;width:1.5ex;margin-left:-1.5ex;display:block;text-decoration:none!important;visibility:hidden;text-align:center;font-weight:400}
+#content h1>a.anchor::before,h2>a.anchor::before,h3>a.anchor::before,#toctitle>a.anchor::before,.sidebarblock>.content>.title>a.anchor::before,h4>a.anchor::before,h5>a.anchor::before,h6>a.anchor::before{content:"\00A7";font-size:.85em;display:block;padding-top:.1em}
+#content h1:hover>a.anchor,#content h1>a.anchor:hover,h2:hover>a.anchor,h2>a.anchor:hover,h3:hover>a.anchor,#toctitle:hover>a.anchor,.sidebarblock>.content>.title:hover>a.anchor,h3>a.anchor:hover,#toctitle>a.anchor:hover,.sidebarblock>.content>.title>a.anchor:hover,h4:hover>a.anchor,h4>a.anchor:hover,h5:hover>a.anchor,h5>a.anchor:hover,h6:hover>a.anchor,h6>a.anchor:hover{visibility:visible}
+#content h1>a.link,h2>a.link,h3>a.link,#toctitle>a.link,.sidebarblock>.content>.title>a.link,h4>a.link,h5>a.link,h6>a.link{color:#ba3925;text-decoration:none}
+#content h1>a.link:hover,h2>a.link:hover,h3>a.link:hover,#toctitle>a.link:hover,.sidebarblock>.content>.title>a.link:hover,h4>a.link:hover,h5>a.link:hover,h6>a.link:hover{color:#a53221}
+details,.audioblock,.imageblock,.literalblock,.listingblock,.stemblock,.videoblock{margin-bottom:1.25em}
+details{margin-left:1.25rem}
+details>summary{cursor:pointer;display:block;position:relative;line-height:1.6;margin-bottom:.625rem;outline:none;-webkit-tap-highlight-color:transparent}
+details>summary::-webkit-details-marker{display:none}
+details>summary::before{content:"";border:solid transparent;border-left:solid;border-width:.3em 0 .3em .5em;position:absolute;top:.5em;left:-1.25rem;transform:translateX(15%)}
+details[open]>summary::before{border:solid transparent;border-top:solid;border-width:.5em .3em 0;transform:translateY(15%)}
+details>summary::after{content:"";width:1.25rem;height:1em;position:absolute;top:.3em;left:-1.25rem}
+.admonitionblock td.content>.title,.audioblock>.title,.exampleblock>.title,.imageblock>.title,.listingblock>.title,.literalblock>.title,.stemblock>.title,.openblock>.title,.paragraph>.title,.quoteblock>.title,table.tableblock>.title,.verseblock>.title,.videoblock>.title,.dlist>.title,.olist>.title,.ulist>.title,.qlist>.title,.hdlist>.title{text-rendering:optimizeLegibility;text-align:left;font-family:"Noto Serif","DejaVu Serif",serif;font-size:1rem;font-style:italic}
+table.tableblock.fit-content>caption.title{white-space:nowrap;width:0}
+.paragraph.lead>p,#preamble>.sectionbody>[class=paragraph]:first-of-type p{font-size:1.21875em;line-height:1.6;color:rgba(0,0,0,.85)}
+.admonitionblock>table{border-collapse:separate;border:0;background:none;width:100%}
+.admonitionblock>table td.icon{text-align:center;width:80px}
+.admonitionblock>table td.icon img{max-width:none}
+.admonitionblock>table td.icon .title{font-weight:bold;font-family:"Open Sans","DejaVu Sans",sans-serif;text-transform:uppercase}
+.admonitionblock>table td.content{padding-left:1.125em;padding-right:1.25em;border-left:1px solid #dddddf;color:rgba(0,0,0,.6);word-wrap:anywhere}
+.admonitionblock>table td.content>:last-child>:last-child{margin-bottom:0}
+.exampleblock>.content{border:1px solid #e6e6e6;margin-bottom:1.25em;padding:1.25em;background:#fff;border-radius:4px}
+.sidebarblock{border:1px solid #dbdbd6;margin-bottom:1.25em;padding:1.25em;background:#f3f3f2;border-radius:4px}
+.sidebarblock>.content>.title{color:#7a2518;margin-top:0;text-align:center}
+.exampleblock>.content>:first-child,.sidebarblock>.content>:first-child{margin-top:0}
+.exampleblock>.content>:last-child,.exampleblock>.content>:last-child>:last-child,.exampleblock>.content .olist>ol>li:last-child>:last-child,.exampleblock>.content .ulist>ul>li:last-child>:last-child,.exampleblock>.content .qlist>ol>li:last-child>:last-child,.sidebarblock>.content>:last-child,.sidebarblock>.content>:last-child>:last-child,.sidebarblock>.content .olist>ol>li:last-child>:last-child,.sidebarblock>.content .ulist>ul>li:last-child>:last-child,.sidebarblock>.content .qlist>ol>li:last-child>:last-child{margin-bottom:0}
+.literalblock pre,.listingblock>.content>pre{border-radius:4px;overflow-x:auto;padding:1em;font-size:.8125em}
+@media screen and (min-width:768px){.literalblock pre,.listingblock>.content>pre{font-size:.90625em}}
+@media screen and (min-width:1280px){.literalblock pre,.listingblock>.content>pre{font-size:1em}}
+.literalblock pre,.listingblock>.content>pre:not(.highlight),.listingblock>.content>pre[class=highlight],.listingblock>.content>pre[class^="highlight "]{background:#f7f7f8}
+.literalblock.output pre{color:#f7f7f8;background:rgba(0,0,0,.9)}
+.listingblock>.content{position:relative}
+.listingblock code[data-lang]::before{display:none;content:attr(data-lang);position:absolute;font-size:.75em;top:.425rem;right:.5rem;line-height:1;text-transform:uppercase;color:inherit;opacity:.5}
+.listingblock:hover code[data-lang]::before{display:block}
+.listingblock.terminal pre .command::before{content:attr(data-prompt);padding-right:.5em;color:inherit;opacity:.5}
+.listingblock.terminal pre .command:not([data-prompt])::before{content:"$"}
+.listingblock pre.highlightjs{padding:0}
+.listingblock pre.highlightjs>code{padding:1em;border-radius:4px}
+.listingblock pre.prettyprint{border-width:0}
+.prettyprint{background:#f7f7f8}
+pre.prettyprint .linenums{line-height:1.45;margin-left:2em}
+pre.prettyprint li{background:none;list-style-type:inherit;padding-left:0}
+pre.prettyprint li code[data-lang]::before{opacity:1}
+pre.prettyprint li:not(:first-child) code[data-lang]::before{display:none}
+table.linenotable{border-collapse:separate;border:0;margin-bottom:0;background:none}
+table.linenotable td[class]{color:inherit;vertical-align:top;padding:0;line-height:inherit;white-space:normal}
+table.linenotable td.code{padding-left:.75em}
+table.linenotable td.linenos,pre.pygments .linenos{border-right:1px solid;opacity:.35;padding-right:.5em;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none}
+pre.pygments span.linenos{display:inline-block;margin-right:.75em}
+.quoteblock{margin:0 1em 1.25em 1.5em;display:table}
+.quoteblock:not(.excerpt)>.title{margin-left:-1.5em;margin-bottom:.75em}
+.quoteblock blockquote,.quoteblock p{color:rgba(0,0,0,.85);font-size:1.15rem;line-height:1.75;word-spacing:.1em;letter-spacing:0;font-style:italic;text-align:justify}
+.quoteblock blockquote{margin:0;padding:0;border:0}
+.quoteblock blockquote::before{content:"\201c";float:left;font-size:2.75em;font-weight:bold;line-height:.6em;margin-left:-.6em;color:#7a2518;text-shadow:0 1px 2px rgba(0,0,0,.1)}
+.quoteblock blockquote>.paragraph:last-child p{margin-bottom:0}
+.quoteblock .attribution{margin-top:.75em;margin-right:.5ex;text-align:right}
+.verseblock{margin:0 1em 1.25em}
+.verseblock pre{font-family:"Open Sans","DejaVu Sans",sans-serif;font-size:1.15rem;color:rgba(0,0,0,.85);font-weight:300;text-rendering:optimizeLegibility}
+.verseblock pre strong{font-weight:400}
+.verseblock .attribution{margin-top:1.25rem;margin-left:.5ex}
+.quoteblock .attribution,.verseblock .attribution{font-size:.9375em;line-height:1.45;font-style:italic}
+.quoteblock .attribution br,.verseblock .attribution br{display:none}
+.quoteblock .attribution cite,.verseblock .attribution cite{display:block;letter-spacing:-.025em;color:rgba(0,0,0,.6)}
+.quoteblock.abstract blockquote::before,.quoteblock.excerpt blockquote::before,.quoteblock .quoteblock blockquote::before{display:none}
+.quoteblock.abstract blockquote,.quoteblock.abstract p,.quoteblock.excerpt blockquote,.quoteblock.excerpt p,.quoteblock .quoteblock blockquote,.quoteblock .quoteblock p{line-height:1.6;word-spacing:0}
+.quoteblock.abstract{margin:0 1em 1.25em;display:block}
+.quoteblock.abstract>.title{margin:0 0 .375em;font-size:1.15em;text-align:center}
+.quoteblock.excerpt>blockquote,.quoteblock .quoteblock{padding:0 0 .25em 1em;border-left:.25em solid #dddddf}
+.quoteblock.excerpt,.quoteblock .quoteblock{margin-left:0}
+.quoteblock.excerpt blockquote,.quoteblock.excerpt p,.quoteblock .quoteblock blockquote,.quoteblock .quoteblock p{color:inherit;font-size:1.0625rem}
+.quoteblock.excerpt .attribution,.quoteblock .quoteblock .attribution{color:inherit;font-size:.85rem;text-align:left;margin-right:0}
+p.tableblock:last-child{margin-bottom:0}
+td.tableblock>.content{margin-bottom:1.25em;word-wrap:anywhere}
+td.tableblock>.content>:last-child{margin-bottom:-1.25em}
+table.tableblock,th.tableblock,td.tableblock{border:0 solid #dedede}
+table.grid-all>*>tr>*{border-width:1px}
+table.grid-cols>*>tr>*{border-width:0 1px}
+table.grid-rows>*>tr>*{border-width:1px 0}
+table.frame-all{border-width:1px}
+table.frame-ends{border-width:1px 0}
+table.frame-sides{border-width:0 1px}
+table.frame-none>colgroup+*>:first-child>*,table.frame-sides>colgroup+*>:first-child>*{border-top-width:0}
+table.frame-none>:last-child>:last-child>*,table.frame-sides>:last-child>:last-child>*{border-bottom-width:0}
+table.frame-none>*>tr>:first-child,table.frame-ends>*>tr>:first-child{border-left-width:0}
+table.frame-none>*>tr>:last-child,table.frame-ends>*>tr>:last-child{border-right-width:0}
+table.stripes-all>*>tr,table.stripes-odd>*>tr:nth-of-type(odd),table.stripes-even>*>tr:nth-of-type(even),table.stripes-hover>*>tr:hover{background:#f8f8f7}
+th.halign-left,td.halign-left{text-align:left}
+th.halign-right,td.halign-right{text-align:right}
+th.halign-center,td.halign-center{text-align:center}
+th.valign-top,td.valign-top{vertical-align:top}
+th.valign-bottom,td.valign-bottom{vertical-align:bottom}
+th.valign-middle,td.valign-middle{vertical-align:middle}
+table thead th,table tfoot th{font-weight:bold}
+tbody tr th{background:#f7f8f7}
+tbody tr th,tbody tr th p,tfoot tr th,tfoot tr th p{color:rgba(0,0,0,.8);font-weight:bold}
+p.tableblock>code:only-child{background:none;padding:0}
+p.tableblock{font-size:1em}
+ol{margin-left:1.75em}
+ul li ol{margin-left:1.5em}
+dl dd{margin-left:1.125em}
+dl dd:last-child,dl dd:last-child>:last-child{margin-bottom:0}
+li p,ul dd,ol dd,.olist .olist,.ulist .ulist,.ulist .olist,.olist .ulist{margin-bottom:.625em}
+ul.checklist,ul.none,ol.none,ul.no-bullet,ol.no-bullet,ol.unnumbered,ul.unstyled,ol.unstyled{list-style-type:none}
+ul.no-bullet,ol.no-bullet,ol.unnumbered{margin-left:.625em}
+ul.unstyled,ol.unstyled{margin-left:0}
+li>p:empty:only-child::before{content:"";display:inline-block}
+ul.checklist>li>p:first-child{margin-left:-1em}
+ul.checklist>li>p:first-child>.fa-square-o:first-child,ul.checklist>li>p:first-child>.fa-check-square-o:first-child{width:1.25em;font-size:.8em;position:relative;bottom:.125em}
+ul.checklist>li>p:first-child>input[type=checkbox]:first-child{margin-right:.25em}
+ul.inline{display:flex;flex-flow:row wrap;list-style:none;margin:0 0 .625em -1.25em}
+ul.inline>li{margin-left:1.25em}
+.unstyled dl dt{font-weight:400;font-style:normal}
+ol.arabic{list-style-type:decimal}
+ol.decimal{list-style-type:decimal-leading-zero}
+ol.loweralpha{list-style-type:lower-alpha}
+ol.upperalpha{list-style-type:upper-alpha}
+ol.lowerroman{list-style-type:lower-roman}
+ol.upperroman{list-style-type:upper-roman}
+ol.lowergreek{list-style-type:lower-greek}
+.hdlist>table,.colist>table{border:0;background:none}
+.hdlist>table>tbody>tr,.colist>table>tbody>tr{background:none}
+td.hdlist1,td.hdlist2{vertical-align:top;padding:0 .625em}
+td.hdlist1{font-weight:bold;padding-bottom:1.25em}
+td.hdlist2{word-wrap:anywhere}
+.literalblock+.colist,.listingblock+.colist{margin-top:-.5em}
+.colist td:not([class]):first-child{padding:.4em .75em 0;line-height:1;vertical-align:top}
+.colist td:not([class]):first-child img{max-width:none}
+.colist td:not([class]):last-child{padding:.25em 0}
+.thumb,.th{line-height:0;display:inline-block;border:4px solid #fff;box-shadow:0 0 0 1px #ddd}
+.imageblock.left{margin:.25em .625em 1.25em 0}
+.imageblock.right{margin:.25em 0 1.25em .625em}
+.imageblock>.title{margin-bottom:0}
+.imageblock.thumb,.imageblock.th{border-width:6px}
+.imageblock.thumb>.title,.imageblock.th>.title{padding:0 .125em}
+.image.left,.image.right{margin-top:.25em;margin-bottom:.25em;display:inline-block;line-height:0}
+.image.left{margin-right:.625em}
+.image.right{margin-left:.625em}
+a.image{text-decoration:none;display:inline-block}
+a.image object{pointer-events:none}
+sup.footnote,sup.footnoteref{font-size:.875em;position:static;vertical-align:super}
+sup.footnote a,sup.footnoteref a{text-decoration:none}
+sup.footnote a:active,sup.footnoteref a:active{text-decoration:underline}
+#footnotes{padding-top:.75em;padding-bottom:.75em;margin-bottom:.625em}
+#footnotes hr{width:20%;min-width:6.25em;margin:-.25em 0 .75em;border-width:1px 0 0}
+#footnotes .footnote{padding:0 .375em 0 .225em;line-height:1.3334;font-size:.875em;margin-left:1.2em;margin-bottom:.2em}
+#footnotes .footnote a:first-of-type{font-weight:bold;text-decoration:none;margin-left:-1.05em}
+#footnotes .footnote:last-of-type{margin-bottom:0}
+#content #footnotes{margin-top:-.625em;margin-bottom:0;padding:.75em 0}
+div.unbreakable{page-break-inside:avoid}
+.big{font-size:larger}
+.small{font-size:smaller}
+.underline{text-decoration:underline}
+.overline{text-decoration:overline}
+.line-through{text-decoration:line-through}
+.aqua{color:#00bfbf}
+.aqua-background{background:#00fafa}
+.black{color:#000}
+.black-background{background:#000}
+.blue{color:#0000bf}
+.blue-background{background:#0000fa}
+.fuchsia{color:#bf00bf}
+.fuchsia-background{background:#fa00fa}
+.gray{color:#606060}
+.gray-background{background:#7d7d7d}
+.green{color:#006000}
+.green-background{background:#007d00}
+.lime{color:#00bf00}
+.lime-background{background:#00fa00}
+.maroon{color:#600000}
+.maroon-background{background:#7d0000}
+.navy{color:#000060}
+.navy-background{background:#00007d}
+.olive{color:#606000}
+.olive-background{background:#7d7d00}
+.purple{color:#600060}
+.purple-background{background:#7d007d}
+.red{color:#bf0000}
+.red-background{background:#fa0000}
+.silver{color:#909090}
+.silver-background{background:#bcbcbc}
+.teal{color:#006060}
+.teal-background{background:#007d7d}
+.white{color:#bfbfbf}
+.white-background{background:#fafafa}
+.yellow{color:#bfbf00}
+.yellow-background{background:#fafa00}
+span.icon>.fa{cursor:default}
+a span.icon>.fa{cursor:inherit}
+.admonitionblock td.icon [class^="fa icon-"]{font-size:2.5em;text-shadow:1px 1px 2px rgba(0,0,0,.5);cursor:default}
+.admonitionblock td.icon .icon-note::before{content:"\f05a";color:#19407c}
+.admonitionblock td.icon .icon-tip::before{content:"\f0eb";text-shadow:1px 1px 2px rgba(155,155,0,.8);color:#111}
+.admonitionblock td.icon .icon-warning::before{content:"\f071";color:#bf6900}
+.admonitionblock td.icon .icon-caution::before{content:"\f06d";color:#bf3400}
+.admonitionblock td.icon .icon-important::before{content:"\f06a";color:#bf0000}
+.conum[data-value]{display:inline-block;color:#fff!important;background:rgba(0,0,0,.8);border-radius:50%;text-align:center;font-size:.75em;width:1.67em;height:1.67em;line-height:1.67em;font-family:"Open Sans","DejaVu Sans",sans-serif;font-style:normal;font-weight:bold}
+.conum[data-value] *{color:#fff!important}
+.conum[data-value]+b{display:none}
+.conum[data-value]::after{content:attr(data-value)}
+pre .conum[data-value]{position:relative;top:-.125em}
+b.conum *{color:inherit!important}
+.conum:not([data-value]):empty{display:none}
+dt,th.tableblock,td.content,div.footnote{text-rendering:optimizeLegibility}
+h1,h2,p,td.content,span.alt,summary{letter-spacing:-.01em}
+p strong,td.content strong,div.footnote strong{letter-spacing:-.005em}
+p,blockquote,dt,td.content,td.hdlist1,span.alt,summary{font-size:1.0625rem}
+p{margin-bottom:1.25rem}
+.sidebarblock p,.sidebarblock dt,.sidebarblock td.content,p.tableblock{font-size:1em}
+.exampleblock>.content{background:#fffef7;border-color:#e0e0dc;box-shadow:0 1px 4px #e0e0dc}
+.print-only{display:none!important}
+@page{margin:1.25cm .75cm}
+@media print{*{box-shadow:none!important;text-shadow:none!important}
+html{font-size:80%}
+a{color:inherit!important;text-decoration:underline!important}
+a.bare,a[href^="#"],a[href^="mailto:"]{text-decoration:none!important}
+a[href^="http:"]:not(.bare)::after,a[href^="https:"]:not(.bare)::after{content:"(" attr(href) ")";display:inline-block;font-size:.875em;padding-left:.25em}
+abbr[title]{border-bottom:1px dotted}
+abbr[title]::after{content:" (" attr(title) ")"}
+pre,blockquote,tr,img,object,svg{page-break-inside:avoid}
+thead{display:table-header-group}
+svg{max-width:100%}
+p,blockquote,dt,td.content{font-size:1em;orphans:3;widows:3}
+h2,h3,#toctitle,.sidebarblock>.content>.title{page-break-after:avoid}
+#header,#content,#footnotes,#footer{max-width:none}
+#toc,.sidebarblock,.exampleblock>.content{background:none!important}
+#toc{border-bottom:1px solid #dddddf!important;padding-bottom:0!important}
+body.book #header{text-align:center}
+body.book #header>h1:first-child{border:0!important;margin:2.5em 0 1em}
+body.book #header .details{border:0!important;display:block;padding:0!important}
+body.book #header .details span:first-child{margin-left:0!important}
+body.book #header .details br{display:block}
+body.book #header .details br+span::before{content:none!important}
+body.book #toc{border:0!important;text-align:left!important;padding:0!important;margin:0!important}
+body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-break-before:always}
+.listingblock code[data-lang]::before{display:block}
+#footer{padding:0 .9375em}
+.hide-on-print{display:none!important}
+.print-only{display:block!important}
+.hide-for-print{display:none!important}
+.show-for-print{display:inherit!important}}
+@media amzn-kf8,print{#header>h1:first-child{margin-top:1.25rem}
+.sect1{padding:0!important}
+.sect1+.sect1{border:0}
+#footer{background:none}
+#footer-text{color:rgba(0,0,0,.6);font-size:.9em}}
+@media amzn-kf8{#header,#content,#footnotes,#footer{padding:0}}
+</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<style>
+pre.rouge table td { padding: 5px; }
+pre.rouge table pre { margin: 0; }
+pre.rouge .cm {
+  color: #999988;
+  font-style: italic;
+}
+pre.rouge .cp {
+  color: #999999;
+  font-weight: bold;
+}
+pre.rouge .c1 {
+  color: #999988;
+  font-style: italic;
+}
+pre.rouge .cs {
+  color: #999999;
+  font-weight: bold;
+  font-style: italic;
+}
+pre.rouge .c, pre.rouge .ch, pre.rouge .cd, pre.rouge .cpf {
+  color: #999988;
+  font-style: italic;
+}
+pre.rouge .err {
+  color: #a61717;
+  background-color: #e3d2d2;
+}
+pre.rouge .gd {
+  color: #000000;
+  background-color: #ffdddd;
+}
+pre.rouge .ge {
+  color: #000000;
+  font-style: italic;
+}
+pre.rouge .gr {
+  color: #aa0000;
+}
+pre.rouge .gh {
+  color: #999999;
+}
+pre.rouge .gi {
+  color: #000000;
+  background-color: #ddffdd;
+}
+pre.rouge .go {
+  color: #888888;
+}
+pre.rouge .gp {
+  color: #555555;
+}
+pre.rouge .gs {
+  font-weight: bold;
+}
+pre.rouge .gu {
+  color: #aaaaaa;
+}
+pre.rouge .gt {
+  color: #aa0000;
+}
+pre.rouge .kc {
+  color: #000000;
+  font-weight: bold;
+}
+pre.rouge .kd {
+  color: #000000;
+  font-weight: bold;
+}
+pre.rouge .kn {
+  color: #000000;
+  font-weight: bold;
+}
+pre.rouge .kp {
+  color: #000000;
+  font-weight: bold;
+}
+pre.rouge .kr {
+  color: #000000;
+  font-weight: bold;
+}
+pre.rouge .kt {
+  color: #445588;
+  font-weight: bold;
+}
+pre.rouge .k, pre.rouge .kv {
+  color: #000000;
+  font-weight: bold;
+}
+pre.rouge .mf {
+  color: #009999;
+}
+pre.rouge .mh {
+  color: #009999;
+}
+pre.rouge .il {
+  color: #009999;
+}
+pre.rouge .mi {
+  color: #009999;
+}
+pre.rouge .mo {
+  color: #009999;
+}
+pre.rouge .m, pre.rouge .mb, pre.rouge .mx {
+  color: #009999;
+}
+pre.rouge .sa {
+  color: #000000;
+  font-weight: bold;
+}
+pre.rouge .sb {
+  color: #d14;
+}
+pre.rouge .sc {
+  color: #d14;
+}
+pre.rouge .sd {
+  color: #d14;
+}
+pre.rouge .s2 {
+  color: #d14;
+}
+pre.rouge .se {
+  color: #d14;
+}
+pre.rouge .sh {
+  color: #d14;
+}
+pre.rouge .si {
+  color: #d14;
+}
+pre.rouge .sx {
+  color: #d14;
+}
+pre.rouge .sr {
+  color: #009926;
+}
+pre.rouge .s1 {
+  color: #d14;
+}
+pre.rouge .ss {
+  color: #990073;
+}
+pre.rouge .s, pre.rouge .dl {
+  color: #d14;
+}
+pre.rouge .na {
+  color: #008080;
+}
+pre.rouge .bp {
+  color: #999999;
+}
+pre.rouge .nb {
+  color: #0086B3;
+}
+pre.rouge .nc {
+  color: #445588;
+  font-weight: bold;
+}
+pre.rouge .no {
+  color: #008080;
+}
+pre.rouge .nd {
+  color: #3c5d5d;
+  font-weight: bold;
+}
+pre.rouge .ni {
+  color: #800080;
+}
+pre.rouge .ne {
+  color: #990000;
+  font-weight: bold;
+}
+pre.rouge .nf, pre.rouge .fm {
+  color: #990000;
+  font-weight: bold;
+}
+pre.rouge .nl {
+  color: #990000;
+  font-weight: bold;
+}
+pre.rouge .nn {
+  color: #555555;
+}
+pre.rouge .nt {
+  color: #000080;
+}
+pre.rouge .vc {
+  color: #008080;
+}
+pre.rouge .vg {
+  color: #008080;
+}
+pre.rouge .vi {
+  color: #008080;
+}
+pre.rouge .nv, pre.rouge .vm {
+  color: #008080;
+}
+pre.rouge .ow {
+  color: #000000;
+  font-weight: bold;
+}
+pre.rouge .o {
+  color: #000000;
+  font-weight: bold;
+}
+pre.rouge .w {
+  color: #bbbbbb;
+}
+pre.rouge {
+  background-color: #f8f8f8;
+}
+</style>
+</head>
+<body class="article toc2 toc-left">
+<div id="header">
+<h1>Lepton Frame Capture Module</h1>
+<div class="details">
+<span id="author" class="author">Daniel Kampert</span><br>
+<span id="email" class="email"><a href="mailto:DanielKampert@kampis-elektroecke.de">DanielKampert@kampis-elektroecke.de</a></span><br>
+<span id="revnumber">version 1.0.0,</span>
+<span id="revdate">2026-04-21</span>
+</div>
+<div id="toc" class="toc2">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_overview">1. Overview</a>
+<ul class="sectlevel2">
+<li><a href="#_key_features">1.1. Key Features</a></li>
+</ul>
+</li>
+<li><a href="#_architecture">2. Architecture</a>
+<ul class="sectlevel2">
+<li><a href="#_frame_buffer_flow">2.1. Frame Buffer Flow</a></li>
+</ul>
+</li>
+<li><a href="#_configuration">3. Configuration</a>
+<ul class="sectlevel2">
+<li><a href="#_task_configuration">3.1. Task Configuration</a></li>
+<li><a href="#_vsync_configuration">3.2. VSync Configuration</a></li>
+</ul>
+</li>
+<li><a href="#_api_functions">4. API Functions</a>
+<ul class="sectlevel2">
+<li><a href="#_lepton_startcapture">4.1. Lepton_StartCapture</a></li>
+<li><a href="#_lepton_stopcapture">4.2. Lepton_StopCapture</a></li>
+</ul>
+</li>
+<li><a href="#_frame_buffer_structure">5. Frame Buffer Structure</a>
+<ul class="sectlevel2">
+<li><a href="#_lepton_framebuffer_t">5.1. Lepton_FrameBuffer_t</a></li>
+</ul>
+</li>
+<li><a href="#_capture_task_implementation">6. Capture Task Implementation</a>
+<ul class="sectlevel2">
+<li><a href="#_task_loop">6.1. Task Loop</a></li>
+<li><a href="#_error_recovery">6.2. Error Recovery</a></li>
+<li><a href="#_sync_error_example">6.3. Sync Error Example</a></li>
+</ul>
+</li>
+<li><a href="#_vsync_interrupt">7. VSync Interrupt</a>
+<ul class="sectlevel2">
+<li><a href="#_purpose">7.1. Purpose</a></li>
+<li><a href="#_isr_implementation">7.2. ISR Implementation</a></li>
+<li><a href="#_without_vsync">7.3. Without VSync</a></li>
+</ul>
+</li>
+<li><a href="#_frame_queue_management">8. Frame Queue Management</a>
+<ul class="sectlevel2">
+<li><a href="#_queue_behavior">8.1. Queue Behavior</a></li>
+<li><a href="#_queue_size_recommendations">8.2. Queue Size Recommendations</a></li>
+</ul>
+</li>
+<li><a href="#_performance_optimization">9. Performance Optimization</a>
+<ul class="sectlevel2">
+<li><a href="#_task_priority">9.1. Task Priority</a></li>
+<li><a href="#_core_affinity">9.2. Core Affinity</a></li>
+<li><a href="#_iram_placement">9.3. IRAM Placement</a></li>
+</ul>
+</li>
+<li><a href="#_watchdog_integration">10. Watchdog Integration</a></li>
+<li><a href="#_telemetry_support">11. Telemetry Support</a></li>
+<li><a href="#_usage_example">12. Usage Example</a>
+<ul class="sectlevel2">
+<li><a href="#_complete_capture_setup">12.1. Complete Capture Setup</a></li>
+<li><a href="#_monitoring_performance">12.2. Monitoring Performance</a></li>
+</ul>
+</li>
+<li><a href="#_troubleshooting">13. Troubleshooting</a>
+<ul class="sectlevel2">
+<li><a href="#_high_sync_errors">13.1. High Sync Errors</a></li>
+<li><a href="#_missed_frames">13.2. Missed Frames</a></li>
+<li><a href="#_memory_issues">13.3. Memory Issues</a></li>
+</ul>
+</li>
+<li><a href="#_see_also">14. See Also</a></li>
+<li><a href="#_license">15. License</a></li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="_overview"><a class="anchor" href="#_overview"></a><a class="link" href="#_overview">1. Overview</a></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The <code>lepton_capture</code> module implements the frame capture task and synchronization logic for the Lepton thermal camera. It handles continuous frame acquisition, error recovery, and frame buffer management.</p>
+</div>
+<div class="sect2">
+<h3 id="_key_features"><a class="anchor" href="#_key_features"></a><a class="link" href="#_key_features">1.1. Key Features</a></h3>
+<div class="ulist">
+<ul>
+<li>
+<p>FreeRTOS task-based frame capture</p>
+</li>
+<li>
+<p>Optional VSync interrupt synchronization</p>
+</li>
+<li>
+<p>Automatic sync error recovery</p>
+</li>
+<li>
+<p>Frame buffer queue management</p>
+</li>
+<li>
+<p>Telemetry data extraction</p>
+</li>
+<li>
+<p>Watchdog integration</p>
+</li>
+<li>
+<p>Configurable task parameters</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_architecture"><a class="anchor" href="#_architecture"></a><a class="link" href="#_architecture">2. Architecture</a></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The capture system uses a dedicated FreeRTOS task that continuously:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Waits for VSync interrupt (optional)</p>
+</li>
+<li>
+<p>Captures frames via VoSPI</p>
+</li>
+<li>
+<p>Handles synchronization errors</p>
+</li>
+<li>
+<p>Queues frame buffers for processing</p>
+</li>
+<li>
+<p>Manages multiple frame buffers</p>
+</li>
+</ol>
+</div>
+<div class="sect2">
+<h3 id="_frame_buffer_flow"><a class="anchor" href="#_frame_buffer_flow"></a><a class="link" href="#_frame_buffer_flow">2.1. Frame Buffer Flow</a></h3>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code>VSync IRQ → Capture Task → VoSPI Transfer → Frame Buffer → Queue → Application</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_configuration"><a class="anchor" href="#_configuration"></a><a class="link" href="#_configuration">3. Configuration</a></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The module can be configured via Kconfig options:</p>
+</div>
+<div class="sect2">
+<h3 id="_task_configuration"><a class="anchor" href="#_task_configuration"></a><a class="link" href="#_task_configuration">3.1. Task Configuration</a></h3>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 40%;">
+<col style="width: 40%;">
+<col style="width: 20%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Option</th>
+<th class="tableblock halign-left valign-top">Description</th>
+<th class="tableblock halign-left valign-top">Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>CONFIG_LEPTON_CAPTURE_TASK_STACK</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Stack size in bytes</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">4096</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>CONFIG_LEPTON_CAPTURE_TASK_PRIORITY</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">FreeRTOS task priority</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">16</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>CONFIG_LEPTON_CAPTURE_TASK_CORE</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">CPU core affinity (0 or 1)</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">1</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>CONFIG_LEPTON_CAPTURE_TASK_CORE_AFFINITY</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Enable core pinning</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Defined</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="_vsync_configuration"><a class="anchor" href="#_vsync_configuration"></a><a class="link" href="#_vsync_configuration">3.2. VSync Configuration</a></h3>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 40%;">
+<col style="width: 40%;">
+<col style="width: 20%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Option</th>
+<th class="tableblock halign-left valign-top">Description</th>
+<th class="tableblock halign-left valign-top">Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>CONFIG_LEPTON_GPIO_USE_VSYNC</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Enable VSync interrupt</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Enabled</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>CONFIG_LEPTON_VSYNC_PLACE_IRAM</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Place ISR in IRAM for faster execution</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Enabled</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_api_functions"><a class="anchor" href="#_api_functions"></a><a class="link" href="#_api_functions">4. API Functions</a></h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_lepton_startcapture"><a class="anchor" href="#_lepton_startcapture"></a><a class="link" href="#_lepton_startcapture">4.1. Lepton_StartCapture</a></h3>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="c"><span class="n">Lepton_Error_t</span> <span class="nf">Lepton_StartCapture</span><span class="p">(</span>
+    <span class="n">Lepton_t</span> <span class="o">*</span><span class="n">p_Device</span><span class="p">,</span>
+    <span class="n">QueueHandle_t</span> <span class="n">p_Queue</span>
+<span class="p">);</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Start the frame capture task.</p>
+</div>
+<div class="paragraph">
+<p><strong>Parameters:</strong></p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>p_Device</code>: Pointer to Lepton device instance</p>
+</li>
+<li>
+<p><code>p_Queue</code>: FreeRTOS queue handle to receive frame buffers</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p><strong>Returns:</strong></p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>LEPTON_ERR_OK</code>: Success</p>
+</li>
+<li>
+<p><code>LEPTON_ERR_INVALID_ARG</code>: Invalid parameters</p>
+</li>
+<li>
+<p><code>LEPTON_ERR_NO_MEM</code>: Task or ISR creation failed</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p><strong>Initialization Steps:</strong></p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Create capture task</p>
+</li>
+<li>
+<p>Register VSync interrupt handler (if enabled)</p>
+</li>
+<li>
+<p>Start VoSPI capture</p>
+</li>
+<li>
+<p>Mark device as capturing</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p><strong>Example:</strong></p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="c"><span class="c1">// Create queue for 3 frames</span>
+<span class="n">QueueHandle_t</span> <span class="n">frame_queue</span> <span class="o">=</span> <span class="n">xQueueCreate</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">Lepton_FrameBuffer_t</span><span class="p">));</span>
+
+<span class="k">if</span> <span class="p">(</span><span class="n">Lepton_StartCapture</span><span class="p">(</span><span class="o">&amp;</span><span class="n">device</span><span class="p">,</span> <span class="n">frame_queue</span><span class="p">)</span> <span class="o">!=</span> <span class="n">LEPTON_ERR_OK</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">ESP_LOGE</span><span class="p">(</span><span class="n">TAG</span><span class="p">,</span> <span class="s">"Failed to start capture"</span><span class="p">);</span>
+<span class="p">}</span></code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_lepton_stopcapture"><a class="anchor" href="#_lepton_stopcapture"></a><a class="link" href="#_lepton_stopcapture">4.2. Lepton_StopCapture</a></h3>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="c"><span class="n">Lepton_Error_t</span> <span class="nf">Lepton_StopCapture</span><span class="p">(</span><span class="n">Lepton_t</span> <span class="o">*</span><span class="n">p_Device</span><span class="p">);</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Stop frame capture and clean up resources.</p>
+</div>
+<div class="paragraph">
+<p><strong>Cleanup Steps:</strong></p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Signal task to stop</p>
+</li>
+<li>
+<p>Remove VSync interrupt handler</p>
+</li>
+<li>
+<p>Stop VoSPI transfer</p>
+</li>
+<li>
+<p>Delete capture task</p>
+</li>
+<li>
+<p>Clear capturing flag</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p><strong>Example:</strong></p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="c"><span class="n">Lepton_StopCapture</span><span class="p">(</span><span class="o">&amp;</span><span class="n">device</span><span class="p">);</span>
+<span class="n">vQueueDelete</span><span class="p">(</span><span class="n">frame_queue</span><span class="p">);</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_frame_buffer_structure"><a class="anchor" href="#_frame_buffer_structure"></a><a class="link" href="#_frame_buffer_structure">5. Frame Buffer Structure</a></h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_lepton_framebuffer_t"><a class="anchor" href="#_lepton_framebuffer_t"></a><a class="link" href="#_lepton_framebuffer_t">5.1. Lepton_FrameBuffer_t</a></h3>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="c"><span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
+    <span class="kt">uint16_t</span> <span class="o">*</span><span class="n">Image_Buffer</span><span class="p">;</span>         <span class="c1">// Pointer to thermal image data</span>
+    <span class="kt">uint8_t</span> <span class="o">*</span><span class="n">Telemetry_Buffer</span><span class="p">;</span>      <span class="c1">// Pointer to telemetry (or NULL)</span>
+    <span class="kt">uint16_t</span> <span class="n">Width</span><span class="p">;</span>                 <span class="c1">// Image width (160)</span>
+    <span class="kt">uint16_t</span> <span class="n">Height</span><span class="p">;</span>                <span class="c1">// Image height (120)</span>
+    <span class="kt">uint8_t</span> <span class="n">BytesPerPixel</span><span class="p">;</span>          <span class="c1">// Bytes per pixel (2 for RAW14)</span>
+<span class="p">}</span> <span class="n">Lepton_FrameBuffer_t</span><span class="p">;</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><strong>Fields:</strong></p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>Image_Buffer</code>: Thermal image data (160x120 pixels, 14-bit values)</p>
+</li>
+<li>
+<p><code>Telemetry_Buffer</code>: Optional telemetry data (if enabled)</p>
+</li>
+<li>
+<p><code>Width</code>: Image width (always 160)</p>
+</li>
+<li>
+<p><code>Height</code>: Image height (120 for Lepton 3.x)</p>
+</li>
+<li>
+<p><code>BytesPerPixel</code>: Always 2 for RAW14 format</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_capture_task_implementation"><a class="anchor" href="#_capture_task_implementation"></a><a class="link" href="#_capture_task_implementation">6. Capture Task Implementation</a></h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_task_loop"><a class="anchor" href="#_task_loop"></a><a class="link" href="#_task_loop">6.1. Task Loop</a></h3>
+<div class="paragraph">
+<p>The capture task runs continuously:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="c"><span class="k">while</span> <span class="p">(</span><span class="n">Device</span><span class="o">-&gt;</span><span class="n">Internal</span><span class="p">.</span><span class="n">VoSPI</span><span class="p">.</span><span class="n">isCapturing</span><span class="p">)</span> <span class="p">{</span>
+    <span class="mi">1</span><span class="p">.</span> <span class="n">Wait</span> <span class="k">for</span> <span class="n">VSync</span> <span class="n">interrupt</span> <span class="p">(</span><span class="n">optional</span><span class="p">)</span>
+    <span class="mi">2</span><span class="p">.</span> <span class="n">Capture</span> <span class="n">frame</span> <span class="n">via</span> <span class="n">VoSPI</span>
+    <span class="mi">3</span><span class="p">.</span> <span class="n">Handle</span> <span class="n">errors</span><span class="o">:</span>
+       <span class="o">-</span> <span class="n">LEPTON_ERR_OK</span><span class="o">:</span> <span class="n">Queue</span> <span class="n">frame</span>
+       <span class="o">-</span> <span class="n">LEPTON_ERR_FAIL</span><span class="o">:</span> <span class="n">Log</span> <span class="n">sync</span> <span class="n">error</span><span class="p">,</span> <span class="n">retry</span>
+       <span class="o">-</span> <span class="n">LEPTON_ERR_NOT_FINISHED</span><span class="o">:</span> <span class="n">Resync</span> <span class="n">in</span> <span class="n">progress</span>
+    <span class="mi">4</span><span class="p">.</span> <span class="n">Reset</span> <span class="n">watchdog</span> <span class="n">timer</span>
+<span class="p">}</span></code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_error_recovery"><a class="anchor" href="#_error_recovery"></a><a class="link" href="#_error_recovery">6.2. Error Recovery</a></h3>
+<div class="paragraph">
+<p>The task implements intelligent error recovery:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Consecutive Errors</strong>: Tracks sync errors in a row</p>
+</li>
+<li>
+<p><strong>Backoff</strong>: Increases delay after errors to reduce CPU load</p>
+</li>
+<li>
+<p><strong>Logging</strong>: Throttled error logging (every 10th consecutive error)</p>
+</li>
+<li>
+<p><strong>Automatic Resync</strong>: VoSPI handles resynchronization</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_sync_error_example"><a class="anchor" href="#_sync_error_example"></a><a class="link" href="#_sync_error_example">6.3. Sync Error Example</a></h3>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="c"><span class="k">if</span> <span class="p">(</span><span class="n">Error</span> <span class="o">==</span> <span class="n">LEPTON_ERR_FAIL</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">Device</span><span class="o">-&gt;</span><span class="n">Internal</span><span class="p">.</span><span class="n">VoSPI</span><span class="p">.</span><span class="n">SyncErrors</span><span class="o">++</span><span class="p">;</span>
+    <span class="n">ConsecutiveErrors</span><span class="o">++</span><span class="p">;</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">ConsecutiveErrors</span> <span class="o">%</span> <span class="mi">10</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">ESP_LOGW</span><span class="p">(</span><span class="n">TAG</span><span class="p">,</span> <span class="s">"Sync error (consecutive: %d, total: %u)"</span><span class="p">,</span>
+                 <span class="n">ConsecutiveErrors</span><span class="p">,</span> <span class="n">Device</span><span class="o">-&gt;</span><span class="n">Internal</span><span class="p">.</span><span class="n">VoSPI</span><span class="p">.</span><span class="n">SyncErrors</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="n">vTaskDelay</span><span class="p">(</span><span class="mi">10</span> <span class="o">/</span> <span class="n">portTICK_PERIOD_MS</span><span class="p">);</span>  <span class="c1">// Backoff</span>
+<span class="p">}</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_vsync_interrupt"><a class="anchor" href="#_vsync_interrupt"></a><a class="link" href="#_vsync_interrupt">7. VSync Interrupt</a></h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_purpose"><a class="anchor" href="#_purpose"></a><a class="link" href="#_purpose">7.1. Purpose</a></h3>
+<div class="paragraph">
+<p>The VSync signal indicates the start of a new frame. Using it:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Reduces CPU usage</strong>: Task sleeps until frame is ready</p>
+</li>
+<li>
+<p><strong>Perfect timing</strong>: Captures frames at sensor rate (~8.6 Hz)</p>
+</li>
+<li>
+<p><strong>Eliminates polling</strong>: No busy-waiting</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_isr_implementation"><a class="anchor" href="#_isr_implementation"></a><a class="link" href="#_isr_implementation">7.2. ISR Implementation</a></h3>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="c"><span class="k">static</span> <span class="kt">void</span> <span class="n">IRAM_ATTR</span> <span class="nf">Lepton_VSync_ISR_Handler</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">p_Args</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="n">BaseType_t</span> <span class="n">xHigherPriorityTaskWoken</span> <span class="o">=</span> <span class="n">pdFALSE</span><span class="p">;</span>
+
+    <span class="c1">// Notify capture task</span>
+    <span class="n">xTaskNotifyFromISR</span><span class="p">((</span><span class="n">TaskHandle_t</span><span class="p">)</span><span class="n">p_Args</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">eNoAction</span><span class="p">,</span>
+                       <span class="o">&amp;</span><span class="n">xHigherPriorityTaskWoken</span><span class="p">);</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">xHigherPriorityTaskWoken</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">portYIELD_FROM_ISR</span><span class="p">();</span>
+    <span class="p">}</span>
+<span class="p">}</span></code></pre>
+</div>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+When <code>CONFIG_LEPTON_VSYNC_PLACE_IRAM</code> is enabled, the ISR is placed in IRAM for fastest response.
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_without_vsync"><a class="anchor" href="#_without_vsync"></a><a class="link" href="#_without_vsync">7.3. Without VSync</a></h3>
+<div class="paragraph">
+<p>If VSync is not available:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Task runs continuously without waiting</p>
+</li>
+<li>
+<p>Higher CPU usage due to polling</p>
+</li>
+<li>
+<p>May miss frame timing boundaries</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_frame_queue_management"><a class="anchor" href="#_frame_queue_management"></a><a class="link" href="#_frame_queue_management">8. Frame Queue Management</a></h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_queue_behavior"><a class="anchor" href="#_queue_behavior"></a><a class="link" href="#_queue_behavior">8.1. Queue Behavior</a></h3>
+<div class="paragraph">
+<p>The capture task uses <code>xQueueOverwrite()</code> for frame buffers:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Latest Frame</strong>: Always contains newest data</p>
+</li>
+<li>
+<p><strong>No Blocking</strong>: Overwrites old frame if not processed</p>
+</li>
+<li>
+<p><strong>Single Item Queue</strong>: Recommended queue size is 1</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p><strong>Alternative:</strong> Use larger queue with <code>xQueueSend()</code> if you need to process every frame.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_queue_size_recommendations"><a class="anchor" href="#_queue_size_recommendations"></a><a class="link" href="#_queue_size_recommendations">8.2. Queue Size Recommendations</a></h3>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 20%;">
+<col style="width: 40%;">
+<col style="width: 40%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Queue Size</th>
+<th class="tableblock halign-left valign-top">Use Case</th>
+<th class="tableblock halign-left valign-top">Behavior</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">1</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Real-time display</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Always shows latest frame</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">2-3</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Balanced performance</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Some buffering, low latency</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">5+</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Frame recording</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Process every frame, higher latency</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_performance_optimization"><a class="anchor" href="#_performance_optimization"></a><a class="link" href="#_performance_optimization">9. Performance Optimization</a></h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_task_priority"><a class="anchor" href="#_task_priority"></a><a class="link" href="#_task_priority">9.1. Task Priority</a></h3>
+<div class="paragraph">
+<p>Set priority based on application needs:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>High priority (15-20)</strong>: Real-time thermal imaging</p>
+</li>
+<li>
+<p><strong>Medium priority (10-14)</strong>: General applications</p>
+</li>
+<li>
+<p><strong>Low priority (&lt;10)</strong>: Background monitoring</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_core_affinity"><a class="anchor" href="#_core_affinity"></a><a class="link" href="#_core_affinity">9.2. Core Affinity</a></h3>
+<div class="paragraph">
+<p>Pin capture task to dedicated core:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="c"><span class="cp">#define CONFIG_LEPTON_CAPTURE_TASK_CORE 1  // Use core 1</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Benefits:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Reduces cache thrashing</p>
+</li>
+<li>
+<p>Predictable timing</p>
+</li>
+<li>
+<p>Leaves core 0 for other tasks</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_iram_placement"><a class="anchor" href="#_iram_placement"></a><a class="link" href="#_iram_placement">9.3. IRAM Placement</a></h3>
+<div class="paragraph">
+<p>Enable IRAM for VSync ISR:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="c"><span class="cp">#define CONFIG_LEPTON_VSYNC_PLACE_IRAM  // Place in IRAM</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Trade-offs:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Faster ISR</strong>: No flash cache access</p>
+</li>
+<li>
+<p><strong>Higher IRAM usage</strong>: Uses precious IRAM space</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_watchdog_integration"><a class="anchor" href="#_watchdog_integration"></a><a class="link" href="#_watchdog_integration">10. Watchdog Integration</a></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The capture task integrates with ESP-IDF watchdog:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="c"><span class="n">esp_task_wdt_add</span><span class="p">(</span><span class="nb">NULL</span><span class="p">);</span>  <span class="c1">// Add current task</span>
+
+<span class="k">while</span> <span class="p">(</span><span class="n">capturing</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">esp_task_wdt_reset</span><span class="p">();</span>  <span class="c1">// Reset watchdog every loop</span>
+    <span class="c1">// ... capture frame ...</span>
+<span class="p">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This prevents watchdog timeout during normal operation.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_telemetry_support"><a class="anchor" href="#_telemetry_support"></a><a class="link" href="#_telemetry_support">11. Telemetry Support</a></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>When telemetry is enabled, the capture module:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Allocates telemetry buffer</p>
+</li>
+<li>
+<p>Extracts telemetry lines from VoSPI stream</p>
+</li>
+<li>
+<p>Provides telemetry pointer in frame buffer</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p><strong>Accessing Telemetry:</strong></p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="c"><span class="n">Lepton_FrameBuffer_t</span> <span class="n">frame</span><span class="p">;</span>
+<span class="n">xQueueReceive</span><span class="p">(</span><span class="n">queue</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">frame</span><span class="p">,</span> <span class="n">portMAX_DELAY</span><span class="p">);</span>
+
+<span class="k">if</span> <span class="p">(</span><span class="n">frame</span><span class="p">.</span><span class="n">Telemetry_Buffer</span> <span class="o">!=</span> <span class="nb">NULL</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">// Parse telemetry data</span>
+    <span class="c1">// Format: 4 lines × 160 words</span>
+<span class="p">}</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_usage_example"><a class="anchor" href="#_usage_example"></a><a class="link" href="#_usage_example">12. Usage Example</a></h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_complete_capture_setup"><a class="anchor" href="#_complete_capture_setup"></a><a class="link" href="#_complete_capture_setup">12.1. Complete Capture Setup</a></h3>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="c"><span class="cp">#include</span> <span class="cpf">"lepton.h"</span><span class="cp">
+</span>
+<span class="k">static</span> <span class="n">Lepton_t</span> <span class="n">lepton</span><span class="p">;</span>
+<span class="k">static</span> <span class="n">QueueHandle_t</span> <span class="n">frame_queue</span><span class="p">;</span>
+
+<span class="kt">void</span> <span class="nf">capture_task</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">arg</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">Lepton_FrameBuffer_t</span> <span class="n">frame</span><span class="p">;</span>
+
+    <span class="k">while</span> <span class="p">(</span><span class="nb">true</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">xQueueReceive</span><span class="p">(</span><span class="n">frame_queue</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">frame</span><span class="p">,</span> <span class="n">portMAX_DELAY</span><span class="p">))</span> <span class="p">{</span>
+            <span class="n">ESP_LOGI</span><span class="p">(</span><span class="n">TAG</span><span class="p">,</span> <span class="s">"Frame: %dx%d, %d bytes/pixel"</span><span class="p">,</span>
+                     <span class="n">frame</span><span class="p">.</span><span class="n">Width</span><span class="p">,</span> <span class="n">frame</span><span class="p">.</span><span class="n">Height</span><span class="p">,</span> <span class="n">frame</span><span class="p">.</span><span class="n">BytesPerPixel</span><span class="p">);</span>
+
+            <span class="c1">// Process frame.Image_Buffer here</span>
+            <span class="c1">// 160x120 pixels, 14-bit per pixel</span>
+
+            <span class="c1">// Optional: Check telemetry</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">frame</span><span class="p">.</span><span class="n">Telemetry_Buffer</span> <span class="o">!=</span> <span class="nb">NULL</span><span class="p">)</span> <span class="p">{</span>
+                <span class="c1">// Parse telemetry</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">app_main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">// Initialize Lepton</span>
+    <span class="n">Lepton_Conf_t</span> <span class="n">config</span> <span class="o">=</span> <span class="p">{</span> <span class="cm">/* ... */</span> <span class="p">};</span>
+    <span class="n">Lepton_Init</span><span class="p">(</span><span class="o">&amp;</span><span class="n">lepton</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">config</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+
+    <span class="c1">// Create queue (size 1 for real-time)</span>
+    <span class="n">frame_queue</span> <span class="o">=</span> <span class="n">xQueueCreate</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">Lepton_FrameBuffer_t</span><span class="p">));</span>
+
+    <span class="c1">// Start capture</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">Lepton_StartCapture</span><span class="p">(</span><span class="o">&amp;</span><span class="n">lepton</span><span class="p">,</span> <span class="n">frame_queue</span><span class="p">)</span> <span class="o">!=</span> <span class="n">LEPTON_ERR_OK</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">ESP_LOGE</span><span class="p">(</span><span class="n">TAG</span><span class="p">,</span> <span class="s">"Capture failed"</span><span class="p">);</span>
+        <span class="k">return</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="c1">// Create processing task</span>
+    <span class="n">xTaskCreatePinnedToCore</span><span class="p">(</span><span class="n">capture_task</span><span class="p">,</span> <span class="s">"capture"</span><span class="p">,</span> <span class="mi">4096</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+<span class="p">}</span></code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_monitoring_performance"><a class="anchor" href="#_monitoring_performance"></a><a class="link" href="#_monitoring_performance">12.2. Monitoring Performance</a></h3>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="c"><span class="kt">void</span> <span class="nf">print_stats</span><span class="p">(</span><span class="n">Lepton_t</span> <span class="o">*</span><span class="n">device</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kt">int32_t</span> <span class="n">frames</span> <span class="o">=</span> <span class="n">Lepton_GetFrameCounter</span><span class="p">(</span><span class="n">device</span><span class="p">);</span>
+    <span class="kt">int32_t</span> <span class="n">errors</span> <span class="o">=</span> <span class="n">Lepton_GetSyncErrors</span><span class="p">(</span><span class="n">device</span><span class="p">);</span>
+
+    <span class="kt">float</span> <span class="n">error_rate</span> <span class="o">=</span> <span class="p">(</span><span class="n">errors</span> <span class="o">*</span> <span class="mi">100</span><span class="p">.</span><span class="mi">0</span><span class="n">f</span><span class="p">)</span> <span class="o">/</span> <span class="n">frames</span><span class="p">;</span>
+
+    <span class="n">ESP_LOGI</span><span class="p">(</span><span class="n">TAG</span><span class="p">,</span> <span class="s">"Frames: %d, Errors: %d (%.2f%%)"</span><span class="p">,</span>
+             <span class="n">frames</span><span class="p">,</span> <span class="n">errors</span><span class="p">,</span> <span class="n">error_rate</span><span class="p">);</span>
+<span class="p">}</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_troubleshooting"><a class="anchor" href="#_troubleshooting"></a><a class="link" href="#_troubleshooting">13. Troubleshooting</a></h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_high_sync_errors"><a class="anchor" href="#_high_sync_errors"></a><a class="link" href="#_high_sync_errors">13.1. High Sync Errors</a></h3>
+<div class="paragraph">
+<p><strong>Symptoms:</strong> Many <code>LEPTON_ERR_FAIL</code> errors</p>
+</div>
+<div class="paragraph">
+<p><strong>Causes:</strong></p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Poor SPI connections</p>
+</li>
+<li>
+<p>Electrical noise</p>
+</li>
+<li>
+<p>Clock speed too high</p>
+</li>
+<li>
+<p>Inadequate power supply</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p><strong>Solutions:</strong></p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Check wiring and shielding</p>
+</li>
+<li>
+<p>Reduce SPI clock speed</p>
+</li>
+<li>
+<p>Add decoupling capacitors</p>
+</li>
+<li>
+<p>Use shorter cables</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_missed_frames"><a class="anchor" href="#_missed_frames"></a><a class="link" href="#_missed_frames">13.2. Missed Frames</a></h3>
+<div class="paragraph">
+<p><strong>Symptoms:</strong> Frame counter increases slowly</p>
+</div>
+<div class="paragraph">
+<p><strong>Causes:</strong></p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Processing too slow</p>
+</li>
+<li>
+<p>VSync not connected</p>
+</li>
+<li>
+<p>Task priority too low</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p><strong>Solutions:</strong></p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Increase task priority</p>
+</li>
+<li>
+<p>Connect VSync pin</p>
+</li>
+<li>
+<p>Optimize processing code</p>
+</li>
+<li>
+<p>Use larger queue</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_memory_issues"><a class="anchor" href="#_memory_issues"></a><a class="link" href="#_memory_issues">13.3. Memory Issues</a></h3>
+<div class="paragraph">
+<p><strong>Symptoms:</strong> <code>LEPTON_ERR_NO_MEM</code> on start</p>
+</div>
+<div class="paragraph">
+<p><strong>Causes:</strong></p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Insufficient heap memory</p>
+</li>
+<li>
+<p>Too many frame buffers</p>
+</li>
+<li>
+<p>Stack overflow</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p><strong>Solutions:</strong></p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Reduce <code>CONFIG_LEPTON_VOSPI_FRAME_BUFFERS</code></p>
+</li>
+<li>
+<p>Increase heap size</p>
+</li>
+<li>
+<p>Use PSRAM for buffers</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_see_also"><a class="anchor" href="#_see_also"></a><a class="link" href="#_see_also">14. See Also</a></h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p><a href="lepton.html">Main Driver</a> - Initialization and configuration</p>
+</li>
+<li>
+<p><a href="vospi.html">VoSPI</a> - Low-level SPI communication</p>
+</li>
+<li>
+<p><a href="lepton_cci.html">CCI Commands</a> - Telemetry control</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_license"><a class="anchor" href="#_license"></a><a class="link" href="#_license">15. License</a></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Copyright &#169; Daniel Kampert, 2026</p>
+</div>
+<div class="paragraph">
+<p>This program is free software under GNU GPL v3.0.</p>
+</div>
+<div class="paragraph">
+<p>Website: <a href="https://www.kampis-elektroecke.de" class="bare">https://www.kampis-elektroecke.de</a></p>
+</div>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Version 1.0.0<br>
+Last updated 2026-04-21 11:02:24 UTC
+</div>
+</div>
+</body>
+</html>
