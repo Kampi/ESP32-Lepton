@@ -38,6 +38,10 @@ jobs:
 
     - name: Build AsciiDoc Documentation
       run: |
+        # Extract version from idf_component.yml
+        COMPONENT_VERSION=$(grep '^version:' idf_component.yml | sed 's/version: *"\(.*\)"/\1/')
+        echo "Component version: ${COMPONENT_VERSION}"
+
         cd docs
         mkdir -p public/pdf
         
@@ -50,13 +54,13 @@ jobs:
             
             # Generate HTML (index.adoc wird zu overview.html umbenannt)
             if [ "$base_name" = "index" ]; then
-              asciidoctor "$adoc_file" -o "public/overview.html"
+              asciidoctor -a revnumber="${COMPONENT_VERSION}" "$adoc_file" -o "public/overview.html"
             else
-              asciidoctor "$adoc_file" -o "public/${base_name}.html"
+              asciidoctor -a revnumber="${COMPONENT_VERSION}" "$adoc_file" -o "public/${base_name}.html"
             fi
             
             # Generate PDF
-            asciidoctor-pdf "$adoc_file" -o "public/pdf/${base_name}.pdf"
+            asciidoctor-pdf -a revnumber="${COMPONENT_VERSION}" "$adoc_file" -o "public/pdf/${base_name}.pdf"
           fi
         done
         
@@ -235,7 +239,7 @@ jobs:
             <p><strong>ESP32-Lepton Component</strong> - FLIR Lepton Thermal Imaging Driver</p>
             <p>Copyright © Daniel Kampert, 2026 | GNU General Public License v3.0</p>
             <p>Website: <a href="https://www.kampis-elektroecke.de">www.kampis-elektroecke.de</a></p>
-            <p>Generated: $(date -u +'%Y-%m-%d %H:%M:%S UTC')</p>
+            <p>Version ${COMPONENT_VERSION} | Generated: $(date -u +'%Y-%m-%d %H:%M:%S UTC')</p>
           </div>
         </body>
         </html>

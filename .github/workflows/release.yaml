@@ -24,24 +24,24 @@ jobs:
         run: |
           # Get the merged branch name from the merge commit
           COMMIT_MSG=$(git log -1 --pretty=%B)
-          echo "Commit message: $COMMIT_MSG"
+          echo "Commit message: ${COMMIT_MSG}"
           
           # Extract branch name from merge commit message (e.g., "Merge branch '0.0.2_Dev'")
-          BRANCH_NAME=$(echo "$COMMIT_MSG" | sed -n "s/.*Merge.*branch '\([^']*\)'.*/\1/p")
+          BRANCH_NAME=$(echo "${COMMIT_MSG}" | sed -n "s/.*Merge.*branch '\([^']*\)'.*/\1/p")
           
-          if [ -z "$BRANCH_NAME" ]; then
+          if [ -z "${BRANCH_NAME}" ]; then
             # Try alternative merge message format
-            BRANCH_NAME=$(echo "$COMMIT_MSG" | sed -n "s/.*Merge.*branch \"\([^\"]*\)\".*/\1/p")
+            BRANCH_NAME=$(echo "${COMMIT_MSG}" | sed -n "s/.*Merge.*branch \"\([^\"]*\)\".*/\1/p")
           fi
           
-          if [ -z "$BRANCH_NAME" ]; then
+          if [ -z "${BRANCH_NAME}" ]; then
             # No merge commit found, try to get version from commit message directly
             echo "::warning::No merge commit detected, trying to extract version from commit message"
-            VERSION=$(echo "$COMMIT_MSG" | grep -oE '[0-9]+\.[0-9]+\.[0-9]+(_[A-Za-z0-9]+)?' | head -n 1)
+            VERSION=$(echo "${COMMIT_MSG}" | grep -oE '[0-9]+\.[0-9]+\.[0-9]+(_[A-Za-z0-9]+)?' | head -n 1)
           else
-            echo "Merged branch: $BRANCH_NAME"
+            echo "Merged branch: ${BRANCH_NAME}"
             # Extract version from branch name (format: X.Y.Z_Dev or X.Y.Z)
-            VERSION=$(echo "$BRANCH_NAME" | grep -oE '[0-9]+\.[0-9]+\.[0-9]+(_[A-Za-z0-9]+)?' | head -n 1)
+            VERSION=$(echo "${BRANCH_NAME}" | grep -oE '[0-9]+\.[0-9]+\.[0-9]+(_[A-Za-z0-9]+)?' | head -n 1)
           fi
           
           if [ -z "$VERSION" ]; then
@@ -50,10 +50,10 @@ jobs:
           fi
           
           # Remove _Dev suffix for the release version
-          RELEASE_VERSION=$(echo "$VERSION" | sed 's/_Dev$//')
+          RELEASE_VERSION=$(echo "${VERSION}" | sed 's/_Dev$//')
           
-          echo "VERSION=$RELEASE_VERSION" >> $GITHUB_ENV
-          echo "Extracted version: $RELEASE_VERSION"
+          echo "VERSION=${RELEASE_VERSION}" >> ${GITHUB_ENV}
+          echo "Extracted version: ${RELEASE_VERSION}"
 
       - name: Update CHANGELOG.md
         run: |
@@ -61,10 +61,10 @@ jobs:
           REPO_URL="https://github.com/${{ github.repository }}"
           
           # Get the previous release tag (exclude current version if it exists)
-          PREVIOUS_TAG=$(git tag --sort=-v:refname | grep -E '^[0-9]+\.[0-9]+\.[0-9]+' | grep -v "^$VERSION$" | head -n 1 || true)
+          PREVIOUS_TAG=$(git tag --sort=-v:refname | grep -E '^[0-9]+\.[0-9]+\.[0-9]+' | grep -v "^${VERSION}$" | head -n 1 || true)
           
           # Replace [Unreleased] with [VERSION] - DATE
-          sed -i "s/^## \[Unreleased\]/## [$VERSION] - $(date +'%Y-%m-%d')/" CHANGELOG.md
+          sed -i "s/^## \[Unreleased\]/## [${VERSION}] - $(date +'%Y-%m-%d')/" CHANGELOG.md
           
           # Add new Unreleased section at the top
           sed -i '/^# CHANGELOG/a\\n## [Unreleased]' CHANGELOG.md
@@ -72,26 +72,26 @@ jobs:
           # Update or add version comparison links at the bottom of the file
           if grep -q "^\[Unreleased\]:" CHANGELOG.md; then
             # Update existing Unreleased link
-            sed -i "s|^\[Unreleased\]:.*|[Unreleased]: $REPO_URL/compare/$VERSION...HEAD|" CHANGELOG.md
+            sed -i "s|^\[Unreleased\]:.*|[Unreleased]: ${REPO_URL}/compare/${VERSION}...HEAD|" CHANGELOG.md
           else
             # Add Unreleased link
             echo "" >> CHANGELOG.md
-            echo "[Unreleased]: $REPO_URL/compare/$VERSION...HEAD" >> CHANGELOG.md
+            echo "[Unreleased]: ${REPO_URL}/compare/${VERSION}...HEAD" >> CHANGELOG.md
           fi
           
           # Add link for the new version
           if [ -n "$PREVIOUS_TAG" ]; then
             # Add comparison link between versions
-            echo "[$VERSION]: $REPO_URL/compare/$PREVIOUS_TAG...$VERSION" >> CHANGELOG.md
+            echo "[${VERSION}]: ${REPO_URL}/compare/$PREVIOUS_TAG...${VERSION}" >> CHANGELOG.md
           else
             # First release, link to the tag
-            echo "[$VERSION]: $REPO_URL/releases/tag/$VERSION" >> CHANGELOG.md
+            echo "[${VERSION}]: ${REPO_URL}/releases/tag/${VERSION}" >> CHANGELOG.md
           fi
 
       - name: Update CMakeLists.txt
         run: |
           # Split version into major, minor, and build
-          IFS='.' read -r MAJOR MINOR BUILD <<< "$VERSION"
+          IFS='.' read -r MAJOR MINOR BUILD <<< "${VERSION}"
           
           # Extract repository name and convert to uppercase with underscores
           REPO_NAME=$(echo "${{ github.repository }}" | cut -d'/' -f2 | tr '[:lower:]' '[:upper:]' | tr '-' '_')
@@ -99,20 +99,20 @@ jobs:
           # Check if version variables exist, if not add them before register_component()
           if ! grep -q "set(${REPO_NAME}_LIB_MAJOR" CMakeLists.txt; then
             # Add version variables before register_component()
-            sed -i "/register_component()/i # Library version\nset(${REPO_NAME}_LIB_MAJOR $MAJOR)\nset(${REPO_NAME}_LIB_MINOR $MINOR)\nset(${REPO_NAME}_LIB_BUILD $BUILD)\n" CMakeLists.txt
+            sed -i "/register_component()/i # Library version\nset(${REPO_NAME}_LIB_MAJOR ${MAJOR})\nset(${REPO_NAME}_LIB_MINOR ${MINOR})\nset(${REPO_NAME}_LIB_BUILD ${BUILD})\n" CMakeLists.txt
           else
             # Update existing version variables
-            sed -i -E "s/set\(${REPO_NAME}_LIB_MAJOR [0-9]+\)/set(${REPO_NAME}_LIB_MAJOR $MAJOR)/" CMakeLists.txt
-            sed -i -E "s/set\(${REPO_NAME}_LIB_MINOR [0-9]+\)/set(${REPO_NAME}_LIB_MINOR $MINOR)/" CMakeLists.txt
-            sed -i -E "s/set\(${REPO_NAME}_LIB_BUILD [0-9]+\)/set(${REPO_NAME}_LIB_BUILD $BUILD)/" CMakeLists.txt
+            sed -i -E "s/set\(${REPO_NAME}_LIB_MAJOR [0-9]+\)/set(${REPO_NAME}_LIB_MAJOR ${MAJOR})/" CMakeLists.txt
+            sed -i -E "s/set\(${REPO_NAME}_LIB_MINOR [0-9]+\)/set(${REPO_NAME}_LIB_MINOR ${MINOR})/" CMakeLists.txt
+            sed -i -E "s/set\(${REPO_NAME}_LIB_BUILD [0-9]+\)/set(${REPO_NAME}_LIB_BUILD ${BUILD})/" CMakeLists.txt
           fi
           
-          echo "Updated CMakeLists.txt with version $MAJOR.$MINOR.$BUILD for $REPO_NAME"
+          echo "Updated CMakeLists.txt with version ${MAJOR}.${MINOR}.${BUILD} for ${REPO_NAME}"
 
       - name: Update idf_component.yml
         run: |
           # Update version in idf_component.yml
-          sed -i "s/^version: .*/version: \"$VERSION\"/" idf_component.yml
+          sed -i "s/^version: .*/version: \"${VERSION}\"/" idf_component.yml
 
       - name: Commit and push changes
         run: |
@@ -122,18 +122,18 @@ jobs:
           if git diff --cached --quiet; then
             echo "No changes to commit"
           else
-            git commit -m "Release: Update to version $VERSION"
+            git commit -m "Release: Update to version ${VERSION}"
             git push origin ${{ github.ref_name }}
           fi
 
       - name: Create and push tag
         run: |
-          if git rev-parse "$VERSION" >/dev/null 2>&1; then
-            echo "Tag $VERSION already exists, skipping tag creation"
+          if git rev-parse "${VERSION}" >/dev/null 2>&1; then
+            echo "Tag ${VERSION} already exists, skipping tag creation"
           else
-            git tag -a "$VERSION" -m "Release $VERSION"
-            git push origin "$VERSION"
-            echo "Tag $VERSION created and pushed"
+            git tag -a "${VERSION}" -m "Release ${VERSION}"
+            git push origin "${VERSION}"
+            echo "Tag ${VERSION} created and pushed"
           fi
 
       - name: Wait for tag to be available
@@ -141,26 +141,26 @@ jobs:
           echo "Waiting for tag to be fully available..."
           sleep 5
           git fetch --tags
-          git tag -l "$VERSION"
+          git tag -l "${VERSION}"
 
       - name: Generate release notes
         run: |
           # Get the previous release tag
-          PREVIOUS_TAG=$(git tag --sort=-v:refname | grep -E '^[0-9]+\.[0-9]+\.[0-9]+' | grep -v "^$VERSION$" | head -n 1 || true)
+          PREVIOUS_TAG=$(git tag --sort=-v:refname | grep -E '^[0-9]+\.[0-9]+\.[0-9]+' | grep -v "^${VERSION}$" | head -n 1 || true)
           
           # Start building release notes
-          echo "# Release $VERSION" > RELEASE_NOTES.md
+          echo "# Release ${VERSION}" > RELEASE_NOTES.md
           echo "" >> RELEASE_NOTES.md
           
           # Extract the section for the current version from CHANGELOG.md
-          awk -v version="$VERSION" '
-            /^## \['"$VERSION"'\]/ { found=1; next }
+          awk -v version="${VERSION}" '
+            /^## \['"${VERSION}"'\]/ { found=1; next }
             /^## \[/ { if(found) exit }
             found { print }
           ' CHANGELOG.md >> RELEASE_NOTES.md
           
           # Add detailed changes section if previous tag exists
-          if [ -n "$PREVIOUS_TAG" ]; then
+          if [ -n "${PREVIOUS_TAG}" ]; then
             echo "" >> RELEASE_NOTES.md
             echo "---" >> RELEASE_NOTES.md
             echo "" >> RELEASE_NOTES.md
@@ -198,8 +198,8 @@ jobs:
           VERSION: ${{ env.VERSION }}
         run: |
           # Create release using GitHub CLI
-          gh release create "$VERSION" \
-            --title "Release $VERSION" \
+          gh release create "${VERSION}" \
+            --title "Release ${VERSION}" \
             --notes-file RELEASE_NOTES.md \
             --target ${{ github.ref_name }}
 

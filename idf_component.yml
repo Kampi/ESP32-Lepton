@@ -1,5 +1,5 @@
 version: "0.0.3"
-description: "ESP32 component for FLIR Lepton 3.5 Thermal Camera"
+description: "ESP32 component for FLIR Lepton 3.5 Thermal Camera."
 url: https://github.com/Kampi/ESP32-Lepton
 repository: https://github.com/Kampi/ESP32-Lepton
 license: "GPL-3.0"
