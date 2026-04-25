@@ -102,4 +102,48 @@ menu "ESP32-Lepton"
             hex "Lepton driver error base code definition"
             default 0xB000     
     endmenu
+
+    menu "Palettes"
+        config LEPTON_PALETTE_IRON
+            bool "Enable Iron palette"
+            default y
+            help
+                Enable the Iron (blue-red gradient) color palette.
+
+        config LEPTON_PALETTE_RAINBOW
+            bool "Enable Rainbow palette"
+            default y
+            help
+                Enable the Rainbow color palette.
+
+        config LEPTON_PALETTE_WHITEHOT
+            bool "Enable Whitehot palette"
+            default y
+            help
+                Enable the Whitehot (grayscale) color palette.
+
+        config LEPTON_PALETTE_BLACKHOT
+            bool "Enable Blackhot palette"
+            default y
+            help
+                Enable the Blackhot (inverted grayscale) color palette.
+
+        config LEPTON_PALETTE_AMBER
+            bool "Enable Amber palette"
+            default y
+            help
+                Enable the Amber (black to orange to white) color palette.
+
+        config LEPTON_PALETTE_ARCTIC
+            bool "Enable Arctic palette"
+            default y
+            help
+                Enable the Arctic (dark blue to cyan to white) color palette.
+
+        config LEPTON_PALETTE_LAVA
+            bool "Enable Lava palette"
+            default y
+            help
+                Enable the Lava (black to purple to red to yellow to white) color palette.
+    endmenu
 endmenu

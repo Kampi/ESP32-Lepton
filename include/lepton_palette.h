@@ -26,6 +26,7 @@
 
 #include <stdint.h>
 
+#ifdef CONFIG_LEPTON_PALETTE_IRON
 /** @brief Iron palette lookup table.
  */
 static const uint8_t Lepton_Palette_Iron[256][3] = {
@@ -62,7 +63,9 @@ static const uint8_t Lepton_Palette_Iron[256][3] = {
     { 255, 255, 255 }, { 255, 255, 255 }, { 255, 255, 255 }, { 255, 255, 255 }, { 255, 255, 255 }, { 255, 255, 255 }, { 255, 255, 255 }, { 255, 255, 255 },
     { 255, 255, 255 }, { 255, 255, 255 }, { 255, 255, 255 }, { 255, 255, 255 }, { 255, 255, 255 }, { 255, 255, 255 }, { 255, 255, 255 }, { 255, 255, 255 },
 };
+#endif /* CONFIG_LEPTON_PALETTE_IRON */
 
+#ifdef CONFIG_LEPTON_PALETTE_RAINBOW
 /** @brief Rainbow palette lookup table.
  */
 static const uint8_t Lepton_Palette_Rainbow[256][3] = {
@@ -99,7 +102,9 @@ static const uint8_t Lepton_Palette_Rainbow[256][3] = {
     { 255, 255, 222 }, { 255, 255, 226 }, { 255, 255, 230 }, { 255, 255, 234 }, { 255, 255, 238 }, { 255, 255, 242 }, { 255, 255, 246 }, { 255, 255, 250 },
     { 255, 255, 255 }, { 255, 255, 255 }, { 255, 255, 255 }, { 255, 255, 255 }, { 255, 255, 255 }, { 255, 255, 255 }, { 255, 255, 255 }, { 255, 255, 255 },
 };
+#endif /* CONFIG_LEPTON_PALETTE_RAINBOW */
 
+#ifdef CONFIG_LEPTON_PALETTE_WHITEHOT
 /** @brief Whitehot palette lookup table (grayscale: cold = black, hot = white).
  */
 static const uint8_t Lepton_Palette_Whitehot[256][3] = {
@@ -136,7 +141,9 @@ static const uint8_t Lepton_Palette_Whitehot[256][3] = {
     { 240, 240, 240 }, { 241, 241, 241 }, { 242, 242, 242 }, { 243, 243, 243 }, { 244, 244, 244 }, { 245, 245, 245 }, { 246, 246, 246 }, { 247, 247, 247 },
     { 248, 248, 248 }, { 249, 249, 249 }, { 250, 250, 250 }, { 251, 251, 251 }, { 252, 252, 252 }, { 253, 253, 253 }, { 254, 254, 254 }, { 255, 255, 255 },
 };
+#endif /* CONFIG_LEPTON_PALETTE_WHITEHOT */
 
+#ifdef CONFIG_LEPTON_PALETTE_BLACKHOT
 /** @brief Blackhot palette lookup table (inverted grayscale: cold = white, hot = black).
  */
 static const uint8_t Lepton_Palette_Blackhot[256][3] = {
@@ -173,7 +180,9 @@ static const uint8_t Lepton_Palette_Blackhot[256][3] = {
     {  15,  15,  15 }, {  14,  14,  14 }, {  13,  13,  13 }, {  12,  12,  12 }, {  11,  11,  11 }, {  10,  10,  10 }, {   9,   9,   9 }, {   8,   8,   8 },
     {   7,   7,   7 }, {   6,   6,   6 }, {   5,   5,   5 }, {   4,   4,   4 }, {   3,   3,   3 }, {   2,   2,   2 }, {   1,   1,   1 }, {   0,   0,   0 },
 };
+#endif /* CONFIG_LEPTON_PALETTE_BLACKHOT */
 
+#ifdef CONFIG_LEPTON_PALETTE_AMBER
 /** @brief Amber palette lookup table (black -> amber -> orange -> white).
  */
 static const uint8_t Lepton_Palette_Amber[256][3] = {
@@ -210,7 +219,9 @@ static const uint8_t Lepton_Palette_Amber[256][3] = {
     { 255, 255, 255 }, { 255, 255, 255 }, { 255, 255, 255 }, { 255, 255, 255 }, { 255, 255, 255 }, { 255, 255, 255 }, { 255, 255, 255 }, { 255, 255, 255 },
     { 255, 255, 255 }, { 255, 255, 255 }, { 255, 255, 255 }, { 255, 255, 255 }, { 255, 255, 255 }, { 255, 255, 255 }, { 255, 255, 255 }, { 255, 255, 255 },
 };
+#endif /* CONFIG_LEPTON_PALETTE_AMBER */
 
+#ifdef CONFIG_LEPTON_PALETTE_ARCTIC
 /** @brief Arctic palette lookup table (dark blue -> cyan -> white).
  */
 static const uint8_t Lepton_Palette_Arctic[256][3] = {
@@ -247,7 +258,9 @@ static const uint8_t Lepton_Palette_Arctic[256][3] = {
     { 255, 255, 255 }, { 255, 255, 255 }, { 255, 255, 255 }, { 255, 255, 255 }, { 255, 255, 255 }, { 255, 255, 255 }, { 255, 255, 255 }, { 255, 255, 255 },
     { 255, 255, 255 }, { 255, 255, 255 }, { 255, 255, 255 }, { 255, 255, 255 }, { 255, 255, 255 }, { 255, 255, 255 }, { 255, 255, 255 }, { 255, 255, 255 },
 };
+#endif /* CONFIG_LEPTON_PALETTE_ARCTIC */
 
+#ifdef CONFIG_LEPTON_PALETTE_LAVA
 /** @brief Lava palette lookup table (black -> blue -> purple -> red -> orange -> yellow -> white).
  */
 static const uint8_t Lepton_Palette_Lava[256][3] = {
@@ -284,6 +297,7 @@ static const uint8_t Lepton_Palette_Lava[256][3] = {
     { 255, 255, 255 }, { 255, 255, 255 }, { 255, 255, 255 }, { 255, 255, 255 }, { 255, 255, 255 }, { 255, 255, 255 }, { 255, 255, 255 }, { 255, 255, 255 },
     { 255, 255, 255 }, { 255, 255, 255 }, { 255, 255, 255 }, { 255, 255, 255 }, { 255, 255, 255 }, { 255, 255, 255 }, { 255, 255, 255 }, { 255, 255, 255 },
 };
+#endif /* CONFIG_LEPTON_PALETTE_LAVA */
 
 /** @brief Palette identifier enumeration.
  */
@@ -301,13 +315,53 @@ typedef enum {
 /** @brief Lookup table mapping palette identifiers to their respective LUT arrays.
  */
 static const uint8_t (*const Lepton_Palette_Table[LEPTON_PALETTE_COUNT])[3] = {
-    Lepton_Palette_Iron,
-    Lepton_Palette_Rainbow,
-    Lepton_Palette_Whitehot,
-    Lepton_Palette_Blackhot,
-    Lepton_Palette_Amber,
-    Lepton_Palette_Arctic,
-    Lepton_Palette_Lava,
+#ifdef CONFIG_LEPTON_PALETTE_IRON
+    [LEPTON_PALETTE_IRON] = Lepton_Palette_Iron,
+#endif
+#ifdef CONFIG_LEPTON_PALETTE_RAINBOW
+    [LEPTON_PALETTE_RAINBOW] = Lepton_Palette_Rainbow,
+#endif
+#ifdef CONFIG_LEPTON_PALETTE_WHITEHOT
+    [LEPTON_PALETTE_WHITEHOT] = Lepton_Palette_Whitehot,
+#endif
+#ifdef CONFIG_LEPTON_PALETTE_BLACKHOT
+    [LEPTON_PALETTE_BLACKHOT] = Lepton_Palette_Blackhot,
+#endif
+#ifdef CONFIG_LEPTON_PALETTE_AMBER
+    [LEPTON_PALETTE_AMBER] = Lepton_Palette_Amber,
+#endif
+#ifdef CONFIG_LEPTON_PALETTE_ARCTIC
+    [LEPTON_PALETTE_ARCTIC] = Lepton_Palette_Arctic,
+#endif
+#ifdef CONFIG_LEPTON_PALETTE_LAVA
+    [LEPTON_PALETTE_LAVA] = Lepton_Palette_Lava,
+#endif
+};
+
+/** @brief Lookup table mapping palette identifiers to their respective names.
+ */
+static const char* const Lepton_Palette_Names[LEPTON_PALETTE_COUNT] = {
+#ifdef CONFIG_LEPTON_PALETTE_IRON
+    [LEPTON_PALETTE_IRON] = "Iron",
+#endif
+#ifdef CONFIG_LEPTON_PALETTE_RAINBOW
+    [LEPTON_PALETTE_RAINBOW] = "Rainbow",
+#endif
+#ifdef CONFIG_LEPTON_PALETTE_WHITEHOT
+    [LEPTON_PALETTE_WHITEHOT] = "Whitehot",
+#endif
+#ifdef CONFIG_LEPTON_PALETTE_BLACKHOT
+    [LEPTON_PALETTE_BLACKHOT] = "Blackhot",
+#endif
+#ifdef CONFIG_LEPTON_PALETTE_AMBER
+    [LEPTON_PALETTE_AMBER] = "Amber",
+#endif
+#ifdef CONFIG_LEPTON_PALETTE_ARCTIC
+    [LEPTON_PALETTE_ARCTIC] = "Arctic",
+#endif
+#ifdef CONFIG_LEPTON_PALETTE_LAVA
+    [LEPTON_PALETTE_LAVA] = "Lava",
+#endif
 };
 
 #endif /* ESP32_LEPTON_PALETTE_H_ */
