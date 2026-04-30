@@ -29,9 +29,10 @@
 #include <freertos/task.h>
 #include <freertos/semphr.h>
 
+#include <dsps_sub.h>
+
 #include "lepton.h"
 #include "vospi.h"
-#include "dsps_sub.h"
 
 #include <sdkconfig.h>
 
@@ -184,8 +185,6 @@ Lepton_Error_t Lepton_StartCapture(Lepton_t *p_Device, QueueHandle_t p_Queue)
     p_Device->Internal.FrameQueue = p_Queue;
     p_Device->Internal.VoSPI.CurrentBuffer = 0;
     p_Device->Internal.VoSPI.IsCapturing = true;
-    p_Device->Internal.MinSmooth = 0;
-    p_Device->Internal.MaxSmooth = 16383;
 
     ESP_LOGD(TAG, "Creating capture task...");
 
@@ -336,20 +335,7 @@ bool Lepton_Raw14ToRGB(Lepton_t *p_Device, uint16_t *p_Input, uint8_t *p_Output,
         }
     }
 
-    /* Smooth min/max to reduce flicker */
-    if ((p_Device->Internal.MinSmooth == 0) && (p_Device->Internal.MaxSmooth == 16383)) {
-        /* First frame - initialize */
-        p_Device->Internal.MinSmooth = min;
-        p_Device->Internal.MaxSmooth = max;
-    } else {
-        /* Exponential moving average */
-        p_Device->Internal.MinSmooth = static_cast<uint16_t>(p_Device->Internal.SmoothFactor * p_Device->Internal.MinSmooth +
-                                                             (1.0f - p_Device->Internal.SmoothFactor) * min);
-        p_Device->Internal.MaxSmooth = static_cast<uint16_t>(p_Device->Internal.SmoothFactor * p_Device->Internal.MaxSmooth +
-                                                             (1.0f - p_Device->Internal.SmoothFactor) * max);
-    }
-
-    range = p_Device->Internal.MaxSmooth - p_Device->Internal.MinSmooth;
+    range = static_cast<uint32_t>(max - min);
 
     /* Avoid division by zero */
     if (range < 10) {
@@ -360,7 +346,7 @@ bool Lepton_Raw14ToRGB(Lepton_t *p_Device, uint16_t *p_Input, uint8_t *p_Output,
      *
      * Stage 1 – Subtraction  (dsps_sub_s16, resolved to dsps_sub_s16_aes3 on
      *             ESP32-S3 when CONFIG_DSP_OPTIMIZED=y):
-     *   Uses ee.vsubs.s16.ld.incp to subtract MinSmooth from 8 pixels per
+     *   Uses ee.vsubs.s16.ld.incp to subtract Min from 8 pixels per
      *   PIE-instruction cycle.  Input is reinterpreted as int16_t (safe:
      *   all RAW14 values fit in [0, 16383] < INT16_MAX).
      *   Processing is row-by-row so the per-row delta fits in a 320-byte
@@ -370,20 +356,20 @@ bool Lepton_Raw14ToRGB(Lepton_t *p_Device, uint16_t *p_Input, uint8_t *p_Output,
      *
      * Stage 2 – Multiply + clamp  (GCC u32x4_t, 4-wide PIE Q-registers):
      *   Fixed-point multiply (delta * InvRange) >> 16 with cap [0, 255].
-     *   Negative delta (pixel < MinSmooth) clamped to 0 during uint32 widen.
+     *   Negative delta (pixel < Min) clamped to 0 during uint32 widen.
      *
      * Palette LUT gather remains scalar (no SIMD gather for 3-byte entries).
      */
     uint32_t InvRange = (255U << 16) / range;
-    uint16_t MinSmooth = p_Device->Internal.MinSmooth;
+    uint16_t Min = static_cast<uint16_t>(min);
 
     /* 16-byte aligned stack buffers for aes3 SIMD alignment requirement */
-    int16_t MinSmoothRow[LEPTON_IMAGE_WIDTH] __attribute__((aligned(16)));
+    int16_t MinRow[LEPTON_IMAGE_WIDTH] __attribute__((aligned(16)));
     int16_t DeltaRow[LEPTON_IMAGE_WIDTH] __attribute__((aligned(16)));
 
     /* Fill constant-subtrahend row once */
     for (uint8_t k = 0; k < LEPTON_IMAGE_WIDTH; k++) {
-        MinSmoothRow[k] = static_cast<int16_t>(MinSmooth);
+        MinRow[k] = static_cast<int16_t>(Min);
     }
 
     const u32x4_t InvRange4 = {InvRange, InvRange, InvRange, InvRange};
@@ -398,8 +384,8 @@ bool Lepton_Raw14ToRGB(Lepton_t *p_Device, uint16_t *p_Input, uint8_t *p_Output,
         uint8_t *RowOut = p_Output + row * Width * 3U;
 
         /* Stage 1: vectorized subtract using dsps_sub_s16_aes3
-         * DeltaRow[k] = RowIn[k] - MinSmooth  (shift = 0, no scaling) */
-        dsps_sub_s16(RowIn, MinSmoothRow, DeltaRow, static_cast<int>(Width), 1, 1, 1, 0);
+         * DeltaRow[k] = RowIn[k] - Min  (shift = 0, no scaling) */
+        dsps_sub_s16(RowIn, MinRow, DeltaRow, static_cast<int>(Width), 1, 1, 1, 0);
 
         /* Stage 2: 4-wide PIE multiply+shift+clamp, then scalar palette gather */
         for (; (k + 4) <= static_cast<int>(Width); k += 4) {

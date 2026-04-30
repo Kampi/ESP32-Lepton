@@ -551,7 +551,14 @@ Lepton_Error_t CCI_Deinit(CCI_t *p_Interface)
 
 Lepton_Error_t CCI_RunFFC(CCI_t *p_Interface, Lepton_Result_t *p_Status)
 {
-    return CCI_Set(p_Interface, CCI_CMD_SYS_RUN_FFC, 0, NULL, p_Status);
+    /* FFC is a RUN-type command (command code LSBs = 0x02) with no data payload.
+     * CCI_Set() rejects Length == 0, so the RUN sequence must be issued directly:
+     * wait-busy → write DATA_LENGTH=0 → write COMMAND → wait-busy. */
+    LEPTON_ERROR_CHECK(CCI_WaitBusy(p_Interface, p_Status));
+    LEPTON_ERROR_CHECK(CCI_WriteRegister(p_Interface, CCI_REG_DATA_LENGTH, 0));
+    LEPTON_ERROR_CHECK(CCI_WriteRegister(p_Interface, CCI_REG_COMMAND, CCI_CMD_SYS_RUN_FFC));
+
+    return CCI_WaitBusy(p_Interface, p_Status);
 }
 
 Lepton_Error_t CCI_Set(CCI_t *p_Interface, uint16_t Command, uint16_t Length, const uint16_t *p_Buffer,

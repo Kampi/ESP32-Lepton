@@ -428,12 +428,6 @@ typedef struct {
                                                      NOTE: Managed by the device driver. */
         VoSPI_t VoSPI;                          /**< VoSPI device object used by the camera driver.
                                                      NOTE: Managed by the device driver. */
-        uint16_t MinSmooth;                     /**< Minimum smooth value for RGB conversion.
-                                                     NOTE: Managed by the device driver. */
-        uint16_t MaxSmooth;                     /**< Maximum smooth value for RGB conversion.
-                                                     NOTE: Managed by the device driver. */
-        const float SmoothFactor = 0.95f;       /**< Smoothing factor for min/max smoothing.
-                                                     NOTE: Managed by the device driver. */
     } Internal;
 } Lepton_t;
 

@@ -343,6 +343,22 @@ Lepton_Error_t Lepton_GetTLinearResolution(Lepton_t *p_Device, Lepton_TLinear_Re
  */
 Lepton_Error_t Lepton_FreezeVideo(Lepton_t *p_Device, bool Freeze, Lepton_Result_t *p_Status = NULL);
 
+/** @brief          Trigger a Flat-Field Correction (FFC) normalization on the camera.
+ *                  Sends the SYS Run FFC command via the CCI interface, causing the Lepton to
+ *                  perform an internal shutter-based flat-field correction. The camera briefly
+ *                  closes its shutter, captures a reference frame, and reopens the shutter.
+ *                  This operation takes approximately 23 ms; avoid calling it during
+ *                  latency-sensitive frame processing.
+ *  @note           FFC is also performed automatically by the camera based on its internal
+ *                  temperature drift detection. This function forces an immediate manual FFC.
+ *  @param p_Device Pointer to device instance
+ *  @param p_Status (Optional) Pointer to device status
+ *  @return         LEPTON_ERR_OK when successful
+ *                  LEPTON_ERR_INVALID_ARG if p_Device is NULL
+ *                  LEPTON_ERR_NOT_INITIALIZED if device is not initialized
+ */
+Lepton_Error_t Lepton_RunFFC(Lepton_t *p_Device, Lepton_Result_t *p_Status = NULL);
+
 /** @brief          Start the capture task to read new frames from the camera.
  *  @param p_Device Pointer to device instance
  *  @param p_Queue  Queue handle to receive frames from the capture task.
@@ -374,15 +390,6 @@ Lepton_Error_t Lepton_StopCapture(Lepton_t *p_Device);
  *                      LEPTON_ERR_NOT_SUPPORTED when device is not radiometric or TLinear is disabled
  */
 Lepton_Error_t Lepton_GetPixelTemperature(Lepton_t *p_Device, uint16_t PixelValue, float *p_Temperature);
-
-/** @brief          Run the Flat-Field Correction (FFC) process.
- *  @param p_Device Pointer to device instance
- *  @param p_Status (Optional) Pointer to device status
- *  @return         LEPTON_ERR_OK when successful
- *                  LEPTON_ERR_NOT_INITIALIZED when device is not initialized
- *                  LEPTON_ERR_NOT_SUPPORTED when FFC is not supported by the device
- */
-Lepton_Error_t Lepton_RunCCI(Lepton_t *p_Device, Lepton_Result_t *p_Status = NULL);
 
 /** @brief          Convert a RAW14 thermal frame to RGB using the specified color palette.
  *                  The function applies a pseudocolor palette mapping optimized for thermal imaging.

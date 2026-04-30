@@ -346,7 +346,7 @@ Lepton_Error_t Lepton_FreezeVideo(Lepton_t *p_Device, bool Freeze, Lepton_Result
     return LEPTON_ERR_OK;
 }
 
-Lepton_Error_t Lepton_RunCCI(Lepton_t *p_Device, Lepton_Result_t *p_Status)
+Lepton_Error_t Lepton_RunFFC(Lepton_t *p_Device, Lepton_Result_t *p_Status)
 {
     if (p_Device == NULL) {
         return LEPTON_ERR_INVALID_ARG;
