@@ -29,7 +29,7 @@
 #include <sdkconfig.h>
 
 #ifndef CONFIG_LEPTON_MISC_ERROR_BASE
-#define CONFIG_LEPTON_MISC_ERROR_BASE                       0xB000
+#define CONFIG_LEPTON_MISC_ERROR_BASE                           0xB000
 #endif
 
 typedef uint32_t Lepton_Error_t;

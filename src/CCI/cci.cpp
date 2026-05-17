@@ -178,14 +178,18 @@ static i2c_device_config_t _CCI_I2C_Config = {
 
 static const char *TAG                  = "cci";
 
-/** @brief              Wait as lon as the camera is busy.
- *  @param p_Interface  Pointer to CCI interface object
- *  @param p_Status     (Optional) Response error code from the camera
- *                      NOTE: This field can be set to NULL to ignore the status
- *  @param Timeout      (Optional) Timeout in milliseconds
- *  @return             LEPTON_ERR_OK when successful
+/** @brief                      Wait as lon as the camera is busy.
+ *  @param p_Interface          Pointer to CCI interface object
+ *  @param p_Status             (Optional) Response error code from the camera
+ *                              NOTE: This field can be set to NULL to ignore the status
+ *  @param Timeout              (Optional) Timeout in milliseconds
+ *                              NOTE: Default is 5000ms. Set to 0 for infinite timeout.
+ *  @param RetryOnCommsError    (Optional) Whether to retry on I2C communication errors (e.g. bus not ready)
+ *                              NOTE: Default is false. When false, the function will return immediately on an I
+ *  @return                     LEPTON_ERR_OK when successful
  */
-static Lepton_Error_t CCI_WaitBusy(CCI_t *p_Interface, Lepton_Result_t *p_Status = NULL, const uint32_t Timeout = 5000)
+static Lepton_Error_t CCI_WaitBusy(CCI_t *p_Interface, Lepton_Result_t *p_Status = NULL, const uint32_t Timeout = 5000,
+                                   bool RetryOnCommsError = false)
 {
     Lepton_Error_t Error;
     uint32_t TimeoutCounter = 0;
@@ -200,6 +204,8 @@ static Lepton_Error_t CCI_WaitBusy(CCI_t *p_Interface, Lepton_Result_t *p_Status
     Error = LEPTON_ERR_OK;
 
     do {
+        bool CommsError = false;
+
         _CCI_Buffer[0] = (CCI_REG_STATUS >> 8) & 0xFF;
         _CCI_Buffer[1] = CCI_REG_STATUS & 0xFF;
 
@@ -212,24 +218,33 @@ static Lepton_Error_t CCI_WaitBusy(CCI_t *p_Interface, Lepton_Result_t *p_Status
             uint8_t RegBuf[2] = { _CCI_Buffer[0], _CCI_Buffer[1] };
 
             if (p_Interface->I2C_WriteRead(&p_Interface->I2C_Dev_Handle, RegBuf, 2, _CCI_Buffer, 2) != 0) {
-                ESP_LOGE(TAG, "Failed to access Status register!");
-
-                xSemaphoreGive(p_Interface->Mutex);
-
-                return LEPTON_ERR_FAIL;
+                CommsError = true;
             }
         } else {
             if ((p_Interface->I2C_Write(&p_Interface->I2C_Dev_Handle, _CCI_Buffer, 2) != 0) ||
                 (p_Interface->I2C_Read(&p_Interface->I2C_Dev_Handle, _CCI_Buffer, 2) != 0)) {
-                ESP_LOGE(TAG, "Failed to access Status register!");
-
-                xSemaphoreGive(p_Interface->Mutex);
-
-                return LEPTON_ERR_FAIL;
+                CommsError = true;
             }
         }
 
         xSemaphoreGive(p_Interface->Mutex);
+
+        /* If the I2C transaction failed and retrying on comms errors is not enabled
+         * (i.e. we are in a normal command-completion wait where the bus must be up),
+         * return immediately so the caller receives a meaningful error. */
+        if (CommsError == true) {
+            if (RetryOnCommsError == false) {
+                ESP_LOGE(TAG, "Failed to access Status register!");
+                return LEPTON_ERR_FAIL;
+            }
+
+            /* Camera I2C not yet up — treat as still-busy and continue polling. */
+            ESP_LOGD(TAG, "Status register not yet accessible, retrying...");
+
+            /* Reset the buffer so the loop condition does not accidentally pass. */
+            _CCI_Buffer[0] = 0x00;
+            _CCI_Buffer[1] = 0x00;
+        }
 
         vTaskDelay(pdMS_TO_TICKS(10));
         TimeoutCounter += 10;
@@ -616,11 +631,18 @@ Lepton_Error_t CCI_Get(CCI_t *p_Interface, uint16_t Command, uint16_t Length, ui
 
 Lepton_Error_t CCI_WaitForBoot(CCI_t *p_Interface, Lepton_Result_t *p_Status)
 {
-    ESP_LOGD(TAG, "Waiting for camera boot (timeout: 10s)...");
-    LEPTON_ERROR_CHECK(CCI_WaitBusy(p_Interface, p_Status, 10000));
+    /* The Lepton 3.5 boot sequence includes an initial FFC (mechanical shutter click)
+     * and the BOOT_STATUS bit in the STATUS register is set only AFTER the FFC
+     * completes. This typically takes 10-15 s from reset deassertion. Use a 20 s
+     * timeout to accommodate worst-case cold-start scenarios.
+     * Pass RetryOnCommsError=true so that I2C failures in the first ~950 ms (while
+     * the Lepton's I2C interface is still coming up) are treated as "still booting"
+     * rather than hard errors. */
+    ESP_LOGD(TAG, "Waiting for camera boot (timeout: 20s)...");
+    LEPTON_ERROR_CHECK(CCI_WaitBusy(p_Interface, p_Status, 20000, true));
     LEPTON_ERROR_CHECK(CCI_WriteRegister(p_Interface, CCI_REG_COMMAND, CCI_CMD_SYS_RUN_PING));
 
-    return CCI_WaitBusy(p_Interface, p_Status, 10000);
+    return CCI_WaitBusy(p_Interface, p_Status, 5000);
 }
 
 Lepton_Error_t CCI_GetPartNumber(CCI_t *p_Interface, char *p_PartNumber, Lepton_Result_t *p_Status)
@@ -631,7 +653,7 @@ Lepton_Error_t CCI_GetPartNumber(CCI_t *p_Interface, char *p_PartNumber, Lepton_
         return LEPTON_ERR_INVALID_ARG;
     }
 
-    memset(p_PartNumber, '\0', 33);
+    __builtin_memset(p_PartNumber, '\0', 33);
 
     LEPTON_ERROR_CHECK(CCI_Get(p_Interface, CCI_CMD_OEM_GET_PART_NUM, 16, Buffer, p_Status));
 
@@ -665,7 +687,7 @@ Lepton_Error_t CCI_GetSerialNumber(CCI_t *p_Interface, uint8_t *p_Serial, Lepton
     }
 
     /* Initialize serial buffer */
-    memset(p_Serial, 0, 8);
+    __builtin_memset(p_Serial, 0, 8);
 
     Error = CCI_Get(p_Interface, CCI_CMD_SYS_GET_SERIALNUMBER, 4, Buffer, p_Status);
     if (Error != LEPTON_ERR_OK) {

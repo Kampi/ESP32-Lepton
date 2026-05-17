@@ -89,6 +89,8 @@ Lepton_Error_t Lepton_Init(Lepton_t *p_Device, const Lepton_Conf_t *const p_Init
     if (CCI_WaitForBoot(&p_Device->Internal.CCI, p_Status) != LEPTON_ERR_OK) {
         Error = LEPTON_ERR_TIMEOUT;
 
+        ESP_LOGI(TAG, "Timeout waiting for camera boot");
+
         goto Lepton_Init_Error_1;
     }
 
@@ -243,7 +245,7 @@ void Lepton_HardReset(Lepton_t *p_Device)
     }
 
     p_Device->Internal.Reset(true);
-    vTaskDelay(pdMS_TO_TICKS(1000));
+    vTaskDelay(pdMS_TO_TICKS(100));
     p_Device->Internal.Reset(false);
 }
 

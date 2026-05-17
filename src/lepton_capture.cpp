@@ -166,6 +166,12 @@ static void Lepton_CaptureTask(void *p_Args)
             vTaskDelay(pdMS_TO_TICKS(5));
         }
     }
+
+    /* The IsCapturing flag was cleared externally; self-terminate cleanly so that
+     * FreeRTOS does not abort with "Task should not return". */
+    ESP_LOGD(TAG, "Capture task stopping");
+    esp_task_wdt_delete(NULL);
+    vTaskDelete(NULL);
 }
 
 Lepton_Error_t Lepton_StartCapture(Lepton_t *p_Device, QueueHandle_t p_Queue)
@@ -244,8 +250,19 @@ Lepton_Error_t Lepton_StopCapture(Lepton_t *p_Device)
 
     p_Device->Internal.VoSPI.IsCapturing = false;
 
-    vTaskDelete(p_Device->Internal.CapHandle);
-    esp_task_wdt_delete(p_Device->Internal.CapHandle);
+    /* Wait for the capture task to self-terminate (max 500 ms, polling every 10 ms).
+     * The task exits its while-loop, calls vTaskDelete(NULL) on itself, and transitions
+     * to eDeleted before the idle task cleans up the TCB.  We must not call vTaskDelete
+     * on a handle that already self-deleted, as that is undefined behaviour. */
+    for (uint32_t i = 0; i < 50; i++) {
+        if (eTaskGetState(p_Device->Internal.CapHandle) == eDeleted) {
+            break;
+        }
+
+        vTaskDelay(pdMS_TO_TICKS(10));
+    }
+
+    p_Device->Internal.CapHandle = NULL;
 
     return LEPTON_ERR_OK;
 }
@@ -277,15 +294,12 @@ bool Lepton_Raw14ToRGB(Lepton_t *p_Device, uint16_t *p_Input, uint8_t *p_Output,
      * Each iteration processes 8 pixels in one set of SIMD operations,
      * reducing loop iterations by 8× compared to the scalar baseline.
      */
-    uint32_t PixelCount = static_cast<uint32_t>(Width) * Height;
-
     /* Initialise 8-lane SIMD accumulators */
-    u16x8_t vmin8 = {UINT16_MAX, UINT16_MAX, UINT16_MAX, UINT16_MAX,
-                     UINT16_MAX, UINT16_MAX, UINT16_MAX, UINT16_MAX
-                    };
-    u16x8_t vmax8 = {0, 0, 0, 0, 0, 0, 0, 0};
+    u16x8_t vmin8 = { UINT16_MAX, UINT16_MAX, UINT16_MAX, UINT16_MAX,
+                     UINT16_MAX, UINT16_MAX, UINT16_MAX, UINT16_MAX };
+    u16x8_t vmax8 = { 0, 0, 0, 0, 0, 0, 0, 0 };
 
-    for (uint32_t i = 0; (i + 8) <= PixelCount; i += 8) {
+    for (uint32_t i = 0; (i + 8) <= (static_cast<uint32_t>(Width) * Height); i += 8) {
         u16x8_t v;
 
         __builtin_memcpy(&v, p_Input + i, sizeof(u16x8_t)); /* unaligned Q-reg load */
@@ -373,22 +387,21 @@ bool Lepton_Raw14ToRGB(Lepton_t *p_Device, uint16_t *p_Input, uint8_t *p_Output,
     }
 
     const u32x4_t InvRange4 = {InvRange, InvRange, InvRange, InvRange};
-    const u32x4_t Cap255 = {255U, 255U, 255U, 255U};
+    const u32x4_t Cap255 = { 255U, 255U, 255U, 255U };
 
     /* Apply palette – one row per outer iteration */
-    for (uint32_t row = 0; row < Height; row++) {
-        int k = 0;
+    for (uint32_t Row = 0; Row < Height; Row++) {
         u32x4_t norm;
         uint32_t OutBase;
-        const int16_t *RowIn  = reinterpret_cast<const int16_t *>(p_Input + row * Width);
-        uint8_t *RowOut = p_Output + row * Width * 3U;
+        const int16_t *RowIn  = reinterpret_cast<const int16_t *>(p_Input + Row * Width);
+        uint8_t *RowOut = p_Output + Row * Width * 3U;
 
         /* Stage 1: vectorized subtract using dsps_sub_s16_aes3
          * DeltaRow[k] = RowIn[k] - Min  (shift = 0, no scaling) */
         dsps_sub_s16(RowIn, MinRow, DeltaRow, static_cast<int>(Width), 1, 1, 1, 0);
 
         /* Stage 2: 4-wide PIE multiply+shift+clamp, then scalar palette gather */
-        for (; (k + 4) <= static_cast<int>(Width); k += 4) {
+        for (int k = 0; (k + 4) <= static_cast<int>(Width); k += 4) {
             u32x4_t delta = {
                 DeltaRow[k + 0] > 0 ? static_cast<uint32_t>(DeltaRow[k + 0]) : 0U,
                 DeltaRow[k + 1] > 0 ? static_cast<uint32_t>(DeltaRow[k + 1]) : 0U,
@@ -415,7 +428,7 @@ bool Lepton_Raw14ToRGB(Lepton_t *p_Device, uint16_t *p_Input, uint8_t *p_Output,
         }
 
         /* Scalar tail (160 is divisible by 4 – this loop is never entered) */
-        for (; k < static_cast<int>(Width); k++) {
+        for (int k = 0; k < static_cast<int>(Width); k++) {
             uint32_t Delta = DeltaRow[k] > 0 ? static_cast<uint32_t>(DeltaRow[k]) : 0U;
             uint32_t normalized = (Delta * InvRange) >> 16;
 

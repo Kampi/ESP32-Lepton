@@ -51,7 +51,7 @@ static esp_err_t VoSPI_ReadPacket(VoSPI_t *p_Interface, uint16_t *p_Header, uint
      * RGB888: 4 bytes header/CRC + 240 bytes payload (80 pixels × 3 bytes) */
     PacketSize = 4 + (VOSPI_PIXELS_PER_PACKET * p_Interface->BytesPerPixel);
 
-    memset(&Trans, 0, sizeof(Trans));
+    __builtin_memset(&Trans, 0, sizeof(Trans));
     Trans.rxlength = PacketSize * 8;  /* Bits */
     Trans.rx_buffer = p_Interface->Packet;
     Trans.tx_buffer = NULL;
@@ -392,7 +392,7 @@ Lepton_Error_t VoSPI_CaptureImage(VoSPI_t *p_Interface, uint8_t *p_BufferIndex)
                      * Need to recalculate byte offset since Image_Buffer is uint16_t* but contains RGB bytes */
                     size_t ByteOffset = ((Segment - 1) * p_Interface->PacketsPerFrame + packet) * VOSPI_PIXELS_PER_PACKET * 3;
                     uint8_t *ImageBufferBytes = reinterpret_cast<uint8_t *>(p_Interface->Image_Buffer[p_Interface->CurrentBuffer]);
-                    memcpy(&ImageBufferBytes[ByteOffset], PacketData, VOSPI_PIXELS_PER_PACKET * 3);
+                    __builtin_memcpy(&ImageBufferBytes[ByteOffset], PacketData, VOSPI_PIXELS_PER_PACKET * 3);
                 } else {
                     /* RAW14 mode: Convert big-endian 16-bit values to little-endian.
                      * SIMD optimisation: process 2 pixels (4 bytes) per iteration using
@@ -406,7 +406,7 @@ Lepton_Error_t VoSPI_CaptureImage(VoSPI_t *p_Interface, uint8_t *p_BufferIndex)
                         uint32_t Val;
                         uint32_t Swapped;
 
-                        memcpy(&Val, Src, sizeof(uint32_t));
+                        __builtin_memcpy(&Val, Src, sizeof(uint32_t));
                         Swapped = __builtin_bswap32(Val);
                         Dest[OutIdx] = static_cast<uint16_t>(Swapped >> 16);
                         Dest[OutIdx + 1] = static_cast<uint16_t>(Swapped & 0xFFFFU);
