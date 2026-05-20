@@ -29,20 +29,20 @@
 
 /** @brief              Initialize the Lepton CCI.
  *  @param p_Interface  Pointer to CCI interface object
- *  @return             LEPTON_ERR_OK when successful
+ *  @return             @c LEPTON_ERR_OK when successful
  */
 Lepton_Error_t CCI_Init(CCI_t *p_Interface);
 
 /** @brief              Deinitialize the Lepton CCI.
  *  @param p_Interface  Pointer to CCI interface object
- *  @return             LEPTON_ERR_OK when successful
+ *  @return             @c LEPTON_ERR_OK when successful
  */
 Lepton_Error_t CCI_Deinit(CCI_t *p_Interface);
 
 /** @brief
  *  @param p_Interface  Pointer to CCI interface object
  *  @param p_Status     (Optional) Pointer to device status
- *  @return             LEPTON_ERR_OK when successful
+ *  @return             @c LEPTON_ERR_OK when successful
  */
 Lepton_Error_t CCI_RunFFC(CCI_t *p_Interface, Lepton_Result_t *p_Status = NULL);
 
@@ -52,7 +52,7 @@ Lepton_Error_t CCI_RunFFC(CCI_t *p_Interface, Lepton_Result_t *p_Status = NULL);
  *  @param Length       Data length (0 to 512 words (16 bit))
  *  @param p_Buffer     Pointer to data buffer
  *  @param p_Status     (Optional) Pointer to device status
- *  @return             LEPTON_ERR_OK when successful
+ *  @return             @c LEPTON_ERR_OK when successful
  */
 Lepton_Error_t CCI_Set(CCI_t *p_Interface, uint16_t Command, uint16_t Length, const uint16_t *p_Buffer,
                        Lepton_Result_t *p_Status = NULL);
@@ -63,7 +63,7 @@ Lepton_Error_t CCI_Set(CCI_t *p_Interface, uint16_t Command, uint16_t Length, co
  *  @param Length       Data length (0 to 512 words (16 bit))
  *  @param p_Buffer     Pointer to data buffer
  *  @param p_Status     (Optional) Pointer to device status
- *  @return             LEPTON_ERR_OK when successful
+ *  @return             @c LEPTON_ERR_OK when successful
  */
 Lepton_Error_t CCI_Get(CCI_t *p_Interface, uint16_t Command, uint16_t Length, uint16_t *p_Buffer,
                        Lepton_Result_t *p_Status = NULL);
@@ -71,7 +71,7 @@ Lepton_Error_t CCI_Get(CCI_t *p_Interface, uint16_t Command, uint16_t Length, ui
 /** @brief              Ping the camera and wait until the boot process has finished.
  *  @param p_Interface  Pointer to CCI interface object
  *  @param p_Status     (Optional) Pointer to device status
- *  @return             LEPTON_ERR_OK when successful
+ *  @return             @c LEPTON_ERR_OK when successful
  */
 Lepton_Error_t CCI_WaitForBoot(CCI_t *p_Interface, Lepton_Result_t *p_Status = NULL);
 
@@ -79,7 +79,7 @@ Lepton_Error_t CCI_WaitForBoot(CCI_t *p_Interface, Lepton_Result_t *p_Status = N
  *  @param p_Interface  Pointer to CCI interface object
  *  @param p_PartNumber Pointer to device part number
  *  @param p_Status     (Optional) Pointer to device status
- *  @return             LEPTON_ERR_OK when successful
+ *  @return             @c LEPTON_ERR_OK when successful
  */
 Lepton_Error_t CCI_GetPartNumber(CCI_t *p_Interface, char *p_PartNumber, Lepton_Result_t *p_Status = NULL);
 
@@ -87,7 +87,7 @@ Lepton_Error_t CCI_GetPartNumber(CCI_t *p_Interface, char *p_PartNumber, Lepton_
  *  @param p_Interface  Pointer to CCI interface object
  *  @param p_Version    Pointer to software version object
  *  @param p_Status     (Optional) Pointer to device status
- *  @return             LEPTON_ERR_OK when successful
+ *  @return             @c LEPTON_ERR_OK when successful
  */
 Lepton_Error_t CCI_GetSoftwareVersion(CCI_t *p_Interface, Lepton_Version_t *p_Version,
                                       Lepton_Result_t *p_Status = NULL);
@@ -96,7 +96,7 @@ Lepton_Error_t CCI_GetSoftwareVersion(CCI_t *p_Interface, Lepton_Version_t *p_Ve
  *  @param p_Interface  Pointer to CCI interface object
  *  @param p_Serial     Pointer to device serial number (8 bytes)
  *  @param p_Status     (Optional) Pointer to device status
- *  @return             LEPTON_ERR_OK when successful
+ *  @return             @c LEPTON_ERR_OK when successful
  */
 Lepton_Error_t CCI_GetSerialNumber(CCI_t *p_Interface, uint8_t *p_Serial, Lepton_Result_t *p_Status = NULL);
 
@@ -104,7 +104,7 @@ Lepton_Error_t CCI_GetSerialNumber(CCI_t *p_Interface, uint8_t *p_Serial, Lepton
  *  @param p_Interface  Pointer to CCI interface object
  *  @param p_Uptime     Pointer to camera uptime
  *  @param p_Status     (Optional) Pointer to device status
- *  @return             LEPTON_ERR_OK when successful
+ *  @return             @c LEPTON_ERR_OK when successful
  */
 Lepton_Error_t CCI_GetUptime(CCI_t *p_Interface, uint32_t *p_Uptime, Lepton_Result_t *p_Status = NULL);
 
@@ -112,7 +112,7 @@ Lepton_Error_t CCI_GetUptime(CCI_t *p_Interface, uint32_t *p_Uptime, Lepton_Resu
  *  @param p_Interface  Pointer to CCI interface object
  *  @param p_Temp       Pointer to temperature
  *  @param p_Status     (Optional) Pointer to device status
- *  @return             LEPTON_ERR_OK when successful
+ *  @return             @c LEPTON_ERR_OK when successful
  */
 Lepton_Error_t CCI_GetAuxTemp(CCI_t *p_Interface, uint16_t *p_Temp, Lepton_Result_t *p_Status = NULL);
 
@@ -120,14 +120,14 @@ Lepton_Error_t CCI_GetAuxTemp(CCI_t *p_Interface, uint16_t *p_Temp, Lepton_Resul
  *  @param p_Interface  Pointer to CCI interface object
  *  @param p_Temp       Pointer to temperature
  *  @param p_Status     (Optional) Pointer to device status
- *  @return             LEPTON_ERR_OK when successful
+ *  @return             @c LEPTON_ERR_OK when successful
  */
 Lepton_Error_t CCI_GetFPATemp(CCI_t *p_Interface, uint16_t *p_Temp, Lepton_Result_t *p_Status = NULL);
 
 /** @brief              Reboot the camera.
  *  @param p_Interface  Pointer to CCI interface object
  *  @param p_Status     (Optional) Pointer to device status
- *  @return             LEPTON_ERR_OK when successful
+ *  @return             @c LEPTON_ERR_OK when successful
  */
 Lepton_Error_t CCI_RebootCamera(CCI_t *p_Interface, Lepton_Result_t *p_Status = NULL);
 
@@ -135,7 +135,7 @@ Lepton_Error_t CCI_RebootCamera(CCI_t *p_Interface, Lepton_Result_t *p_Status = 
  *  @param p_Interface  Pointer to CCI interface object
  *  @param Mode         GPIO mode
  *  @param p_Status     (Optional) Pointer to device status
- *  @return             LEPTON_ERR_OK when successful
+ *  @return             @c LEPTON_ERR_OK when successful
  */
 Lepton_Error_t CCI_SetGPIOMode(CCI_t *p_Interface, Lepton_GPIO_t Mode, Lepton_Result_t *p_Status = NULL);
 
@@ -143,15 +143,15 @@ Lepton_Error_t CCI_SetGPIOMode(CCI_t *p_Interface, Lepton_GPIO_t Mode, Lepton_Re
  *  @param p_Interface  Pointer to CCI interface object
  *  @param p_Mode       Pointer to GPIO mode
  *  @param p_Status     (Optional) Pointer to device status
- *  @return             LEPTON_ERR_OK when successful
+ *  @return             @c LEPTON_ERR_OK when successful
  */
 Lepton_Error_t CCI_GetGPIOMode(CCI_t *p_Interface, Lepton_GPIO_t *p_Mode, Lepton_Result_t *p_Status = NULL);
 
-/** @brief              Enable / Disable radiometry.
+/** @brief              @p Enable / Disable radiometry.
  *  @param p_Interface  Pointer to CCI interface object
  *  @param Enable       Enable / Disable
  *  @param p_Status     (Optional) Pointer to device status
- *  @return             LEPTON_ERR_OK when successful
+ *  @return             @c LEPTON_ERR_OK when successful
  */
 Lepton_Error_t CCI_SetRadiometry(CCI_t *p_Interface, bool Enable, Lepton_Result_t *p_Status = NULL);
 
@@ -159,7 +159,7 @@ Lepton_Error_t CCI_SetRadiometry(CCI_t *p_Interface, bool Enable, Lepton_Result_
  *  @param p_Interface  Pointer to CCI interface object
  *  @param p_Enable     Pointer to state
  *  @param p_Status     (Optional) Pointer to device status
- *  @return             LEPTON_ERR_OK when successful
+ *  @return             @c LEPTON_ERR_OK when successful
  */
 Lepton_Error_t CCI_GetRadiometry(CCI_t *p_Interface, bool *p_Enable, Lepton_Result_t *p_Status = NULL);
 
@@ -167,7 +167,7 @@ Lepton_Error_t CCI_GetRadiometry(CCI_t *p_Interface, bool *p_Enable, Lepton_Resu
  *  @param p_Interface  Pointer to CCI interface object
  *  @param Enable       Enable / Disable
  *  @param p_Status     (Optional) Pointer to device status
- *  @return             LEPTON_ERR_OK when successful
+ *  @return             @c LEPTON_ERR_OK when successful
  */
 Lepton_Error_t CCI_SetAGCEnabled(CCI_t *p_Interface, bool Enable, Lepton_Result_t *p_Status = NULL);
 
@@ -175,7 +175,7 @@ Lepton_Error_t CCI_SetAGCEnabled(CCI_t *p_Interface, bool Enable, Lepton_Result_
  *  @param p_Interface  Pointer to CCI interface object
  *  @param p_Enable     Pointer to state
  *  @param p_Status     (Optional) Pointer to device status
- *  @return             LEPTON_ERR_OK when successful
+ *  @return             @c LEPTON_ERR_OK when successful
  */
 Lepton_Error_t CCI_GetAGCEnabled(CCI_t *p_Interface, bool *p_Enable, Lepton_Result_t *p_Status = NULL);
 
@@ -183,7 +183,7 @@ Lepton_Error_t CCI_GetAGCEnabled(CCI_t *p_Interface, bool *p_Enable, Lepton_Resu
  *  @param p_Interface  Pointer to CCI interface object
  *  @param p_Enable     Pointer to state
  *  @param p_Status     (Optional) Pointer to device status
- *  @return             LEPTON_ERR_OK when successful
+ *  @return             @c LEPTON_ERR_OK when successful
  */
 Lepton_Error_t CCI_SetAGCCalc(CCI_t *p_Interface, bool Enable, Lepton_Result_t *p_Status = NULL);
 
@@ -191,15 +191,15 @@ Lepton_Error_t CCI_SetAGCCalc(CCI_t *p_Interface, bool Enable, Lepton_Result_t *
  *  @param p_Interface  Pointer to CCI interface object
  *  @param p_Enable     Pointer to state
  *  @param p_Status     (Optional) Pointer to device status
- *  @return             LEPTON_ERR_OK when successful
+ *  @return             @c LEPTON_ERR_OK when successful
  */
 Lepton_Error_t CCI_GetAGCCalc(CCI_t *p_Interface, bool *p_Enable, Lepton_Result_t *p_Status = NULL);
 
-/** @brief              Enable / Disable Radiometry T-Linear.
+/** @brief              @p Enable / Disable Radiometry T-Linear.
  *  @param p_Interface  Pointer to CCI interface object
  *  @param Enable       Enable / Disable
  *  @param p_Status     (Optional) Pointer to device status
- *  @return             LEPTON_ERR_OK when successful
+ *  @return             @c LEPTON_ERR_OK when successful
  */
 Lepton_Error_t CCI_SetTLinearEnabled(CCI_t *p_Interface, bool Enable, Lepton_Result_t *p_Status = NULL);
 
@@ -207,15 +207,15 @@ Lepton_Error_t CCI_SetTLinearEnabled(CCI_t *p_Interface, bool Enable, Lepton_Res
  *  @param p_Interface  Pointer to CCI interface object
  *  @param p_Enable     Pointer to state
  *  @param p_Status     (Optional) Pointer to device status
- *  @return             LEPTON_ERR_OK when successful
+ *  @return             @c LEPTON_ERR_OK when successful
  */
 Lepton_Error_t CCI_GetTLinearEnabled(CCI_t *p_Interface, bool *p_Enable, Lepton_Result_t *p_Status = NULL);
 
-/** @brief              Enable / Disable telemetry.
+/** @brief              @p Enable / Disable telemetry.
  *  @param p_Interface  Pointer to CCI interface object
  *  @param Enable       Enable / Disable
  *  @param p_Status     (Optional) Pointer to device status
- *  @return             LEPTON_ERR_OK when successful
+ *  @return             @c LEPTON_ERR_OK when successful
  */
 Lepton_Error_t CCI_SetTelemetry(CCI_t *p_Interface, bool Enable, Lepton_Result_t *p_Status = NULL);
 
@@ -223,7 +223,7 @@ Lepton_Error_t CCI_SetTelemetry(CCI_t *p_Interface, bool Enable, Lepton_Result_t
  *  @param p_Interface  Pointer to CCI interface object
  *  @param p_Enable     Pointer to state
  *  @param p_Status     (Optional) Pointer to device status
- *  @return             LEPTON_ERR_OK when successful
+ *  @return             @c LEPTON_ERR_OK when successful
  */
 Lepton_Error_t CCI_GetTelemetry(CCI_t *p_Interface, bool *p_Enable, Lepton_Result_t *p_Status = NULL);
 
@@ -231,7 +231,7 @@ Lepton_Error_t CCI_GetTelemetry(CCI_t *p_Interface, bool *p_Enable, Lepton_Resul
  *  @param p_Interface  Pointer to CCI interface object
  *  @param Position     Telemetry position
  *  @param p_Status     (Optional) Pointer to device status
- *  @return             LEPTON_ERR_OK when successful
+ *  @return             @c LEPTON_ERR_OK when successful
  */
 Lepton_Error_t CCI_SetTelemetryPosition(CCI_t *p_Interface, Lepton_TelemetryPos_t Position,
                                         Lepton_Result_t *p_Status = NULL);
@@ -240,16 +240,16 @@ Lepton_Error_t CCI_SetTelemetryPosition(CCI_t *p_Interface, Lepton_TelemetryPos_
  *  @param p_Interface  Pointer to CCI interface object
  *  @param p_Position   Pointer to telemetry position
  *  @param p_Status     (Optional) Pointer to device status
- *  @return             LEPTON_ERR_OK when successful
+ *  @return             @c LEPTON_ERR_OK when successful
  */
 Lepton_Error_t CCI_GetTelemetryPosition(CCI_t *p_Interface, Lepton_TelemetryPos_t *p_Position,
                                         Lepton_Result_t *p_Status = NULL);
 
-/** @brief              Enable / Disable Radiometry T-Linear Auto Res.
+/** @brief              @p Enable / Disable Radiometry T-Linear Auto Res.
  *  @param p_Interface  Pointer to CCI interface object
  *  @param Enable       Enable / Disable
  *  @param p_Status     (Optional) Pointer to device status
- *  @return             LEPTON_ERR_OK when successful
+ *  @return             @c LEPTON_ERR_OK when successful
  */
 Lepton_Error_t CCI_SetRadiometryTLinearAutoRes(CCI_t *p_Interface, bool Enable, Lepton_Result_t *p_Status = NULL);
 
@@ -257,7 +257,7 @@ Lepton_Error_t CCI_SetRadiometryTLinearAutoRes(CCI_t *p_Interface, bool Enable, 
  *  @param p_Interface  Pointer to CCI interface object
  *  @param p_Enable     Pointer to state
  *  @param p_Status     (Optional) Pointer to device status
- *  @return             LEPTON_ERR_OK when successful
+ *  @return             @c LEPTON_ERR_OK when successful
  */
 Lepton_Error_t CCI_GetRadiometryTLinearAutoRes(CCI_t *p_Interface, bool *p_Enable, Lepton_Result_t *p_Status = NULL);
 
@@ -265,7 +265,7 @@ Lepton_Error_t CCI_GetRadiometryTLinearAutoRes(CCI_t *p_Interface, bool *p_Enabl
  *  @param p_Interface  Pointer to CCI interface object
  *  @param Mode         Gain mode
  *  @param p_Status     (Optional) Pointer to device status
- *  @return             LEPTON_ERR_OK when successful
+ *  @return             @c LEPTON_ERR_OK when successful
  */
 Lepton_Error_t CCI_SetGainMode(CCI_t *p_Interface, Lepton_Gain_t Mode, Lepton_Result_t *p_Status = NULL);
 
@@ -273,7 +273,7 @@ Lepton_Error_t CCI_SetGainMode(CCI_t *p_Interface, Lepton_Gain_t Mode, Lepton_Re
  *  @param p_Interface  Pointer to CCI interface object
  *  @param p_Mode       Pointer to gain mode
  *  @param p_Status     (Optional) Pointer to device status
- *  @return             LEPTON_ERR_OK when successful
+ *  @return             @c LEPTON_ERR_OK when successful
  */
 Lepton_Error_t CCI_GetGainMode(CCI_t *p_Interface, Lepton_Gain_t *p_Mode, Lepton_Result_t *p_Status = NULL);
 
@@ -281,7 +281,7 @@ Lepton_Error_t CCI_GetGainMode(CCI_t *p_Interface, Lepton_Gain_t *p_Mode, Lepton
  *  @param p_Interface  Pointer to CCI interface object
  *  @param p_Params     Pointer to flux linear parameters
  *  @param p_Status     (Optional) Pointer to device status
- *  @return             LEPTON_ERR_OK when successful
+ *  @return             @c LEPTON_ERR_OK when successful
  */
 Lepton_Error_t CCI_SetRadiometryFluxLinearParams(CCI_t *p_Interface, Lepton_FluxLinearParams_t *p_Params,
                                                  Lepton_Result_t *p_Status = NULL);
@@ -290,7 +290,7 @@ Lepton_Error_t CCI_SetRadiometryFluxLinearParams(CCI_t *p_Interface, Lepton_Flux
  *  @param p_Interface  Pointer to CCI interface object
  *  @param p_Params     Pointer to flux linear parameters
  *  @param p_Status     (Optional) Pointer to device status
- *  @return             LEPTON_ERR_OK when successful
+ *  @return             @c LEPTON_ERR_OK when successful
  */
 Lepton_Error_t CCI_GetRadiometryFluxLinearParams(CCI_t *p_Interface, Lepton_FluxLinearParams_t *p_Params,
                                                  Lepton_Result_t *p_Status = NULL);
@@ -299,7 +299,7 @@ Lepton_Error_t CCI_GetRadiometryFluxLinearParams(CCI_t *p_Interface, Lepton_Flux
  *  @param p_Interface  Pointer to CCI interface object
  *  @param Format       Video format
  *  @param p_Status     (Optional) Pointer to device status
- *  @return             LEPTON_ERR_OK when successful
+ *  @return             @c LEPTON_ERR_OK when successful
  */
 Lepton_Error_t CCI_SetVideoFormat(CCI_t *p_Interface, Lepton_VideoFormat_t Format, Lepton_Result_t *p_Status = NULL);
 
@@ -307,7 +307,7 @@ Lepton_Error_t CCI_SetVideoFormat(CCI_t *p_Interface, Lepton_VideoFormat_t Forma
  *  @param p_Interface  Pointer to CCI interface object
  *  @param p_Format     Pointer to video format
  *  @param p_Status     (Optional) Pointer to device status
- *  @return             LEPTON_ERR_OK when successful
+ *  @return             @c LEPTON_ERR_OK when successful
  */
 Lepton_Error_t CCI_GetVideoFormat(CCI_t *p_Interface, Lepton_VideoFormat_t *p_Format, Lepton_Result_t *p_Status = NULL);
 
@@ -315,7 +315,7 @@ Lepton_Error_t CCI_GetVideoFormat(CCI_t *p_Interface, Lepton_VideoFormat_t *p_Fo
  *  @param p_Interface  Pointer to CCI interface object
  *  @param Position     Shutter position
  *  @param p_Status     (Optional) Pointer to device status
- *  @return             LEPTON_ERR_OK when successful
+ *  @return             @c LEPTON_ERR_OK when successful
  */
 Lepton_Error_t CCI_SetShutterPosition(CCI_t *p_Interface, Lepton_ShutterPos_t Position,
                                       Lepton_Result_t *p_Status = NULL);
@@ -324,7 +324,7 @@ Lepton_Error_t CCI_SetShutterPosition(CCI_t *p_Interface, Lepton_ShutterPos_t Po
  *  @param p_Interface  Pointer to CCI interface object
  *  @param p_Position   Pointer to shutter position
  *  @param p_Status     (Optional) Pointer to device status
- *  @return             LEPTON_ERR_OK when successful
+ *  @return             @c LEPTON_ERR_OK when successful
  */
 Lepton_Error_t CCI_GetShutterPosition(CCI_t *p_Interface, Lepton_ShutterPos_t *p_Position,
                                       Lepton_Result_t *p_Status = NULL);
@@ -333,9 +333,9 @@ Lepton_Error_t CCI_GetShutterPosition(CCI_t *p_Interface, Lepton_ShutterPos_t *p
  *  @param p_Interface  Pointer to CCI interface object
  *  @param Source       Video output source
  *  @param Constant     (Optional) Constant value
- *                      NOTE: Only used when Source is set to LEPTON_SOURCE_CONSTANT
+ *                      NOTE: Only used when @p Source is set to @c LEPTON_SOURCE_CONSTANT
  *  @param p_Status     (Optional) Pointer to device status
- *  @return             LEPTON_ERR_OK when successful
+ *  @return             @c LEPTON_ERR_OK when successful
  */
 Lepton_Error_t CCI_SetVideoSource(CCI_t *p_Interface, Lepton_VideoSource_t Source, uint16_t Constant = 0,
                                   Lepton_Result_t *p_Status = NULL);
@@ -344,7 +344,7 @@ Lepton_Error_t CCI_SetVideoSource(CCI_t *p_Interface, Lepton_VideoSource_t Sourc
  *  @param p_Interface  Pointer to CCI interface object
  *  @param p_Source     Pointer to video output source
  *  @param p_Status     (Optional) Pointer to device status
- *  @return             LEPTON_ERR_OK when successful
+ *  @return             @c LEPTON_ERR_OK when successful
  */
 Lepton_Error_t CCI_GetVideoSource(CCI_t *p_Interface, Lepton_VideoSource_t *p_Source, Lepton_Result_t *p_Status = NULL);
 
@@ -352,7 +352,7 @@ Lepton_Error_t CCI_GetVideoSource(CCI_t *p_Interface, Lepton_VideoSource_t *p_So
  *  @param p_Interface  Pointer to CCI interface object
  *  @param p_ROI        Pointer to ROI object
  *  @param p_Status     (Optional) Pointer to device status
- *  @return             LEPTON_ERR_OK when successful
+ *  @return             @c LEPTON_ERR_OK when successful
  */
 Lepton_Error_t CCI_SetAGCROI(CCI_t *p_Interface, const Lepton_ROI_t *p_ROI, Lepton_Result_t *p_Status = NULL);
 
@@ -360,7 +360,7 @@ Lepton_Error_t CCI_SetAGCROI(CCI_t *p_Interface, const Lepton_ROI_t *p_ROI, Lept
  *  @param p_Interface  Pointer to CCI interface object
  *  @param p_ROI        Pointer to ROI object
  *  @param p_Status     (Optional) Pointer to device status
- *  @return             LEPTON_ERR_OK when successful
+ *  @return             @c LEPTON_ERR_OK when successful
  */
 Lepton_Error_t CCI_GetAGCROI(CCI_t *p_Interface, Lepton_ROI_t *p_ROI, Lepton_Result_t *p_Status = NULL);
 
@@ -368,7 +368,7 @@ Lepton_Error_t CCI_GetAGCROI(CCI_t *p_Interface, Lepton_ROI_t *p_ROI, Lepton_Res
  *  @param p_Interface  Pointer to CCI interface object
  *  @param p_ROI        Pointer to ROI object
  *  @param p_Status     (Optional) Pointer to device status
- *  @return             LEPTON_ERR_OK when successful
+ *  @return             @c LEPTON_ERR_OK when successful
  */
 Lepton_Error_t CCI_SetSceneROI(CCI_t *p_Interface, const Lepton_ROI_t *p_ROI, Lepton_Result_t *p_Status = NULL);
 
@@ -376,7 +376,7 @@ Lepton_Error_t CCI_SetSceneROI(CCI_t *p_Interface, const Lepton_ROI_t *p_ROI, Le
  *  @param p_Interface  Pointer to CCI interface object
  *  @param p_ROI        Pointer to ROI object
  *  @param p_Status     (Optional) Pointer to device status
- *  @return             LEPTON_ERR_OK when successful
+ *  @return             @c LEPTON_ERR_OK when successful
  */
 Lepton_Error_t CCI_GetSceneROI(CCI_t *p_Interface, Lepton_ROI_t *p_ROI, Lepton_Result_t *p_Status = NULL);
 
@@ -384,7 +384,7 @@ Lepton_Error_t CCI_GetSceneROI(CCI_t *p_Interface, Lepton_ROI_t *p_ROI, Lepton_R
  *  @param p_Interface  Pointer to CCI interface object
  *  @param p_ROI        Pointer to ROI object
  *  @param p_Status     (Optional) Pointer to device status
- *  @return             LEPTON_ERR_OK when successful
+ *  @return             @c LEPTON_ERR_OK when successful
  */
 Lepton_Error_t CCI_SetVideoFocusROI(CCI_t *p_Interface, const Lepton_ROI_t *p_ROI, Lepton_Result_t *p_Status = NULL);
 
@@ -392,7 +392,7 @@ Lepton_Error_t CCI_SetVideoFocusROI(CCI_t *p_Interface, const Lepton_ROI_t *p_RO
  *  @param p_Interface  Pointer to CCI interface object
  *  @param p_ROI        Pointer to ROI object
  *  @param p_Status     (Optional) Pointer to device status
- *  @return             LEPTON_ERR_OK when successful
+ *  @return             @c LEPTON_ERR_OK when successful
  */
 Lepton_Error_t CCI_GetVideoFocusROI(CCI_t *p_Interface, Lepton_ROI_t *p_ROI, Lepton_Result_t *p_Status = NULL);
 
@@ -400,7 +400,7 @@ Lepton_Error_t CCI_GetVideoFocusROI(CCI_t *p_Interface, Lepton_ROI_t *p_ROI, Lep
  *  @param p_Interface  Pointer to CCI interface object
  *  @param p_ROI        Pointer to ROI object
  *  @param p_Status     (Optional) Pointer to device status
- *  @return             LEPTON_ERR_OK when successful
+ *  @return             @c LEPTON_ERR_OK when successful
  */
 Lepton_Error_t CCI_SetSpotmeterROI(CCI_t *p_Interface, const Lepton_ROI_t *p_ROI, Lepton_Result_t *p_Status = NULL);
 
@@ -408,7 +408,7 @@ Lepton_Error_t CCI_SetSpotmeterROI(CCI_t *p_Interface, const Lepton_ROI_t *p_ROI
  *  @param p_Interface  Pointer to CCI interface object
  *  @param p_ROI        Pointer to ROI object
  *  @param p_Status     (Optional) Pointer to device status
- *  @return             LEPTON_ERR_OK when successful
+ *  @return             @c LEPTON_ERR_OK when successful
  */
 Lepton_Error_t CCI_GetSpotmeterROI(CCI_t *p_Interface, Lepton_ROI_t *p_ROI, Lepton_Result_t *p_Status = NULL);
 
@@ -416,7 +416,7 @@ Lepton_Error_t CCI_GetSpotmeterROI(CCI_t *p_Interface, Lepton_ROI_t *p_ROI, Lept
  *  @param p_Interface  Pointer to CCI interface object
  *  @param p_Spot       Pointer to spotmeter object
  *  @param p_Status     (Optional) Pointer to device status
- *  @return             LEPTON_ERR_OK when successful
+ *  @return             @c LEPTON_ERR_OK when successful
  */
 Lepton_Error_t CCI_GetSpotmeter(CCI_t *p_Interface, Lepton_Spotmeter_t *p_Spot, Lepton_Result_t *p_Status = NULL);
 
@@ -424,7 +424,7 @@ Lepton_Error_t CCI_GetSpotmeter(CCI_t *p_Interface, Lepton_Spotmeter_t *p_Spot, 
  *  @param p_Interface  Pointer to CCI interface object
  *  @param p_Statistics Pointer to scene statistics object
  *  @param p_Status     (Optional) Pointer to device status
- *  @return             LEPTON_ERR_OK when successful
+ *  @return             @c LEPTON_ERR_OK when successful
  */
 Lepton_Error_t CCI_GetSceneStatistics(CCI_t *p_Interface, Lepton_SceneStatistics_t *p_Statistics,
                                       Lepton_Result_t *p_Status = NULL);
@@ -433,7 +433,7 @@ Lepton_Error_t CCI_GetSceneStatistics(CCI_t *p_Interface, Lepton_SceneStatistics
  *  @param p_Interface  Pointer to CCI interface object
  *  @param Resolution   TLinear resolution
  *  @param p_Status     (Optional) Pointer to device status
- *  @return             LEPTON_ERR_OK when successful
+ *  @return             @c LEPTON_ERR_OK when successful
  */
 Lepton_Error_t CCI_SetTLinearResolution(CCI_t *p_Interface, Lepton_TLinear_Resolution_t Resolution,
                                         Lepton_Result_t *p_Status = NULL);
@@ -442,7 +442,7 @@ Lepton_Error_t CCI_SetTLinearResolution(CCI_t *p_Interface, Lepton_TLinear_Resol
  *  @param p_Interface  Pointer to CCI interface object
  *  @param p_Resolution Pointer to TLinear resolution object
  *  @param p_Status     (Optional) Pointer to device status
- *  @return             LEPTON_ERR_OK when successful
+ *  @return             @c LEPTON_ERR_OK when successful
  */
 Lepton_Error_t CCI_GetTLinearResolution(CCI_t *p_Interface, Lepton_TLinear_Resolution_t *p_Resolution,
                                         Lepton_Result_t *p_Status = NULL);
@@ -451,7 +451,7 @@ Lepton_Error_t CCI_GetTLinearResolution(CCI_t *p_Interface, Lepton_TLinear_Resol
  *  @param p_Interface  Pointer to CCI interface object
  *  @param Policy       AGC policy
  *  @param p_Status     (Optional) Pointer to device status
- *  @return             LEPTON_ERR_OK when successful
+ *  @return             @c LEPTON_ERR_OK when successful
  */
 Lepton_Error_t CCI_SetAGCPolicy(CCI_t *p_Interface, Lepton_AGC_Mode_t Policy, Lepton_Result_t *p_Status = NULL);
 
@@ -459,7 +459,7 @@ Lepton_Error_t CCI_SetAGCPolicy(CCI_t *p_Interface, Lepton_AGC_Mode_t Policy, Le
  *  @param p_Interface  Pointer to CCI interface object
  *  @param p_Policy     Pointer to AGC policy
  *  @param p_Status     (Optional) Pointer to device status
- *  @return             LEPTON_ERR_OK when successful
+ *  @return             @c LEPTON_ERR_OK when successful
  */
 Lepton_Error_t CCI_GetAGCPolicy(CCI_t *p_Interface, Lepton_AGC_Mode_t *p_Policy, Lepton_Result_t *p_Status = NULL);
 
@@ -467,7 +467,7 @@ Lepton_Error_t CCI_GetAGCPolicy(CCI_t *p_Interface, Lepton_AGC_Mode_t *p_Policy,
  *  @param p_Interface  Pointer to CCI interface object
  *  @param Freeze       Enable or disable video freeze
  *  @param p_Status     (Optional) Pointer to device status
- *  @return             LEPTON_ERR_OK when successful
+ *  @return             @c LEPTON_ERR_OK when successful
  */
 Lepton_Error_t CCI_SetVideoFreeze(CCI_t *p_Interface, bool Freeze, Lepton_Result_t *p_Status = NULL);
 
@@ -475,7 +475,7 @@ Lepton_Error_t CCI_SetVideoFreeze(CCI_t *p_Interface, bool Freeze, Lepton_Result
  *  @param p_Interface  Pointer to CCI interface object
  *  @param p_Freeze     Pointer to video freeze state
  *  @param p_Status     (Optional) Pointer to device status
- *  @return             LEPTON_ERR_OK when successful
+ *  @return             @c LEPTON_ERR_OK when successful
  */
 Lepton_Error_t CCI_GetVideoFreeze(CCI_t *p_Interface, bool *p_Freeze, Lepton_Result_t *p_Status = NULL);
 

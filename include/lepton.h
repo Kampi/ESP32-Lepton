@@ -51,7 +51,7 @@ extern "C" {
 /** @brief          Return the current video format.
  *  @param p_Device Pointer to device instance
  *  @param p_Format Pointer to output video format
- *  @return         LEPTON_ERR_OK when successful
+ *  @return         @c LEPTON_ERR_OK when successful
  */
 inline __attribute__((always_inline)) Lepton_Error_t Lepton_GetVideoFormat(Lepton_t *p_Device,
                                                                            Lepton_VideoFormat_t *p_Format)
@@ -65,8 +65,8 @@ inline __attribute__((always_inline)) Lepton_Error_t Lepton_GetVideoFormat(Lepto
     return LEPTON_ERR_OK;
 }
 
-/** @brief          Convert a temperature from Kelvin (in Lepton format) into degree Celsius.
- *                  The Lepton sensor returns temperature values in centi-Kelvin (Kelvin * 100).
+/** @brief          Convert a temperature from @p Kelvin (in Lepton format) into degree Celsius.
+ *                  The Lepton sensor returns temperature values in centi-@p Kelvin (@p Kelvin * 100).
  *  @param Kelvin   Temperature in Lepton format (centi-Kelvin, i.e., Kelvin * 100)
  *  @return         Temperature [Degree Celsius]
  */
@@ -77,7 +77,7 @@ inline __attribute__((always_inline)) float Lepton_KelvinToCelsius(uint32_t Kelv
 
 /** @brief          Return the capturing status.
  *  @param p_Device Pointer to device instance
- *  @return         true when the device is capturing images
+ *  @return         @c true when the device is capturing images
  */
 inline __attribute__((always_inline)) bool Lepton_isCapturing(Lepton_t *p_Device)
 {
@@ -127,7 +127,7 @@ inline __attribute__((always_inline)) std::string Lepton_LibVersion(void)
  *  @param p_Device Pointer to device instance
  *  @param p_Init   Pointer to initial device configuration
  *  @param p_Status (Optional) Pointer to device status
- *  @return         LEPTON_ERR_OK when successful
+ *  @return         @c LEPTON_ERR_OK when successful
  */
 Lepton_Error_t Lepton_Init(Lepton_t *p_Device, const Lepton_Conf_t *const p_Init, Lepton_Result_t *p_Status = NULL);
 
@@ -141,7 +141,7 @@ void Lepton_Deinit(Lepton_t *p_Device);
  */
 void Lepton_HardReset(Lepton_t *p_Device) __attribute__((weak));
 
-/** @brief          Enable / Disable the power-down mode of the camera.
+/** @brief          @p Enable / Disable the power-down mode of the camera.
  *  @param p_Device Pointer to device instance
  *  @param Enable   Enable / Disable
  */
@@ -152,15 +152,15 @@ void Lepton_EnablePowerDown(Lepton_t *p_Device, bool Enable) __attribute__((weak
  *  @param p_Device Pointer to device instance
  *  @param Format   Video format
  *  @param p_Status (Optional) Pointer to device status
- *  @return         LEPTON_ERR_OK when successful
+ *  @return         @c LEPTON_ERR_OK when successful
  */
 Lepton_Error_t Lepton_SetVideoFormat(Lepton_t *p_Device, Lepton_VideoFormat_t Format, Lepton_Result_t *p_Status = NULL);
 
-/** @brief          Enable / Disable the telemetry data in the video stream.
+/** @brief          @p Enable / Disable the telemetry data in the video stream.
  *  @param p_Device Pointer to device instance
  *  @param Enable   Enable / Disable
  *  @param p_Status (Optional) Pointer to device status
- *  @return         LEPTON_ERR_OK when successful
+ *  @return         @c LEPTON_ERR_OK when successful
  */
 Lepton_Error_t Lepton_EnableTelemetry(Lepton_t *p_Device, bool Enable, Lepton_Result_t *p_Status = NULL);
 
@@ -169,16 +169,16 @@ Lepton_Error_t Lepton_EnableTelemetry(Lepton_t *p_Device, bool Enable, Lepton_Re
  *  @param p_FPA    Pointer to FPA temperature in Lepton format (Kelvin * 0.01)
  *  @param p_AUX    Pointer to AUX temperature in Lepton format (Kelvin * 0.01)
  *  @param p_Status (Optional) Pointer to device status
- *  @return         LEPTON_ERR_OK when successful
+ *  @return         @c LEPTON_ERR_OK when successful
  */
 Lepton_Error_t Lepton_GetTemperature(Lepton_t *p_Device, uint16_t *p_FPA, uint16_t *p_AUX,
                                      Lepton_Result_t *p_Status = NULL);
 
-/** @brief          Enable / Disable the automatic gain control.
+/** @brief          @p Enable / Disable the automatic gain control.
  *  @param p_Device Pointer to device instance
  *  @param Enable   Enable / Disable
  *  @param p_Status (Optional) Pointer to device status
- *  @return         LEPTON_ERR_OK when successful
+ *  @return         @c LEPTON_ERR_OK when successful
  */
 Lepton_Error_t Lepton_EnableAGC(Lepton_t *p_Device, bool Enable, Lepton_Result_t *p_Status = NULL);
 
@@ -186,7 +186,7 @@ Lepton_Error_t Lepton_EnableAGC(Lepton_t *p_Device, bool Enable, Lepton_Result_t
  *  @param p_Device     Pointer to device instance
  *  @param Emissivity   Emissivity value (0-100)
  *  @param p_Status     (Optional) Pointer to device status
- *  @return             LEPTON_ERR_OK when successful
+ *  @return             @c LEPTON_ERR_OK when successful
  */
 Lepton_Error_t Lepton_SetEmissivity(Lepton_t *p_Device, Lepton_Emissivity_t Emissivity,
                                     Lepton_Result_t *p_Status = NULL);
@@ -195,7 +195,7 @@ Lepton_Error_t Lepton_SetEmissivity(Lepton_t *p_Device, Lepton_Emissivity_t Emis
  *  @param p_Device     Pointer to device instance
  *  @param p_Parameters Pointer to flux linear parameters object
  *  @param p_Status     (Optional) Pointer to device status
- *  @return             LEPTON_ERR_OK when successful
+ *  @return             @c LEPTON_ERR_OK when successful
  */
 Lepton_Error_t Lepton_GetFluxLinearParameters(Lepton_t *p_Device, Lepton_FluxLinearParams_t *p_Parameters,
                                               Lepton_Result_t *p_Status = NULL);
@@ -204,7 +204,7 @@ Lepton_Error_t Lepton_GetFluxLinearParameters(Lepton_t *p_Device, Lepton_FluxLin
  *  @param p_Device     Pointer to device instance
  *  @param p_Parameters Pointer to flux linear parameters object
  *  @param p_Status     (Optional) Pointer to device status
- *  @return             LEPTON_ERR_OK when successful
+ *  @return             @c LEPTON_ERR_OK when successful
  */
 Lepton_Error_t Lepton_SetFluxLinearParameters(Lepton_t *p_Device, Lepton_FluxLinearParams_t *p_Parameters,
                                               Lepton_Result_t *p_Status = NULL);
@@ -220,7 +220,7 @@ uint32_t Lepton_GetUptime(Lepton_t *p_Device, Lepton_Result_t *p_Status = NULL);
  *  @param p_Device     Pointer to device instance
  *  @param p_Statistics Pointer to scene statistics object
  *  @param p_Status     (Optional) Pointer to device status
- *  @return             LEPTON_ERR_OK when successful
+ *  @return             @c LEPTON_ERR_OK when successful
  */
 Lepton_Error_t Lepton_GetSceneStatistics(Lepton_t *p_Device, Lepton_SceneStatistics_t *p_Statistics,
                                          Lepton_Result_t *p_Status = NULL);
@@ -229,7 +229,7 @@ Lepton_Error_t Lepton_GetSceneStatistics(Lepton_t *p_Device, Lepton_SceneStatist
  *  @param p_Device Pointer to device instance
  *  @param p_Spot   Pointer to spotmeter object
  *  @param p_Status (Optional) Pointer to device status
- *  @return         LEPTON_ERR_OK when successful
+ *  @return         @c LEPTON_ERR_OK when successful
  */
 Lepton_Error_t Lepton_GetSpotmeter(Lepton_t *p_Device, Lepton_Spotmeter_t *p_Spot, Lepton_Result_t *p_Status = NULL);
 
@@ -237,7 +237,7 @@ Lepton_Error_t Lepton_GetSpotmeter(Lepton_t *p_Device, Lepton_Spotmeter_t *p_Spo
  *  @param p_Device Pointer to device instance
  *  @param p_ROI    Pointer to Lepton ROI object
  *  @param p_Status (Optional) Pointer to device status
- *  @return         LEPTON_ERR_OK when successful
+ *  @return         @c LEPTON_ERR_OK when successful
  */
 Lepton_Error_t Lepton_GetSpotmeterROI(Lepton_t *p_Device, Lepton_ROI_t *p_ROI, Lepton_Result_t *p_Status = NULL);
 
@@ -245,7 +245,7 @@ Lepton_Error_t Lepton_GetSpotmeterROI(Lepton_t *p_Device, Lepton_ROI_t *p_ROI, L
  *  @param p_Device Pointer to device instance
  *  @param p_ROI    Pointer to Lepton ROI object
  *  @param p_Status (Optional) Pointer to device status
- *  @return         LEPTON_ERR_OK when successful
+ *  @return         @c LEPTON_ERR_OK when successful
  */
 Lepton_Error_t Lepton_SetSpotmeterROI(Lepton_t *p_Device, Lepton_ROI_t *p_ROI, Lepton_Result_t *p_Status = NULL);
 
@@ -253,7 +253,7 @@ Lepton_Error_t Lepton_SetSpotmeterROI(Lepton_t *p_Device, Lepton_ROI_t *p_ROI, L
  *  @param p_Device Pointer to device instance
  *  @param p_ROI    Pointer to Lepton ROI object
  *  @param p_Status (Optional) Pointer to device status
- *  @return         LEPTON_ERR_OK when successful
+ *  @return         @c LEPTON_ERR_OK when successful
  */
 Lepton_Error_t Lepton_GetSceneROI(Lepton_t *p_Device, Lepton_ROI_t *p_ROI, Lepton_Result_t *p_Status = NULL);
 
@@ -261,7 +261,7 @@ Lepton_Error_t Lepton_GetSceneROI(Lepton_t *p_Device, Lepton_ROI_t *p_ROI, Lepto
  *  @param p_Device Pointer to device instance
  *  @param p_ROI    Pointer to Lepton ROI object
  *  @param p_Status (Optional) Pointer to device status
- *  @return         LEPTON_ERR_OK when successful
+ *  @return         @c LEPTON_ERR_OK when successful
  */
 Lepton_Error_t Lepton_SetSceneROI(Lepton_t *p_Device, Lepton_ROI_t *p_ROI, Lepton_Result_t *p_Status = NULL);
 
@@ -269,7 +269,7 @@ Lepton_Error_t Lepton_SetSceneROI(Lepton_t *p_Device, Lepton_ROI_t *p_ROI, Lepto
  *  @param p_Device Pointer to device instance
  *  @param p_ROI    Pointer to Lepton ROI object
  *  @param p_Status (Optional) Pointer to device status
- *  @return         LEPTON_ERR_OK when successful
+ *  @return         @c LEPTON_ERR_OK when successful
  */
 Lepton_Error_t Lepton_GetAGCROI(Lepton_t *p_Device, Lepton_ROI_t *p_ROI, Lepton_Result_t *p_Status = NULL);
 
@@ -277,7 +277,7 @@ Lepton_Error_t Lepton_GetAGCROI(Lepton_t *p_Device, Lepton_ROI_t *p_ROI, Lepton_
  *  @param p_Device Pointer to device instance
  *  @param p_ROI    Pointer to Lepton ROI object
  *  @param p_Status (Optional) Pointer to device status
- *  @return         LEPTON_ERR_OK when successful
+ *  @return         @c LEPTON_ERR_OK when successful
  */
 Lepton_Error_t Lepton_SetAGCROI(Lepton_t *p_Device, Lepton_ROI_t *p_ROI, Lepton_Result_t *p_Status = NULL);
 
@@ -285,7 +285,7 @@ Lepton_Error_t Lepton_SetAGCROI(Lepton_t *p_Device, Lepton_ROI_t *p_ROI, Lepton_
  *  @param p_Device Pointer to device instance
  *  @param p_ROI    Pointer to Lepton ROI object
  *  @param p_Status (Optional) Pointer to device status
- *  @return         LEPTON_ERR_OK when successful
+ *  @return         @c LEPTON_ERR_OK when successful
  */
 Lepton_Error_t Lepton_GetVideoFocusROI(Lepton_t *p_Device, Lepton_ROI_t *p_ROI, Lepton_Result_t *p_Status = NULL);
 
@@ -293,7 +293,7 @@ Lepton_Error_t Lepton_GetVideoFocusROI(Lepton_t *p_Device, Lepton_ROI_t *p_ROI, 
  *  @param p_Device Pointer to device instance
  *  @param p_ROI    Pointer to Lepton ROI object
  *  @param p_Status (Optional) Pointer to device status
- *  @return         LEPTON_ERR_OK when successful
+ *  @return         @c LEPTON_ERR_OK when successful
  */
 Lepton_Error_t Lepton_SetVideoFocusROI(Lepton_t *p_Device, Lepton_ROI_t *p_ROI, Lepton_Result_t *p_Status = NULL);
 
@@ -301,9 +301,9 @@ Lepton_Error_t Lepton_SetVideoFocusROI(Lepton_t *p_Device, Lepton_ROI_t *p_ROI, 
  *  @param p_Device Pointer to device instance
  *  @param Source   Video source
  *  @param Constant (Optional) Constant value
- *                  NOTE: Only used when Source is set to LEPTON_SOURCE_CONSTANT
+ *                  NOTE: Only used when @p Source is set to @c LEPTON_SOURCE_CONSTANT
  *  @param p_Status (Optional) Pointer to device status
- *  @return         LEPTON_ERR_OK when successful
+ *  @return         @c LEPTON_ERR_OK when successful
  */
 Lepton_Error_t Lepton_SetVideoSource(Lepton_t *p_Device, Lepton_VideoSource_t Source, uint16_t Constant = 0,
                                      Lepton_Result_t *p_Status = NULL);
@@ -312,7 +312,7 @@ Lepton_Error_t Lepton_SetVideoSource(Lepton_t *p_Device, Lepton_VideoSource_t So
  *  @param p_Device Pointer to device instance
  *  @param p_Source Video source
  *  @param p_Status (Optional) Pointer to device status
- *  @return         LEPTON_ERR_OK when successful
+ *  @return         @c LEPTON_ERR_OK when successful
  */
 Lepton_Error_t Lepton_GetVideoSource(Lepton_t *p_Device, Lepton_VideoSource_t *p_Source,
                                      Lepton_Result_t *p_Status = NULL);
@@ -321,7 +321,7 @@ Lepton_Error_t Lepton_GetVideoSource(Lepton_t *p_Device, Lepton_VideoSource_t *p
  *  @param p_Device     Pointer to device instance
  *  @param Resolution   TLinear resolution
  *  @param p_Status     (Optional) Pointer to device status
- *  @return             LEPTON_ERR_OK when successful
+ *  @return             @c LEPTON_ERR_OK when successful
  */
 Lepton_Error_t Lepton_SetTLinearResolution(Lepton_t *p_Device, Lepton_TLinear_Resolution_t Resolution,
                                            Lepton_Result_t *p_Status = NULL);
@@ -330,16 +330,16 @@ Lepton_Error_t Lepton_SetTLinearResolution(Lepton_t *p_Device, Lepton_TLinear_Re
  *  @param p_Device     Pointer to device instance
  *  @param p_Resolution Pointer to TLinear resolution
  *  @param p_Status     (Optional) Pointer to device status
- *  @return             LEPTON_ERR_OK when successful
+ *  @return             @c LEPTON_ERR_OK when successful
  */
 Lepton_Error_t Lepton_GetTLinearResolution(Lepton_t *p_Device, Lepton_TLinear_Resolution_t *p_Resolution,
                                            Lepton_Result_t *p_Status = NULL);
 
 /** @brief          Enable / Disable video freeze.
  *  @param p_Device Pointer to device instance
- *  @param Freeze   true to enable video freeze, false to disable
+ *  @param Freeze   @c true to enable video freeze, @c false to disable
  *  @param p_Status (Optional) Pointer to device status
- *  @return         LEPTON_ERR_OK when successful
+ *  @return         @c LEPTON_ERR_OK when successful
  */
 Lepton_Error_t Lepton_FreezeVideo(Lepton_t *p_Device, bool Freeze, Lepton_Result_t *p_Status = NULL);
 
@@ -353,9 +353,9 @@ Lepton_Error_t Lepton_FreezeVideo(Lepton_t *p_Device, bool Freeze, Lepton_Result
  *                  temperature drift detection. This function forces an immediate manual FFC.
  *  @param p_Device Pointer to device instance
  *  @param p_Status (Optional) Pointer to device status
- *  @return         LEPTON_ERR_OK when successful
- *                  LEPTON_ERR_INVALID_ARG if p_Device is NULL
- *                  LEPTON_ERR_NOT_INITIALIZED if device is not initialized
+ *  @return         @c LEPTON_ERR_OK when successful
+ *                  @c LEPTON_ERR_INVALID_ARG if @p p_Device is @c NULL
+ *                  @c LEPTON_ERR_NOT_INITIALIZED if device is not initialized
  */
 Lepton_Error_t Lepton_RunFFC(Lepton_t *p_Device, Lepton_Result_t *p_Status = NULL);
 
@@ -365,16 +365,16 @@ Lepton_Error_t Lepton_RunFFC(Lepton_t *p_Device, Lepton_Result_t *p_Status = NUL
  *                  The queue must uses the type Lepton_FrameBuffer_t that contains a pointer to the frame
  *                  buffer which becomes ready. Make sure the queue is large enough to hold multiple
  *                  frames or process the frames fast enough to avoid frame drops. You can use
- *                  If required, you can use CONFIG_LEPTON_VOSPI_FRAME_BUFFERS to increase the amount of
+ *                  If required, you can use @c CONFIG_LEPTON_VOSPI_FRAME_BUFFERS to increase the amount of
  *                  frame buffers in the VoSPI driver to reduce the chance of frame drops.
- *  @return         LEPTON_ERR_OK when successful
- *                  LEPTON_ERR_NO_MEM when either the capture task nor the capture ISR can be initialized
+ *  @return         @c LEPTON_ERR_OK when successful
+ *                  @c LEPTON_ERR_NO_MEM when either the capture task nor the capture ISR can be initialized
  */
 Lepton_Error_t Lepton_StartCapture(Lepton_t *p_Device, QueueHandle_t p_Queue);
 
 /** @brief          Stop the image capturing.
  *  @param p_Device Pointer to device instance
- *  @return         LEPTON_ERR_OK when successful
+ *  @return         @c LEPTON_ERR_OK when successful
  */
 Lepton_Error_t Lepton_StopCapture(Lepton_t *p_Device);
 
@@ -384,16 +384,16 @@ Lepton_Error_t Lepton_StopCapture(Lepton_t *p_Device);
  *  @param p_Device     Pointer to device instance
  *  @param PixelValue   Raw 14-bit pixel value from the thermal image
  *  @param p_Temperature Pointer to output temperature in degrees Celsius
- *  @return             LEPTON_ERR_OK when successful
- *                      LEPTON_ERR_INVALID_ARG when parameters are NULL
- *                      LEPTON_ERR_NOT_INITIALIZED when device is not initialized
- *                      LEPTON_ERR_NOT_SUPPORTED when device is not radiometric or TLinear is disabled
+ *  @return             @c LEPTON_ERR_OK when successful
+ *                      @c LEPTON_ERR_INVALID_ARG when parameters are @c NULL
+ *                      @c LEPTON_ERR_NOT_INITIALIZED when device is not initialized
+ *                      @c LEPTON_ERR_NOT_SUPPORTED when device is not radiometric or TLinear is disabled
  */
 Lepton_Error_t Lepton_GetPixelTemperature(Lepton_t *p_Device, uint16_t PixelValue, float *p_Temperature);
 
 /** @brief          Convert a RAW14 thermal frame to RGB using the specified color palette.
  *                  The function applies a pseudocolor palette mapping optimized for thermal imaging.
- *                  Palette selection is controlled by the p_Palette parameter.
+ *                  Palette selection is controlled by the @p p_Palette parameter.
  *  @param p_Device Pointer to device instance
  *  @param p_Input  Pointer to input buffer containing thermal values (14-bit per pixel)
  *  @param p_Output Pointer to RGB output buffer
@@ -402,7 +402,7 @@ Lepton_Error_t Lepton_GetPixelTemperature(Lepton_t *p_Device, uint16_t PixelValu
  *  @param Width    Image width in pixels
  *  @param Height   Image height in pixels
  *  @param p_Palette Pointer to the palette LUT (array of 256 RGB triples); use Lepton_Palette_Table[id]
- *  @return         true on success, false on failure
+ *  @return         @c true on success, @c false on failure
  */
 bool Lepton_Raw14ToRGB(Lepton_t *p_Device, uint16_t *p_Input, uint8_t *p_Output, Lepton_Pixel_t *p_Min,
                        Lepton_Pixel_t *p_Max,

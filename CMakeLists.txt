@@ -21,7 +21,7 @@ set(COMPONENT_PRIV_INCLUDEDIRS
 set(COMPONENT_PRIV_REQUIRES freertos driver espressif__esp-dsp)
 
 if((IDF_TARGET STREQUAL "esp32s3"))
-	list(APPEND COMPONENT_PRIV_REQUIRES esp_timer)
+	list(APPEND COMPONENT_PRIV_REQUIRES esp_timer esp_driver_gpio esp_driver_i2c esp_driver_spi)
 endif()
 
 # Library version

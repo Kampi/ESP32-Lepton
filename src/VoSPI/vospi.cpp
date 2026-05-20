@@ -37,7 +37,7 @@ static const char *TAG = "VoSPI";
  *  @param p_Interface  Pointer to VoSPI interface
  *  @param p_Header     Output: raw 16-bit header word
  *  @param p_PacketData Output: pointer to payload data (inside Packet buffer)
- *  @return             ESP_OK on success
+ *  @return             @c ESP_OK on success
  */
 static esp_err_t VoSPI_ReadPacket(VoSPI_t *p_Interface, uint16_t *p_Header, uint8_t **p_PacketData)
 {
@@ -166,18 +166,14 @@ Lepton_Error_t VoSPI_Init(VoSPI_t *p_Interface)
 
 VoSPI_Init_Error_4:
     for (uint8_t i = 0; i < CONFIG_LEPTON_VOSPI_FRAME_BUFFERS; i++) {
-        if (p_Interface->Telemetry_Buffer[i] != NULL) {
-            heap_caps_free(p_Interface->Telemetry_Buffer[i]);
-            p_Interface->Telemetry_Buffer[i] = NULL;
-        }
+        heap_caps_free(p_Interface->Telemetry_Buffer[i]);
+        p_Interface->Telemetry_Buffer[i] = NULL;
     }
 
 VoSPI_Init_Error_3:
     for (uint8_t i = 0; i < CONFIG_LEPTON_VOSPI_FRAME_BUFFERS; i++) {
-        if (p_Interface->Image_Buffer[i] != NULL) {
-            heap_caps_free(p_Interface->Image_Buffer[i]);
-            p_Interface->Image_Buffer[i] = NULL;
-        }
+        heap_caps_free(p_Interface->Image_Buffer[i]);
+        p_Interface->Image_Buffer[i] = NULL;
     }
 
     heap_caps_free(p_Interface->Packet);
@@ -203,21 +199,15 @@ Lepton_Error_t VoSPI_Deinit(VoSPI_t *p_Interface)
     spi_bus_free(p_Interface->Host);
 
     for (uint8_t i = 0; i < CONFIG_LEPTON_VOSPI_FRAME_BUFFERS; i++) {
-        if (p_Interface->Telemetry_Buffer[i] != NULL) {
-            heap_caps_free(p_Interface->Telemetry_Buffer[i]);
-            p_Interface->Telemetry_Buffer[i] = NULL;
-        }
+        heap_caps_free(p_Interface->Telemetry_Buffer[i]);
+        p_Interface->Telemetry_Buffer[i] = NULL;
 
-        if (p_Interface->Image_Buffer[i] != NULL) {
-            heap_caps_free(p_Interface->Image_Buffer[i]);
-            p_Interface->Image_Buffer[i] = NULL;
-        }
+        heap_caps_free(p_Interface->Image_Buffer[i]);
+        p_Interface->Image_Buffer[i] = NULL;
     }
 
-    if (p_Interface->Packet != NULL) {
-        heap_caps_free(p_Interface->Packet);
-        p_Interface->Packet = NULL;
-    }
+    heap_caps_free(p_Interface->Packet);
+    p_Interface->Packet = NULL;
 
     p_Interface->IsInitialized = false;
     return LEPTON_ERR_OK;

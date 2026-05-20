@@ -24,8 +24,8 @@
 #ifndef ESP32_LEPTON_CONFIG_H_
 #define ESP32_LEPTON_CONFIG_H_
 
-#include <driver/i2c.h>
 #include <driver/gpio.h>
+#include <driver/i2c_master.h>
 #include <driver/spi_master.h>
 
 #include <sdkconfig.h>
@@ -128,9 +128,9 @@
 /** @brief                  Assign the I2C functions to a Lepton configuration object.
  *  @param Conf             Lepton configuration object
  *  @param InitFunc         I2C initialization function
- *                          NOTE: Can be set to NULL to skip the initialization.
+ *                          NOTE: Can be set to @c NULL to skip the initialization.
  *  @param DeinitFunc       I2C deinitialization function
- *                          NOTE: Can be set to NULL to skip the deinitialization.
+ *                          NOTE: Can be set to @c NULL to skip the deinitialization.
  *  @param WriteFunc        I2C write function
  *  @param ReadFunc         I2C read function
  *  @param WriteReadFunc    I2C combined write-read function
@@ -148,8 +148,8 @@
  *  @param Host         I2C host port
  *  @param SDA          I2C SDA pin
  *  @param SCL          I2C SCL pin
- *  @param EnablePullup Set to true to enable internal pullups for SDA and SCL lines
- *  @param AutoPD       Set to true to enable automatic power down management
+ *  @param EnablePullup Set to @c true to enable internal pullups for @p SDA and @p SCL lines
+ *  @param AutoPD       Set to @c true to enable automatic power down management
  */
 #define LEPTON_DEFAULT_I2C(Conf, Host, SDA, SCL, EnablePullup, AutoPD)                  do {                                                                            \
                                                                                             Conf.CCI.I2C_Bus_Config->i2c_port = Host;                                   \

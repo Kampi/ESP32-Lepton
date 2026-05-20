@@ -141,7 +141,9 @@ Lepton_Error_t Lepton_GetSceneStatistics(Lepton_t *p_Device, Lepton_SceneStatist
 
     LEPTON_ERROR_CHECK(CCI_GetSceneStatistics(&p_Device->Internal.CCI, p_Statistics, p_Status));
 
-    /* The values are handled in Kelvin when TLinear is active. See Lepton documentation Chapter 4.5.12 for details. */
+    /* In TLinear mode the CCI SYS_SCENE_STATISTICS register returns values in centi-Celsius (°C × 100).
+     * Dividing by 100 directly yields degrees Celsius (no Kelvin offset required).
+     * See Lepton Software IDD Chapter 4.5.12 for details. */
     if (p_Device->Internal.UseTLinear) {
         p_Statistics->MeanIntensity = p_Statistics->MeanIntensity / 100.0f;
         p_Statistics->MaxIntensity = p_Statistics->MaxIntensity / 100.0f;

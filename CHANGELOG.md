@@ -10,6 +10,7 @@
 
 **Added:**
 
+- Add support for esp-idf 6
 - Add `MALLOC_CAP_SIMD` for image buffers
 - Add dynamic memory caps for VoSPI transaction to allow the usage without PSRAM
 - Add SIMD support

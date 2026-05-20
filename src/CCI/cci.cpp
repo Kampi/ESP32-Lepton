@@ -181,12 +181,12 @@ static const char *TAG                  = "cci";
 /** @brief                      Wait as lon as the camera is busy.
  *  @param p_Interface          Pointer to CCI interface object
  *  @param p_Status             (Optional) Response error code from the camera
- *                              NOTE: This field can be set to NULL to ignore the status
+ *                              NOTE: This field can be set to @c NULL to ignore the status
  *  @param Timeout              (Optional) Timeout in milliseconds
  *                              NOTE: Default is 5000ms. Set to 0 for infinite timeout.
  *  @param RetryOnCommsError    (Optional) Whether to retry on I2C communication errors (e.g. bus not ready)
- *                              NOTE: Default is false. When false, the function will return immediately on an I
- *  @return                     LEPTON_ERR_OK when successful
+ *                              NOTE: Default is @c false. When @c false, the function will return immediately on an I
+ *  @return                     @c LEPTON_ERR_OK when successful
  */
 static Lepton_Error_t CCI_WaitBusy(CCI_t *p_Interface, Lepton_Result_t *p_Status = NULL, const uint32_t Timeout = 5000,
                                    bool RetryOnCommsError = false)
@@ -266,8 +266,8 @@ static Lepton_Error_t CCI_WaitBusy(CCI_t *p_Interface, Lepton_Result_t *p_Status
 /** @brief              Write a 16-bit value into a register.
  *  @param p_Interface  Pointer to CCI interface object
  *  @param Register     Register address
- *  @param Value        Register value
- *  @return             LEPTON_ERR_OK when successful
+ *  @param Value        @p Register value
+ *  @return             @c LEPTON_ERR_OK when successful
  */
 static Lepton_Error_t CCI_WriteRegister(CCI_t *p_Interface, uint16_t Register, uint16_t Value)
 {
@@ -303,7 +303,7 @@ static Lepton_Error_t CCI_WriteRegister(CCI_t *p_Interface, uint16_t Register, u
  *  @param Start        Start address
  *  @param Length       Transmission length
  *  @param p_Buf        Pointer to buffer
- *  @return             LEPTON_ERR_OK when successful
+ *  @return             @c LEPTON_ERR_OK when successful
  */
 static Lepton_Error_t CCI_WriteBurst(CCI_t *p_Interface, uint16_t Start, uint16_t Length, const uint16_t *p_Buf)
 {
@@ -345,7 +345,7 @@ static Lepton_Error_t CCI_WriteBurst(CCI_t *p_Interface, uint16_t Start, uint16_
  *  @param p_Interface  Pointer to CCI interface object
  *  @param Register     Register address
  *  @param p_Value      Pointer to register value
- *  @return             LEPTON_ERR_OK when successful
+ *  @return             @c LEPTON_ERR_OK when successful
  */
 static Lepton_Error_t CCI_ReadRegister(CCI_t *p_Interface, uint16_t Register, uint16_t *p_Value)
 {
@@ -392,7 +392,7 @@ static Lepton_Error_t CCI_ReadRegister(CCI_t *p_Interface, uint16_t Register, ui
  *  @param Start        Start address
  *  @param Length       Transmission length
  *  @param p_Buf        Pointer to buffer
- *  @return             LEPTON_ERR_OK when successful
+ *  @return             @c LEPTON_ERR_OK when successful
  */
 static Lepton_Error_t CCI_ReadBurst(CCI_t *p_Interface, uint16_t Start, uint16_t Length, uint16_t *p_Buf)
 {
@@ -450,7 +450,7 @@ CCI_ReadBurst_Exit:
  *  @param Command      Command to set the ROI
  *  @param p_ROI        Pointer to ROI structure
  *  @param p_Status     (Optional) Response error code from the camera
- *  @return             LEPTON_ERR_OK when successful
+ *  @return             @c LEPTON_ERR_OK when successful
  */
 static Lepton_Error_t CCI_SetROI(CCI_t *p_Interface, uint16_t Command, const Lepton_ROI_t *p_ROI,
                                  Lepton_Result_t *p_Status)
@@ -474,7 +474,7 @@ static Lepton_Error_t CCI_SetROI(CCI_t *p_Interface, uint16_t Command, const Lep
  *  @param Command      Command to set the ROI
  *  @param p_ROI        Pointer to ROI structure
  *  @param p_Status     (Optional) Response error code from the camera
- *  @return             LEPTON_ERR_OK when successful
+ *  @return             @c LEPTON_ERR_OK when successful
  */
 static Lepton_Error_t CCI_GetROI(CCI_t *p_Interface, uint16_t Command, Lepton_ROI_t *p_ROI, Lepton_Result_t *p_Status)
 {
@@ -1313,9 +1313,9 @@ Lepton_Error_t CCI_GetSceneStatistics(CCI_t *p_Interface, Lepton_SceneStatistics
         return Error;
     }
 
-    p_Statistics->MinIntensity = Buffer[0];
+    p_Statistics->MeanIntensity = Buffer[0];
     p_Statistics->MaxIntensity = Buffer[1];
-    p_Statistics->MeanIntensity = Buffer[2];
+    p_Statistics->MinIntensity = Buffer[2];
     p_Statistics->Pixels = Buffer[3];
 
     return LEPTON_ERR_OK;

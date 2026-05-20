@@ -82,13 +82,8 @@ extern "C" void app_main(void)
     if ((RGB_Buffer[0] == NULL) || (RGB_Buffer[1] == NULL)) {
         ESP_LOGE(TAG, "Can not allocate RGB buffers!");
 
-        if (RGB_Buffer[0]) {
-            heap_caps_free(RGB_Buffer[0]);
-        }
-
-        if (RGB_Buffer[1]) {
-            heap_caps_free(RGB_Buffer[1]);
-        }
+        heap_caps_free(RGB_Buffer[0]);
+        heap_caps_free(RGB_Buffer[1]);
 
         vSemaphoreDelete(BufferMutex);
         vEventGroupDelete(EventGroup);

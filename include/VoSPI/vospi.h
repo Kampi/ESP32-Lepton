@@ -53,15 +53,15 @@
 
 /** @brief              Initialize the VoSPI interface and trigger a resynchronization.
  *  @param p_Interface  Pointer to VoSPI interface object
- *  @return             LEPTON_ERR_OK when successful
- *                      LEPTON_ERR_FAIL when the initialization has failed
- *                      LEPTON_ERR_NO_MEM when no memory is available for the SPI
+ *  @return             @c LEPTON_ERR_OK when successful
+ *                      @c LEPTON_ERR_FAIL when the initialization has failed
+ *                      @c LEPTON_ERR_NO_MEM when no memory is available for the SPI
  */
 Lepton_Error_t VoSPI_Init(VoSPI_t *p_Interface);
 
 /** @brief              Deinitialize the VoSPI interface.
  *  @param p_Interface  Pointer to VoSPI interface object
- *  @return             LEPTON_ERR_OK when successful
+ *  @return             @c LEPTON_ERR_OK when successful
  */
 Lepton_Error_t VoSPI_Deinit(VoSPI_t *p_Interface);
 
@@ -74,16 +74,16 @@ void VoSPI_RequestResync(VoSPI_t *p_Interface);
 
 /** @brief              Check if VoSPI is currently in resync period.
  *  @param p_Interface  Pointer to VoSPI interface object
- *  @return             true if still resyncing (CS held high), false when ready to capture
+ *  @return             @c true if still resyncing (CS held high), @c false when ready to capture
  */
 bool VoSPI_IsResyncing(VoSPI_t *p_Interface);
 
 /** @brief                  Capture a complete frame from the Lepton.
  *  @param p_Interface      Pointer to VoSPI interface object
- *  @param p_BufferIndex    Output: index of the buffer that was written (valid only when LEPTON_ERR_OK)
- *  @return                 LEPTON_ERR_OK when a frame was received successfully
- *                          LEPTON_ERR_NOT_FINISHED when no frame is ready yet (call again)
- *                          LEPTON_ERR_FAIL on sync error (resync will be triggered automatically)
+ *  @param p_BufferIndex    Output: index of the buffer that was written (valid only when @c LEPTON_ERR_OK)
+ *  @return                 @c LEPTON_ERR_OK when a frame was received successfully
+ *                          @c LEPTON_ERR_NOT_FINISHED when no frame is ready yet (call again)
+ *                          @c LEPTON_ERR_FAIL on sync error (resync will be triggered automatically)
  */
 Lepton_Error_t VoSPI_CaptureImage(VoSPI_t *p_Interface, uint8_t *p_BufferIndex);
 
